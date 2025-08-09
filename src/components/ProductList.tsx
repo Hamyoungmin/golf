@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ProductCard from './ProductCard';
 import Pagination from './Pagination';
 
@@ -22,12 +22,25 @@ interface ProductListProps {
 const ProductList = ({ title, subtitle, products, totalCount, category }: ProductListProps) => {
   const [sortBy, setSortBy] = useState('recent');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   const productsPerPage = 20;
   const totalPages = Math.ceil(totalCount / productsPerPage);
   
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortBy(e.target.value);
+  const sortOptions = [
+    { value: 'recent', label: '등록순' },
+    { value: 'popular', label: '인기순' },
+    { value: 'price-low', label: '낮은가격순' },
+    { value: 'price-high', label: '높은가격순' },
+    { value: 'reviews', label: '상품평 많은순' },
+    { value: 'name', label: '이름순' },
+    { value: 'name-desc', label: '이름역순' }
+  ];
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value);
+    setIsDropdownOpen(false);
     // 실제 정렬 로직은 여기에 구현
   };
 
@@ -35,6 +48,33 @@ const ProductList = ({ title, subtitle, products, totalCount, category }: Produc
     setCurrentPage(page);
     // 실제 페이지 변경 로직은 여기에 구현
   };
+
+  // 외부 클릭 및 스크롤 시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    const handleScroll = () => {
+      setIsDropdownOpen(false);
+    };
+
+    const handleResize = () => {
+      setIsDropdownOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('scroll', handleScroll, true); // true for capture phase
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []); // 빈 의존성 배열로 변경
 
   return (
     <div className="container">
@@ -47,19 +87,44 @@ const ProductList = ({ title, subtitle, products, totalCount, category }: Produc
         <div className="product-count">
           <strong>{category}</strong> "{totalCount}"
         </div>
-        <select 
-          className="sort-select" 
-          value={sortBy} 
-          onChange={handleSortChange}
-        >
-          <option value="recent">등록순</option>
-          <option value="popular">인기순</option>
-          <option value="price-low">낮은가격순</option>
-          <option value="price-high">높은가격순</option>
-          <option value="reviews">상품평 많은순</option>
-          <option value="name">이름순</option>
-          <option value="name-desc">이름역순</option>
-        </select>
+        <div className="custom-dropdown" ref={dropdownRef}>
+          <button 
+            className="sort-select-button"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          >
+            <span>{sortOptions.find(option => option.value === sortBy)?.label}</span>
+            <svg 
+              className={`dropdown-arrow ${isDropdownOpen ? 'open' : ''}`}
+              width="12" 
+              height="12" 
+              viewBox="0 0 12 12" 
+              fill="none"
+            >
+              <path 
+                d="M3 4.5L6 7.5L9 4.5" 
+                stroke="currentColor" 
+                strokeWidth="1.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          {isDropdownOpen && (
+            <ul className="sort-dropdown-menu">
+              {sortOptions.map((option, index) => (
+                <li 
+                  key={option.value} 
+                  className={`sort-dropdown-item ${index === 0 ? 'first' : ''}`}
+                  onClick={() => handleSortChange(option.value)}
+                >
+                  <span className={sortBy === option.value ? 'active' : ''}>
+                    {option.label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
       
       <div className="product-grid">

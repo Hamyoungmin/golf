@@ -60,18 +60,36 @@ button {
 }
 
 .auth-button {
-  padding: 8px 16px;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  background-color: #ffffff;
+  padding: 8px 12px;
+  border: none;
+  background: none;
   color: #495057;
   font-size: 14px;
-  transition: all 0.2s;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .auth-button:hover {
-  background-color: #e9ecef;
-  border-color: #adb5bd;
+  color: #007bff;
+  transform: scale(1.05);
+}
+
+.auth-button::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #007bff;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.auth-button:hover::before {
+  width: 100%;
 }
 
 /* 네비게이션 스타일 */
@@ -202,22 +220,28 @@ button {
 
 /* 상품 페이지 스타일 */
 .page-header {
-  text-align: center;
+  text-align: left;
   padding: 30px 0;
-  border-bottom: 2px solid #e9ecef;
+  border-bottom: 4px solid #000000;
   background-color: #ffffff;
+  display: flex;
+  justify-content: flex-start;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 28px;
+  font-size: 36px;
   font-weight: bold;
   color: #2c3e50;
+  margin: 0;
 }
 
 .page-subtitle {
-  font-size: 16px;
-  color: #6c757d;
-  margin-top: 5px;
+  font-size: 36px;
+  color: #1d4ed8;
+  margin: 0;
+  font-weight: bold;
 }
 
 .product-controls {
@@ -232,12 +256,134 @@ button {
   color: #6c757d;
 }
 
-.sort-select {
-  padding: 8px 12px;
+/* 커스텀 드롭다운 스타일 */
+.custom-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.sort-select-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  min-width: 140px;
   border: 1px solid #dee2e6;
-  border-radius: 6px;
+  border-radius: 8px;
   background-color: #ffffff;
   color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  gap: 12px;
+}
+
+.sort-select-button:hover {
+  border-color: #4a90e2;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.15);
+  transform: translateY(-1px);
+}
+
+.dropdown-arrow {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  color: #6c757d;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+  color: #4a90e2;
+}
+
+.sort-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background-color: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  list-style: none;
+  padding: 8px 0;
+  z-index: 1000;
+  animation: sortDropdownSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: top center;
+  overflow: hidden;
+}
+
+@keyframes sortDropdownSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+    filter: blur(1px);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-3px) scale(0.98);
+    filter: blur(0.5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.sort-dropdown-item {
+  margin: 0;
+  opacity: 0;
+  animation: sortDropdownItemFadeIn 0.3s ease-out forwards;
+  cursor: pointer;
+}
+
+.sort-dropdown-item.first { animation-delay: 0.05s; }
+.sort-dropdown-item:nth-child(2) { animation-delay: 0.1s; }
+.sort-dropdown-item:nth-child(3) { animation-delay: 0.15s; }
+.sort-dropdown-item:nth-child(4) { animation-delay: 0.2s; }
+.sort-dropdown-item:nth-child(5) { animation-delay: 0.25s; }
+.sort-dropdown-item:nth-child(6) { animation-delay: 0.3s; }
+.sort-dropdown-item:nth-child(7) { animation-delay: 0.35s; }
+
+@keyframes sortDropdownItemFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.sort-dropdown-item span {
+  display: block;
+  padding: 12px 16px;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 400;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  margin: 2px 6px;
+}
+
+.sort-dropdown-item:hover span {
+  background-color: #f8f9fa;
+  color: #4a90e2;
+  transform: translateX(4px);
+  font-weight: 500;
+}
+
+.sort-dropdown-item span.active {
+  background-color: #4a90e2;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.sort-dropdown-item span.active:hover {
+  background-color: #357abd;
+  transform: translateX(0);
 }
 
 /* 상품 그리드 */
@@ -281,13 +427,13 @@ button {
   font-weight: 500;
   margin-bottom: 8px;
   line-height: 1.4;
-  color: #343a40;
+  color: #6c757d;
 }
 
 .product-price {
   font-size: 18px;
   font-weight: bold;
-  color: #28a745;
+  color: #000000;
 }
 
 /* 페이지네이션 */
@@ -367,26 +513,34 @@ button {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 60px;
-  height: 60px;
-  background-color: #fee500;
-  border-radius: 50%;
+  padding: 12px 20px;
+  background-color: #FFD700;
+  border-radius: 25px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
   z-index: 1000;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: none;
+  cursor: pointer;
+  gap: 6px;
 }
 
 .kakao-chat:hover {
-  transform: scale(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .kakao-chat span {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
-  color: #3c1e1e;
+  color: #000;
+}
+
+.kakao-chat svg {
+  fill: #000;
+  stroke: none;
 }
 
 /* 드롭다운 메뉴 스타일 */
@@ -430,45 +584,77 @@ button {
   transform: translateX(-50%);
   background-color: #ffffff;
   border: none;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
   list-style: none;
-  padding: 8px 0;
+  padding: 12px 0;
   margin: 0;
   min-width: 150px;
   z-index: 1000;
-  animation: fadeIn 0.2s ease-in-out;
+  animation: dropdownSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: top center;
 }
 
-@keyframes fadeIn {
-  from {
+@keyframes dropdownSlideIn {
+  0% {
     opacity: 0;
-    transform: translateX(-50%) translateY(-5px);
+    transform: translateX(-50%) translateY(-15px) scale(0.95);
+    filter: blur(1px);
   }
-  to {
+  50% {
+    opacity: 0.8;
+    transform: translateX(-50%) translateY(-5px) scale(0.98);
+    filter: blur(0.5px);
+  }
+  100% {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateX(-50%) translateY(0) scale(1);
+    filter: blur(0);
   }
 }
 
 .dropdown-menu-item {
   margin: 0;
+  opacity: 0;
+  animation: dropdownItemFadeIn 0.3s ease-out forwards;
+}
+
+.dropdown-menu-item:nth-child(1) { animation-delay: 0.1s; }
+.dropdown-menu-item:nth-child(2) { animation-delay: 0.15s; }
+.dropdown-menu-item:nth-child(3) { animation-delay: 0.2s; }
+.dropdown-menu-item:nth-child(4) { animation-delay: 0.25s; }
+.dropdown-menu-item:nth-child(5) { animation-delay: 0.3s; }
+
+@keyframes dropdownItemFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .dropdown-link {
   display: block;
-  padding: 10px 20px;
+  padding: 12px 18px;
   color: #495057;
   text-decoration: none;
   font-size: 14px;
   font-weight: 400;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   white-space: nowrap;
+  border-radius: 6px;
+  margin: 2px 6px;
 }
 
 .dropdown-link:hover {
   background-color: #f8f9fa;
   color: #4a90e2;
+  transform: translateX(8px);
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.15);
+  font-weight: 500;
 }
 
 /* 반응형 디자인 */
@@ -492,6 +678,22 @@ button {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 15px;
   }
+
+  .page-header {
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .page-title {
+    font-size: 28px;
+  }
+
+  .page-subtitle {
+    font-size: 28px;
+  }
   
   .footer-content {
     grid-template-columns: 1fr;
@@ -502,6 +704,16 @@ button {
     flex-direction: column;
     gap: 15px;
     align-items: stretch;
+  }
+
+  .sort-select-button {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .sort-dropdown-menu {
+    left: 0;
+    right: 0;
   }
   
   .dropdown-menu {

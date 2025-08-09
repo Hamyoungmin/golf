@@ -13,8 +13,8 @@ const KakaoChat = () => {
       onClick={handleChatClick}
       title="카카오톡 채팅하기"
     >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px'}}>
-        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.477 2 2 5.805 2 10.4c0 2.97 1.937 5.568 4.826 7.051L6.5 20.75c-.22.42.257.842.654.653l3.346-1.597C11.159 19.933 11.571 20 12 20c5.523 0 10-3.805 10-8.4S17.523 2 12 2z"/>
       </svg>
       <span>문의</span>
     </button>
