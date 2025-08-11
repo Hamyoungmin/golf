@@ -4,10 +4,15 @@ import {
   signOut,
   User
 } from 'firebase/auth';
-import { auth } from './firebase';
+import { getFirebaseAuth } from './firebase';
 
 // 회원가입
 export const signUp = async (email: string, password: string): Promise<User> => {
+  const auth = getFirebaseAuth();
+  if (!auth) {
+    throw new Error('Firebase 인증을 사용할 수 없습니다.');
+  }
+  
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     return userCredential.user;
@@ -19,6 +24,11 @@ export const signUp = async (email: string, password: string): Promise<User> => 
 
 // 로그인
 export const signIn = async (email: string, password: string): Promise<User> => {
+  const auth = getFirebaseAuth();
+  if (!auth) {
+    throw new Error('Firebase 인증을 사용할 수 없습니다.');
+  }
+  
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential.user;
@@ -30,6 +40,11 @@ export const signIn = async (email: string, password: string): Promise<User> => 
 
 // 로그아웃
 export const logOut = async (): Promise<void> => {
+  const auth = getFirebaseAuth();
+  if (!auth) {
+    throw new Error('Firebase 인증을 사용할 수 없습니다.');
+  }
+  
   try {
     await signOut(auth);
   } catch {

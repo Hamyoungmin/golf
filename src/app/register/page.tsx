@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signUp } from '@/lib/auth';
 
+// 동적 렌더링 강제 설정
+export const dynamic = 'force-dynamic';
+
 export default function Register() {
   const [formData, setFormData] = useState({
     email: '',
