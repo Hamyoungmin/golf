@@ -1,0 +1,395 @@
+# 페이지 스타일 가이드 (Page Style Guide)
+# 팬더골프 프로젝트 - 일관된 페이지 개발을 위한 가이드
+
+## 📋 목차
+1. 페이지 구조 패턴
+2. 컴포넌트 사용법
+3. 데이터 구조 규칙
+4. 파일명 및 폴더 규칙
+5. 코드 스타일 가이드
+6. 실제 구현 예시
+
+===============================================================================
+
+## 🏗️ 1. 페이지 구조 패턴
+
+### 패턴 A: 메인 페이지 타입
+**용도**: 홈페이지, 랜딩 페이지
+**구조**: 
+```tsx
+import ComponentName from '@/components/ComponentName';
+
+export default function Home() {
+  return (
+    <div>
+      <ComponentName />
+    </div>
+  );
+}
+```
+
+### 패턴 B: 상품 카테고리 페이지 타입
+**용도**: 드라이버, 아이언, 퍼터, 웨지, 우드, 유틸리티 등 상품 목록 페이지
+**구조**:
+```tsx
+import ProductList from '@/components/ProductList';
+
+const 카테고리Products = [
+  // 상품 데이터 배열
+];
+
+export default function 카테고리명() {
+  return (
+    <ProductList 
+      title="표시할 제목"
+      subtitle="| 영문명 또는 설명"
+      products={카테고리Products}
+      totalCount={실제총개수}
+      category="카테고리명"
+    />
+  );
+}
+```
+
+### 패턴 C: 특수 카테고리 페이지 타입
+**용도**: 여성용, 주니어용, 왼손잡이용 등 특수 분류 페이지
+**구조**:
+```tsx
+import ProductList from '@/components/ProductList';
+
+export default function 특수카테고리명() {
+  const products = [
+    // 인라인 상품 데이터 (소량의 경우)
+  ];
+
+  return (
+    <div className="category-page">
+      <ProductList 
+        title="한글 제목"
+        subtitle="설명 문구"
+        products={products}
+        totalCount={products.length}
+        category="카테고리명"
+      />
+    </div>
+  );
+}
+```
+
+===============================================================================
+
+## 🧩 2. 컴포넌트 사용법
+
+### ProductList 컴포넌트 필수 Props
+```tsx
+interface ProductListProps {
+  title: string;        // 페이지 제목 (예: "드라이버", "아이언")
+  subtitle: string;     // 부제목 (예: "| Drivers", "다양한 브랜드의...")
+  products: Product[];  // 상품 배열
+  totalCount: number;   // 전체 상품 개수 (실제 DB의 총 개수)
+  category: string;     // 카테고리명 (필터링 등에 사용)
+}
+```
+
+### 권장 Title/Subtitle 패턴
+```
+✅ 권장:
+title: "드라이버"     subtitle: "| Drivers"
+title: "아이언"       subtitle: "| Irons"
+title: "퍼터"         subtitle: "| Putters"
+title: "주니어용"     subtitle: "아이들을 위한 전용 골프 용품을 만나보세요"
+title: "여성용"       subtitle: "여성 골퍼를 위한 특별한 골프 용품"
+
+❌ 비권장:
+title: "DRIVERS"      subtitle: "드라이버"
+title: ""             subtitle: "제목 없음"
+```
+
+===============================================================================
+
+## 📊 3. 데이터 구조 규칙
+
+### 상품 데이터 표준 구조
+```tsx
+interface Product {
+  id: number;           // 고유 ID (숫자)
+  name: string;         // 상품명 (구체적이고 상세하게)
+  price: string;        // 가격 ("가격문의" 또는 "120,000원" 형태)
+  image: string | null; // 이미지 URL 또는 null
+}
+```
+
+### 가격 표기 규칙
+```
+✅ 올바른 형태:
+"가격문의"
+"120,000원"
+"160,000원"
+"할인가 90,000원"
+
+❌ 잘못된 형태:
+"120000"
+"12만원"
+"price inquiry"
+"120,000 won"
+```
+
+### 상품명 작성 규칙
+```
+✅ 좋은 예시:
+"TW717 455 10.5도 비자드 55 R"
+"주니어 골프세트 1"
+"RMX216 10.5도 바사라 R"
+
+❌ 피해야 할 예시:
+"상품1"
+"golf club"
+"Driver"
+```
+
+===============================================================================
+
+## 📁 4. 파일명 및 폴더 규칙
+
+### 페이지 파일 규칙
+```
+✅ 올바른 구조:
+src/app/drivers/page.tsx          (드라이버 메인)
+src/app/drivers/titleist/page.tsx (브랜드별)
+src/app/irons/page.tsx
+src/app/womens/page.tsx
+
+❌ 잘못된 구조:
+src/app/drivers.tsx
+src/app/driver/page.tsx
+src/app/Drivers/page.tsx
+```
+
+### 컴포넌트 명명 규칙
+- 파일명: PascalCase (예: ProductList.tsx)
+- 함수명: PascalCase (예: function ProductList())
+- 변수명: camelCase (예: driverProducts)
+
+### 폴더 구조 일관성
+```
+카테고리/
+  ├── page.tsx                    (카테고리 메인 페이지)
+  ├── bridgestone/page.tsx        (브랜드별 페이지)
+  ├── callaway/page.tsx
+  ├── honma/page.tsx
+  ├── others/page.tsx
+  ├── taylormade/page.tsx
+  └── titleist/page.tsx
+```
+
+===============================================================================
+
+## 🎨 5. 코드 스타일 가이드
+
+### Import 순서 규칙
+```tsx
+// 1. Next.js/React 관련
+import type { Metadata } from "next";
+
+// 2. 외부 라이브러리
+import someLibrary from 'some-library';
+
+// 3. 내부 컴포넌트 (@/ 경로)
+import ProductList from '@/components/ProductList';
+import Header from '@/components/Header';
+
+// 4. 상대 경로
+import './styles.css';
+```
+
+### 함수 컴포넌트 작성 규칙
+```tsx
+// ✅ 권장 방식
+export default function ComponentName() {
+  // 상태 및 데이터
+  const data = [...];
+  
+  // 이벤트 핸들러 (필요시)
+  const handleSomething = () => {
+    // 처리 로직
+  };
+
+  // JSX 반환
+  return (
+    <div>
+      <Component prop={data} />
+    </div>
+  );
+}
+
+// ❌ 비권장 방식
+const ComponentName = () => {
+  return <div>...</div>
+}
+export default ComponentName;
+```
+
+### 데이터 정의 위치 규칙
+```tsx
+// ✅ 대량 데이터 (10개 이상): 컴포넌트 외부에 정의
+const driverProducts = [
+  { id: 1, name: '...', price: '...', image: null },
+  // ... 많은 데이터
+];
+
+export default function Drivers() {
+  return <ProductList products={driverProducts} />;
+}
+
+// ✅ 소량 데이터 (10개 미만): 컴포넌트 내부에 정의
+export default function SmallCategory() {
+  const products = [
+    { id: 1, name: '...', price: '...', image: null },
+    { id: 2, name: '...', price: '...', image: null }
+  ];
+  
+  return <ProductList products={products} />;
+}
+```
+
+===============================================================================
+
+## 📋 6. 실제 구현 예시
+
+### 예시 1: 새로운 카테고리 페이지 생성 (예: 골프백)
+```tsx
+// src/app/bags/page.tsx
+import ProductList from '@/components/ProductList';
+
+const bagProducts = [
+  { 
+    id: 1, 
+    name: 'Titleist Players 4 Stand Bag 화이트', 
+    price: '180,000원', 
+    image: null 
+  },
+  { 
+    id: 2, 
+    name: 'Callaway Org 14 Cart Bag 블랙', 
+    price: '220,000원', 
+    image: null 
+  },
+  { 
+    id: 3, 
+    name: 'TaylorMade FlexTech Crossover 골프백', 
+    price: '150,000원', 
+    image: null 
+  }
+];
+
+export default function Bags() {
+  return (
+    <ProductList 
+      title="골프백"
+      subtitle="| Golf Bags"
+      products={bagProducts}
+      totalCount={45}  // 실제 DB의 총 개수
+      category="골프백"
+    />
+  );
+}
+```
+
+### 예시 2: 브랜드별 하위 페이지 생성 (예: 타이틀리스트 드라이버)
+```tsx
+// src/app/drivers/titleist/page.tsx
+import ProductList from '@/components/ProductList';
+
+const titleistDrivers = [
+  { 
+    id: 1, 
+    name: 'TW717 455 10.5도 비자드 55 R', 
+    price: '가격문의', 
+    image: null 
+  },
+  { 
+    id: 2, 
+    name: 'TW737 455 9.5도 비자드 S', 
+    price: '가격문의', 
+    image: null 
+  }
+];
+
+export default function TitleistDrivers() {
+  return (
+    <ProductList 
+      title="타이틀리스트 드라이버"
+      subtitle="| Titleist Drivers"
+      products={titleistDrivers}
+      totalCount={12}
+      category="드라이버"
+    />
+  );
+}
+```
+
+### 예시 3: 특수 카테고리 페이지 (예: 초보자용)
+```tsx
+// src/app/beginners/page.tsx
+import ProductList from '@/components/ProductList';
+
+export default function Beginners() {
+  const products = [
+    {
+      id: 1,
+      name: "초보자 골프세트 (드라이버+아이언+퍼터)",
+      price: "290,000원",
+      image: "https://images.unsplash.com/photo-1551524164-6cf2ac531c3b?w=400&h=300&fit=crop"
+    },
+    {
+      id: 2,
+      name: "입문용 하프세트 9개",
+      price: "180,000원",
+      image: "https://images.unsplash.com/photo-1551524164-6cf2ac531c3b?w=400&h=300&fit=crop"
+    }
+  ];
+
+  return (
+    <div className="category-page">
+      <ProductList 
+        title="초보자용"
+        subtitle="골프를 시작하는 분들을 위한 완벽한 세트"
+        products={products}
+        totalCount={products.length}
+        category="초보자용"
+      />
+    </div>
+  );
+}
+```
+
+===============================================================================
+
+## ✅ 체크리스트
+
+새 페이지 생성 시 다음 사항들을 확인하세요:
+
+### 필수 확인 사항
+□ ProductList 컴포넌트 import 했는가?
+□ 상품 데이터 구조가 올바른가? (id, name, price, image)
+□ title과 subtitle이 일관된 패턴을 따르는가?
+□ totalCount가 실제 데이터 개수와 맞는가?
+□ 파일명이 소문자 kebab-case인가? (예: left-handed)
+□ export default function이 PascalCase인가?
+
+### 권장 확인 사항
+□ 상품명이 구체적이고 상세한가?
+□ 가격 표기가 통일되어 있는가?
+□ 카테고리명이 명확한가?
+□ 코드가 다른 페이지와 일관된 스타일인가?
+□ 주석이 필요한 부분에 추가되어 있는가?
+
+===============================================================================
+
+## 📞 문의 및 수정
+
+페이지 스타일 가이드 관련 문의사항이나 수정 요청사항이 있으면
+프로젝트 담당자에게 연락해주세요.
+
+마지막 업데이트: 2024년 12월
+작성자: AI Assistant

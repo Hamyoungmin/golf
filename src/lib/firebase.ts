@@ -1,5 +1,7 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
+import { getStorage, FirebaseStorage } from 'firebase/storage';
 
 // 환경변수 검증
 const validateFirebaseConfig = () => {
@@ -50,6 +52,8 @@ const initializeFirebaseApp = () => {
 
 // Auth 인스턴스를 lazy하게 생성
 let authInstance: Auth | null = null;
+let firestoreInstance: Firestore | null = null;
+let storageInstance: FirebaseStorage | null = null;
 
 export const getFirebaseAuth = () => {
   if (typeof window === 'undefined') {
@@ -69,5 +73,43 @@ export const getFirebaseAuth = () => {
   return authInstance;
 };
 
+export const getFirebaseFirestore = () => {
+  if (typeof window === 'undefined') {
+    // 서버 사이드에서는 null 반환
+    return null;
+  }
+  
+  if (!firestoreInstance) {
+    const firebaseApp = initializeFirebaseApp();
+    if (!firebaseApp) {
+      console.error('Firebase app could not be initialized');
+      return null;
+    }
+    firestoreInstance = getFirestore(firebaseApp);
+  }
+  
+  return firestoreInstance;
+};
+
+export const getFirebaseStorage = () => {
+  if (typeof window === 'undefined') {
+    // 서버 사이드에서는 null 반환
+    return null;
+  }
+  
+  if (!storageInstance) {
+    const firebaseApp = initializeFirebaseApp();
+    if (!firebaseApp) {
+      console.error('Firebase app could not be initialized');
+      return null;
+    }
+    storageInstance = getStorage(firebaseApp);
+  }
+  
+  return storageInstance;
+};
+
 export const auth = getFirebaseAuth();
+export const db = getFirebaseFirestore();
+export const storage = getFirebaseStorage();
 export default app;

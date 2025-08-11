@@ -4,6 +4,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PhoneCall from "@/components/PhoneCall";
 import NoticeButton from "@/components/NoticeButton";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
 
 export const metadata: Metadata = {
   title: "팬더골프 PANDAGOLF - 골프상회 도매몰",
@@ -18,13 +20,17 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        <Header />
-        <main>
-          {children}
-        </main>
-        <Footer />
-        <NoticeButton />
-        <PhoneCall />
+        <AuthProvider>
+          <CartProvider>
+            <Header />
+            <main>
+              {children}
+            </main>
+            <Footer />
+            <NoticeButton />
+            <PhoneCall />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

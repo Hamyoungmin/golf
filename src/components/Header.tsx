@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 
 interface NavigationItem {
   name: string;
@@ -13,6 +15,8 @@ interface NavigationItem {
 
 const Header = () => {
   const pathname = usePathname();
+  const { user, loading, signOut } = useAuth();
+  const { cartItemCount } = useCart();
   const [isDriversOpen, setIsDriversOpen] = useState(false);
   const [isWoodsOpen, setIsWoodsOpen] = useState(false);
   const [isUtilitiesOpen, setIsUtilitiesOpen] = useState(false);
@@ -104,6 +108,16 @@ const Header = () => {
     return pathname.startsWith(href);
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      // 로그아웃 후 홈페이지로 이동하지 않고 현재 페이지에 머물기
+    } catch (error) {
+      console.error('로그아웃 오류:', error);
+      alert('로그아웃 중 오류가 발생했습니다.');
+    }
+  };
+
   return (
     <header className="header">
       <div className="container">
@@ -112,12 +126,59 @@ const Header = () => {
           골프상회 도매몰
         </Link>
           <div className="auth-buttons">
-            <Link href="/login" className="auth-button">
-              로그인
+            {/* 장바구니 아이콘 */}
+            <Link href="/cart" className="auth-button" style={{ position: 'relative' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="m1 1 4 4 1 6 8 0 9-10H6"></path>
+              </svg>
+              {cartItemCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-8px',
+                  right: '-8px',
+                  background: '#ff6b35',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '12px',
+                  fontWeight: 'bold'
+                }}>
+                  {cartItemCount > 99 ? '99+' : cartItemCount}
+                </span>
+              )}
             </Link>
-            <Link href="/register" className="auth-button">
-              회원가입
-            </Link>
+            
+            {loading ? (
+              <div className="auth-button">로딩중...</div>
+            ) : user ? (
+              <>
+                <Link href="/mypage" className="auth-button">
+                  마이페이지
+                </Link>
+                <button 
+                  onClick={handleSignOut} 
+                  className="auth-button"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  로그아웃
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="auth-button">
+                  로그인
+                </Link>
+                <Link href="/register" className="auth-button">
+                  회원가입
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

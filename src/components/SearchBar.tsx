@@ -1,18 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const SearchBar = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const router = useRouter();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      // 실제 검색 로직 구현
-      if (process.env.NODE_ENV === 'development') {
-        console.log('검색어:', searchTerm);
-      }
-      alert(`"${searchTerm}" 검색 기능입니다. 실제 서비스에서는 검색 결과 페이지로 이동합니다.`);
+      // 검색 결과 페이지로 이동
+      router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
     }
   };
 

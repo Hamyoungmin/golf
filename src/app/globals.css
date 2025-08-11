@@ -11,7 +11,7 @@ body {
   line-height: 1.6;
   color: #2c3e50;
   background-color: #f8f9fa;
-  padding-top: 120px; /* 헤더 높이만큼 여백 추가 */
+  padding-top: 160px; /* 헤더와 콘텐츠 사이 간격 증가 */
 }
 
 a {
@@ -408,12 +408,18 @@ button {
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
   background-color: #ffffff;
+  position: relative;
 }
 
 .product-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
   border-color: #dee2e6;
+}
+
+.product-card:hover .purchase-buttons {
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 .product-image {
@@ -480,7 +486,7 @@ button {
 
 /* 이미지 슬라이더 스타일 */
 .image-slider {
-  margin: 0;
+  margin: 30px 0 0 0; /* 상단 여백 추가 */
   width: 100vw;
   position: relative;
   left: 50%;

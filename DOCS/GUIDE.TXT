@@ -1,0 +1,238 @@
+# 골프 용품 쇼핑몰 구현 가이드
+
+## 🎯 프로젝트 개요
+Next.js 기반 골프 용품 쇼핑몰 구축
+- 프레임워크: Next.js 14 (App Router)
+- 인증/DB: Firebase
+- 스타일링: Tailwind CSS
+
+## 📋 현재 구현 상태
+### ✅ 완료된 항목
+- 기본 프로젝트 구조 설정
+- 카테고리별 페이지 구조 (드라이버, 아이언, 퍼터, 웨지, 우드, 유틸리티)
+- 특수 카테고리 (여성용, 주니어용, 왼손잡이용)
+- 브랜드별 하위 페이지 구조
+- 기본 컴포넌트 (Header, Footer, ProductCard, ProductList)
+- 로그인/회원가입 페이지 (UI만)
+
+### ❌ 미구현 항목
+- 실제 데이터베이스 연동
+- 사용자 인증 시스템
+- 상품 상세 페이지
+- 장바구니 기능
+- 결제 시스템
+- 관리자 페이지
+- 주문 관리
+- 마이페이지
+
+## 🏗️ 구현해야 할 핵심 기능 및 페이지
+
+### 1. 데이터베이스 설계 및 연동
+#### Firebase Firestore 컬렉션 구조
+```
+- products/
+  - id
+  - name
+  - price
+  - category (drivers/irons/putters/wedges/woods/utilities)
+  - brand (titleist/taylormade/callaway/honma/bridgestone/others)
+  - images[]
+  - description
+  - stock
+  - specifications{}
+  - isWomens
+  - isKids
+  - isLeftHanded
+  - createdAt
+  - updatedAt
+
+- users/
+  - uid
+  - email
+  - name
+  - phone
+  - address
+  - isAdmin
+  - createdAt
+
+- orders/
+  - orderId
+  - userId
+  - items[]
+  - totalAmount
+  - status (pending/paid/shipped/delivered/cancelled)
+  - shippingAddress
+  - paymentMethod
+  - createdAt
+
+- cart/
+  - userId
+  - items[]
+    - productId
+    - quantity
+    - price
+
+- reviews/
+  - productId
+  - userId
+  - rating
+  - content
+  - images[]
+  - createdAt
+
+- wishlist/
+  - userId
+  - productIds[]
+```
+
+### 2. 사용자 인증 시스템
+- **구현 페이지/기능:**
+  - `/login` - 로그인 (이메일/비밀번호, 소셜 로그인)
+  - `/register` - 회원가입
+  - `/forgot-password` - 비밀번호 찾기
+  - 로그인 상태 관리 (Context API)
+  - 보호된 라우트 구현
+
+### 3. 상품 관리 시스템
+- **구현 페이지:**
+  - `/products/[id]` - 상품 상세 페이지
+  - `/admin/products` - 상품 관리 (CRUD)
+  - `/admin/products/new` - 상품 등록
+  - `/admin/products/[id]/edit` - 상품 수정
+
+- **필수 기능:**
+  - 상품 이미지 업로드 (Firebase Storage)
+  - 상품 검색 및 필터링
+  - 상품 정렬 (가격순, 인기순, 최신순)
+  - 재고 관리
+  - 할인가 설정
+
+### 4. 장바구니 시스템
+- **구현 페이지:**
+  - `/cart` - 장바구니 페이지
+  
+- **필수 기능:**
+  - 장바구니 추가/삭제/수량 변경
+  - 장바구니 아이템 저장 (로컬스토리지 + DB)
+  - 장바구니 아이콘 뱃지 (수량 표시)
+  - 예상 배송비 계산
+
+### 5. 주문/결제 시스템
+- **구현 페이지:**
+  - `/checkout` - 주문/결제 페이지
+  - `/checkout/success` - 결제 성공
+  - `/checkout/fail` - 결제 실패
+
+- **필수 기능:**
+  - 배송 정보 입력
+  - 결제 수단 선택 (토스페이먼츠/카카오페이 등)
+  - 주문 정보 확인
+  - 결제 API 연동
+
+### 6. 마이페이지
+- **구현 페이지:**
+  - `/mypage` - 마이페이지 메인
+  - `/mypage/orders` - 주문 내역
+  - `/mypage/orders/[id]` - 주문 상세
+  - `/mypage/wishlist` - 찜 목록
+  - `/mypage/reviews` - 내가 쓴 리뷰
+  - `/mypage/profile` - 회원정보 수정
+  - `/mypage/address` - 배송지 관리
+
+### 7. 관리자 페이지
+- **구현 페이지:**
+  - `/admin` - 관리자 대시보드
+  - `/admin/orders` - 주문 관리
+  - `/admin/users` - 회원 관리
+  - `/admin/inventory` - 재고 관리
+  - `/admin/analytics` - 매출 통계
+
+- **필수 기능:**
+  - 관리자 권한 체크
+  - 주문 상태 변경
+  - 매출 통계 차트
+  - 상품별 판매 현황
+
+### 8. 추가 기능
+- **리뷰 시스템**
+  - 상품 리뷰 작성/수정/삭제
+  - 별점 평가
+  - 리뷰 이미지 업로드
+  - 리뷰 도움됨 투표
+
+- **검색 기능**
+  - 실시간 검색
+  - 검색 자동완성
+  - 인기 검색어
+  - 최근 검색어
+
+- **알림/공지사항**
+  - `/notice` - 공지사항 목록
+  - `/notice/[id]` - 공지사항 상세
+  - 팝업 공지
+
+- **이벤트/프로모션**
+  - `/events` - 이벤트 목록
+  - 쿠폰 시스템
+  - 포인트/적립금
+
+- **고객 지원**
+  - `/faq` - 자주 묻는 질문
+  - `/contact` - 문의하기
+  - `/terms` - 이용약관
+  - `/privacy` - 개인정보처리방침
+
+## 🚀 구현 우선순위
+
+### Phase 1 (핵심 기능) - 1~2주
+1. Firebase 설정 및 데이터베이스 구조 설계
+2. 사용자 인증 시스템 구현
+3. 상품 상세 페이지 구현
+4. 장바구니 기능 구현
+
+### Phase 2 (주문/결제) - 1~2주
+1. 주문/결제 프로세스 구현
+2. 결제 API 연동 (토스페이먼츠 추천)
+3. 주문 내역 관리
+4. 마이페이지 기본 기능
+
+### Phase 3 (관리자 기능) - 1주
+1. 관리자 페이지 구현
+2. 상품 CRUD 기능
+3. 주문 관리 기능
+4. 기본 통계 기능
+
+### Phase 4 (부가 기능) - 1~2주
+1. 리뷰 시스템
+2. 검색 및 필터링 고도화
+3. 쿠폰/포인트 시스템
+4. 이벤트 페이지
+
+### Phase 5 (최적화 및 마무리) - 1주
+1. 성능 최적화
+2. SEO 최적화
+3. 반응형 디자인 점검
+4. 테스트 및 버그 수정
+
+## 📌 주의사항
+1. 모바일 우선 반응형 디자인 적용
+2. 로딩 상태 및 에러 처리 철저히
+3. 보안 고려 (인증, 권한 체크)
+4. 결제 시스템은 PG사 가이드 준수
+5. 개인정보 처리 관련 법규 준수
+
+## 🛠️ 추천 라이브러리
+- 상태관리: Zustand 또는 Context API
+- 폼 처리: React Hook Form
+- 유효성 검사: Zod
+- 결제: 토스페이먼츠 SDK
+- 차트: Recharts
+- 이미지 업로드: react-dropzone
+- 토스트 알림: react-hot-toast
+- 날짜 처리: date-fns
+
+## 📝 다음 단계
+1. Firebase 프로젝트 설정 완료
+2. 환경변수 설정 (.env.local)
+3. 데이터베이스 스키마 생성
+4. 인증 시스템부터 구현 시작

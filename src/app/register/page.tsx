@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signUp } from '@/lib/auth';
+import { createUserProfile } from '@/lib/users';
 
 // 동적 렌더링 강제 설정
 export const dynamic = 'force-dynamic';
@@ -86,18 +87,18 @@ export default function Register() {
     try {
       // Firebase 회원가입
       const user = await signUp(formData.email, formData.password);
+      
+      // 사용자 추가 정보 저장
+      await createUserProfile(user.uid, formData.email, {
+        name: formData.name,
+        phone: formData.phone,
+        businessNumber: formData.businessNumber,
+        companyName: formData.companyName,
+      });
+      
       if (process.env.NODE_ENV === 'development') {
         console.log('회원가입 성공:', user);
-        console.log('추가 정보:', {
-          businessNumber: formData.businessNumber,
-          companyName: formData.companyName,
-          name: formData.name,
-          phone: formData.phone,
-          shopPhotos: {
-            shopInteriorPhoto: shopPhotos.shopInteriorPhoto?.name,
-            shopSignPhoto: shopPhotos.shopSignPhoto?.name
-          }
-        });
+        console.log('추가 정보 저장 완료');
       }
       
       alert('회원가입에 성공했습니다! 로그인 페이지로 이동합니다.');
