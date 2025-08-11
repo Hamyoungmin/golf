@@ -2,12 +2,17 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { signIn } from '@/lib/auth';
 
 export default function Login() {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -16,11 +21,22 @@ export default function Login() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 실제 로그인 로직
-    console.log('로그인 시도:', formData);
-    alert('로그인 기능입니다. 실제 서비스에서는 인증 처리가 됩니다.');
+    setLoading(true);
+    setError('');
+
+    try {
+      const user = await signIn(formData.email, formData.password);
+      console.log('로그인 성공:', user);
+      alert('로그인에 성공했습니다!');
+      router.push('/'); // 메인 페이지로 이동
+    } catch (error: any) {
+      console.error('로그인 실패:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -39,6 +55,20 @@ export default function Login() {
         }}>
           로그인
         </h1>
+        
+        {error && (
+          <div style={{
+            backgroundColor: '#fff5f5',
+            border: '1px solid #fed7d7',
+            borderRadius: '4px',
+            padding: '15px',
+            marginBottom: '20px',
+            fontSize: '14px',
+            color: '#e53e3e'
+          }}>
+            {error}
+          </div>
+        )}
         
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '20px' }}>
@@ -91,20 +121,22 @@ export default function Login() {
           
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: '100%',
               padding: '12px',
-              backgroundColor: '#ff6b35',
+              backgroundColor: loading ? '#ccc' : '#ff6b35',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
               fontSize: '16px',
               fontWeight: '500',
               marginBottom: '20px',
-              cursor: 'pointer'
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.6 : 1
             }}
           >
-            로그인
+            {loading ? '로그인 중...' : '로그인'}
           </button>
         </form>
         

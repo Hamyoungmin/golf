@@ -13,34 +13,88 @@ interface NavigationItem {
 
 const Header = () => {
   const pathname = usePathname();
-  const [isNewArrivalsOpen, setIsNewArrivalsOpen] = useState(false);
-  const [isLostBallsOpen, setIsLostBallsOpen] = useState(false);
+  const [isDriversOpen, setIsDriversOpen] = useState(false);
+  const [isWoodsOpen, setIsWoodsOpen] = useState(false);
+  const [isUtilitiesOpen, setIsUtilitiesOpen] = useState(false);
+  const [isWedgesOpen, setIsWedgesOpen] = useState(false);
+  const [isPuttersOpen, setIsPuttersOpen] = useState(false);
+  const [isLeftHandedOpen, setIsLeftHandedOpen] = useState(false);
+  const [isWomensOpen, setIsWomensOpen] = useState(false);
   
   const navigationItems: NavigationItem[] = [
     { name: '홈', href: '/', category: 'home' },
-    { name: '신규입고', href: '/new-arrivals', category: 'new', hasDropdown: true },
-    { name: '로스트볼', href: '/lost-balls', category: 'lost', hasDropdown: true },
-    { name: '드라이버', href: '/drivers', category: 'drivers' },
-    { name: '우드', href: '/woods', category: 'woods' },
-    { name: '유틸리티', href: '/utilities', category: 'utilities' },
-    { name: '아이언', href: '/irons', category: 'irons' },
-    { name: '웨지', href: '/wedges', category: 'wedges' },
-    { name: '퍼터', href: '/putters', category: 'putters' },
-    { name: '여성용', href: '/womens', category: 'womens' },
-    { name: '왼손용', href: '/left-handed', category: 'left' },
-    { name: '키즈', href: '/kids', category: 'kids' }
+    { name: '드라이버', href: '/drivers', category: 'drivers', hasDropdown: true },
+    { name: '우드', href: '/woods', category: 'woods', hasDropdown: true },
+    { name: '유틸리티', href: '/utilities', category: 'utilities', hasDropdown: true },
+    { name: '웨지', href: '/wedges', category: 'wedges', hasDropdown: true },
+    { name: '퍼터', href: '/putters', category: 'putters', hasDropdown: true },
+    { name: '왼손용', href: '/left-handed', category: 'left', hasDropdown: true },
+    { name: '여성용', href: '/womens', category: 'womens', hasDropdown: true }
   ];
 
-  const newArrivalsItems = [
-    { name: '25년05월 입고', href: '/new-arrivals/2025-05' },
-    { name: '25년06월 입고', href: '/new-arrivals/2025-06' }
+
+
+  const driversItems = [
+    { name: '타이틀리스트', href: '/drivers/titleist' },
+    { name: '캘러웨이', href: '/drivers/callaway' },
+    { name: '테일러메이드', href: '/drivers/taylormade' },
+    { name: '혼마', href: '/drivers/honma' },
+    { name: '브리지스톤', href: '/drivers/bridgestone' },
+    { name: '기타', href: '/drivers/others' }
   ];
 
-  const lostBallsItems = [
-    { name: '브랜드 혼합', href: '/lost-balls/brand-mix' },
-    { name: '타이틀리스트', href: '/lost-balls/titleist' },
-    { name: '캘러웨이', href: '/lost-balls/callaway' },
-    { name: '테일러메이드', href: '/lost-balls/taylormade' }
+  const woodsItems = [
+    { name: '타이틀리스트', href: '/woods/titleist' },
+    { name: '캘러웨이', href: '/woods/callaway' },
+    { name: '테일러메이드', href: '/woods/taylormade' },
+    { name: '혼마', href: '/woods/honma' },
+    { name: '브리지스톤', href: '/woods/bridgestone' },
+    { name: '기타', href: '/woods/others' }
+  ];
+
+  const utilitiesItems = [
+    { name: '타이틀리스트', href: '/utilities/titleist' },
+    { name: '캘러웨이', href: '/utilities/callaway' },
+    { name: '테일러메이드', href: '/utilities/taylormade' },
+    { name: '혼마', href: '/utilities/honma' },
+    { name: '브리지스톤', href: '/utilities/bridgestone' },
+    { name: '기타', href: '/utilities/others' }
+  ];
+
+  const wedgesItems = [
+    { name: '타이틀리스트', href: '/wedges/titleist' },
+    { name: '캘러웨이', href: '/wedges/callaway' },
+    { name: '테일러메이드', href: '/wedges/taylormade' },
+    { name: '혼마', href: '/wedges/honma' },
+    { name: '브리지스톤', href: '/wedges/bridgestone' },
+    { name: '기타', href: '/wedges/others' }
+  ];
+
+  const puttersItems = [
+    { name: '타이틀리스트', href: '/putters/titleist' },
+    { name: '캘러웨이', href: '/putters/callaway' },
+    { name: '테일러메이드', href: '/putters/taylormade' },
+    { name: '혼마', href: '/putters/honma' },
+    { name: '브리지스톤', href: '/putters/bridgestone' },
+    { name: '기타', href: '/putters/others' }
+  ];
+
+  const leftHandedItems = [
+    { name: '타이틀리스트', href: '/left-handed/titleist' },
+    { name: '캘러웨이', href: '/left-handed/callaway' },
+    { name: '테일러메이드', href: '/left-handed/taylormade' },
+    { name: '혼마', href: '/left-handed/honma' },
+    { name: '브리지스톤', href: '/left-handed/bridgestone' },
+    { name: '기타', href: '/left-handed/others' }
+  ];
+
+  const womensItems = [
+    { name: '타이틀리스트', href: '/womens/titleist' },
+    { name: '캘러웨이', href: '/womens/callaway' },
+    { name: '테일러메이드', href: '/womens/taylormade' },
+    { name: '혼마', href: '/womens/honma' },
+    { name: '브리지스톤', href: '/womens/bridgestone' },
+    { name: '기타', href: '/womens/others' }
   ];
 
   const isActiveLink = (href: string) => {
@@ -54,9 +108,9 @@ const Header = () => {
     <header className="header">
       <div className="container">
         <div className="header-top">
-          <Link href="/" className="logo">
-            골프용품 도매몰
-          </Link>
+                  <Link href="/" className="logo">
+          골프상회 도매몰
+        </Link>
           <div className="auth-buttons">
             <Link href="/login" className="auth-button">
               로그인
@@ -72,22 +126,53 @@ const Header = () => {
         <div className="container">
           <ul className="nav-list">
             {navigationItems.map((item) => {
-              const isNewArrivals = item.category === 'new';
-              const isLostBalls = item.category === 'lost';
-              const dropdownItems = isNewArrivals ? newArrivalsItems : isLostBalls ? lostBallsItems : [];
-              const isDropdownOpen = isNewArrivals ? isNewArrivalsOpen : isLostBalls ? isLostBallsOpen : false;
+              const isDrivers = item.category === 'drivers';
+              const isWoods = item.category === 'woods';
+              const isUtilities = item.category === 'utilities';
+              const isWedges = item.category === 'wedges';
+              const isPutters = item.category === 'putters';
+              const isLeftHanded = item.category === 'left';
+              const isWomens = item.category === 'womens';
+              
+              const dropdownItems = isDrivers ? driversItems 
+                : isWoods ? woodsItems
+                : isUtilities ? utilitiesItems
+                : isWedges ? wedgesItems
+                : isPutters ? puttersItems
+                : isLeftHanded ? leftHandedItems
+                : isWomens ? womensItems
+                : [];
+                
+              const isDropdownOpen = isDrivers ? isDriversOpen
+                : isWoods ? isWoodsOpen
+                : isUtilities ? isUtilitiesOpen
+                : isWedges ? isWedgesOpen
+                : isPutters ? isPuttersOpen
+                : isLeftHanded ? isLeftHandedOpen
+                : isWomens ? isWomensOpen
+                : false;
               
               return (
                 <li 
                   key={item.category} 
                   className={`nav-item ${item.hasDropdown ? 'dropdown-item' : ''}`}
                   onMouseEnter={item.hasDropdown ? () => {
-                    if (isNewArrivals) setIsNewArrivalsOpen(true);
-                    if (isLostBalls) setIsLostBallsOpen(true);
+                    if (isDrivers) setIsDriversOpen(true);
+                    if (isWoods) setIsWoodsOpen(true);
+                    if (isUtilities) setIsUtilitiesOpen(true);
+                    if (isWedges) setIsWedgesOpen(true);
+                    if (isPutters) setIsPuttersOpen(true);
+                    if (isLeftHanded) setIsLeftHandedOpen(true);
+                    if (isWomens) setIsWomensOpen(true);
                   } : undefined}
                   onMouseLeave={item.hasDropdown ? () => {
-                    if (isNewArrivals) setIsNewArrivalsOpen(false);
-                    if (isLostBalls) setIsLostBallsOpen(false);
+                    if (isDrivers) setIsDriversOpen(false);
+                    if (isWoods) setIsWoodsOpen(false);
+                    if (isUtilities) setIsUtilitiesOpen(false);
+                    if (isWedges) setIsWedgesOpen(false);
+                    if (isPutters) setIsPuttersOpen(false);
+                    if (isLeftHanded) setIsLeftHandedOpen(false);
+                    if (isWomens) setIsWomensOpen(false);
                   } : undefined}
                 >
                   {item.hasDropdown ? (

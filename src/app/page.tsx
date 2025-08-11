@@ -1,11 +1,9 @@
-import SearchBar from '@/components/SearchBar';
-import Notice from '@/components/Notice';
+import ImageSlider from '@/components/ImageSlider';
 
 export default function Home() {
   return (
-    <div className="container">
-      <SearchBar />
-      <Notice />
+    <div>
+      <ImageSlider />
     </div>
   );
 }
