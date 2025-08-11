@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 const ImageSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -56,10 +57,14 @@ const ImageSlider = () => {
         <div className="slider-wrapper">
           {golfImages.map((image, index) => (
             <div key={index} className={`slide ${index === currentSlide ? 'active' : ''}`}>
-              <img 
+              <Image 
                 src={image.url} 
                 alt={image.title}
                 className="slide-image"
+                fill
+                style={{objectFit: 'cover'}}
+                priority={index === 0}
+                sizes="100vw"
               />
               <div className="slide-overlay">
                 <h3 className="slide-title">{image.title}</h3>

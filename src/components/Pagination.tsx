@@ -10,7 +10,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
     const maxVisible = 7; // 최대 7개 페이지 표시
     
     let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let end = Math.min(totalPages, start + maxVisible - 1);
+    const end = Math.min(totalPages, start + maxVisible - 1);
     
     // 끝에서 시작 조정
     if (end - start + 1 < maxVisible) {

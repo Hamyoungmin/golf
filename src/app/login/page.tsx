@@ -28,12 +28,14 @@ export default function Login() {
 
     try {
       const user = await signIn(formData.email, formData.password);
-      console.log('로그인 성공:', user);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('로그인 성공:', user);
+      }
       alert('로그인에 성공했습니다!');
       router.push('/'); // 메인 페이지로 이동
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('로그인 실패:', error);
-      setError(error.message);
+      setError(error instanceof Error ? error.message : '로그인 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }

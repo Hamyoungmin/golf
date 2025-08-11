@@ -45,7 +45,7 @@ const ProductList = ({ title, subtitle, products, totalCount, category }: Produc
       
       <div className="product-controls">
         <div className="product-count">
-          <strong>{category}</strong> "{totalCount}"
+          <strong>{category}</strong> &quot;{totalCount}&quot;
         </div>
       </div>
       

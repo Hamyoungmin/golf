@@ -11,8 +11,9 @@ export const signUp = async (email: string, password: string): Promise<User> => 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     return userCredential.user;
-  } catch (error: any) {
-    throw new Error(getFirebaseErrorMessage(error.code));
+  } catch (error: unknown) {
+    const errorCode = error instanceof Error && 'code' in error ? (error as { code: string }).code : 'unknown';
+    throw new Error(getFirebaseErrorMessage(errorCode));
   }
 };
 
@@ -21,8 +22,9 @@ export const signIn = async (email: string, password: string): Promise<User> => 
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential.user;
-  } catch (error: any) {
-    throw new Error(getFirebaseErrorMessage(error.code));
+  } catch (error: unknown) {
+    const errorCode = error instanceof Error && 'code' in error ? (error as { code: string }).code : 'unknown';
+    throw new Error(getFirebaseErrorMessage(errorCode));
   }
 };
 
@@ -30,7 +32,7 @@ export const signIn = async (email: string, password: string): Promise<User> => 
 export const logOut = async (): Promise<void> => {
   try {
     await signOut(auth);
-  } catch (error: any) {
+  } catch {
     throw new Error('로그아웃 중 오류가 발생했습니다.');
   }
 };

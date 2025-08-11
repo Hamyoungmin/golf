@@ -83,23 +83,25 @@ export default function Register() {
     try {
       // Firebase 회원가입
       const user = await signUp(formData.email, formData.password);
-      console.log('회원가입 성공:', user);
-      console.log('추가 정보:', {
-        businessNumber: formData.businessNumber,
-        companyName: formData.companyName,
-        name: formData.name,
-        phone: formData.phone,
-        shopPhotos: {
-          shopInteriorPhoto: shopPhotos.shopInteriorPhoto?.name,
-          shopSignPhoto: shopPhotos.shopSignPhoto?.name
-        }
-      });
+      if (process.env.NODE_ENV === 'development') {
+        console.log('회원가입 성공:', user);
+        console.log('추가 정보:', {
+          businessNumber: formData.businessNumber,
+          companyName: formData.companyName,
+          name: formData.name,
+          phone: formData.phone,
+          shopPhotos: {
+            shopInteriorPhoto: shopPhotos.shopInteriorPhoto?.name,
+            shopSignPhoto: shopPhotos.shopSignPhoto?.name
+          }
+        });
+      }
       
       alert('회원가입에 성공했습니다! 로그인 페이지로 이동합니다.');
       router.push('/login');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('회원가입 실패:', error);
-      setError(error.message);
+      setError(error instanceof Error ? error.message : '회원가입 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }

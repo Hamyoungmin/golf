@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 interface Product {
   id: number;
   name: string;
@@ -19,7 +21,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
     <div className="product-card" onClick={handleProductClick}>
       <div className="product-image">
         {product.image ? (
-          <img src={product.image} alt={product.name} />
+          <Image 
+            src={product.image} 
+            alt={product.name}
+            width={250}
+            height={200}
+            style={{objectFit: 'cover'}}
+          />
         ) : (
           <span>이미지 없음</span>
         )}

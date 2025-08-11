@@ -9,7 +9,9 @@ const SearchBar = () => {
     e.preventDefault();
     if (searchTerm.trim()) {
       // 실제 검색 로직 구현
-      console.log('검색어:', searchTerm);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('검색어:', searchTerm);
+      }
       alert(`"${searchTerm}" 검색 기능입니다. 실제 서비스에서는 검색 결과 페이지로 이동합니다.`);
     }
   };
