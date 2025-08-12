@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserOrders, getOrderStatusText, getOrderStatusColor } from '@/lib/orders';
-import { Order } from '@/types';
+import { Order, OrderStatus } from '@/types';
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -178,7 +178,7 @@ export default function OrdersPage() {
           <p className="text-gray-600 mb-6">
             {selectedStatus === 'all' 
               ? '아직 주문한 상품이 없습니다.' 
-              : `${getOrderStatusText(selectedStatus)} 상태의 주문이 없습니다.`
+              : `${getOrderStatusText(selectedStatus as OrderStatus)} 상태의 주문이 없습니다.`
             }
           </p>
           <Link 

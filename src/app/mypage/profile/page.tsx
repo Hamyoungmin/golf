@@ -52,8 +52,8 @@ export default function ProfilePage() {
           setFormData({
             name: data.name || '',
             phone: data.phone || '',
-            businessNumber: data.businessNumber || '',
-            companyName: data.companyName || '',
+            businessNumber: '',
+            companyName: '',
           });
           
           if (data.address) {
@@ -119,8 +119,6 @@ export default function ProfilePage() {
       const updateData: Partial<UserType> = {
         name: formData.name,
         phone: formData.phone,
-        businessNumber: formData.businessNumber,
-        companyName: formData.companyName,
         address: addressData,
       };
 

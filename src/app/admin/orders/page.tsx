@@ -243,7 +243,7 @@ export default function AdminOrdersPage() {
       {/* 주문 테이블 */}
       <div className="bg-white shadow rounded-lg">
         <DataTable
-          data={filteredOrders}
+          data={filteredOrders.map(order => ({ ...order, id: order.orderId }))}
           columns={columns}
           loading={loading}
           emptyMessage="주문이 없습니다."

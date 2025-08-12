@@ -11,8 +11,8 @@ import {
   FunnelIcon
 } from '@heroicons/react/24/outline';
 import DataTable from '@/components/admin/DataTable';
-import { getProducts, deleteProduct, Product } from '@/lib/products';
-import { ProductFilter, Category, Brand } from '@/types';
+import { getProducts, deleteProduct } from '@/lib/products';
+import { ProductFilter, Category, Brand, Product } from '@/types';
 
 export default function AdminProductsPage() {
   const router = useRouter();

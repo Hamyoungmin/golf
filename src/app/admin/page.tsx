@@ -6,7 +6,7 @@ import {
   CurrencyDollarIcon, 
   UsersIcon,
   ExclamationTriangleIcon,
-  ClipboardListIcon,
+  ClipboardDocumentListIcon,
   CubeIcon 
 } from '@heroicons/react/24/outline';
 import StatsCard from '@/components/admin/StatsCard';
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
         <StatsCard
           title="대기중 주문"
           value={orderStats.pendingOrders}
-          icon={ClipboardListIcon}
+          icon={ClipboardDocumentListIcon}
           iconColor="text-yellow-600"
         />
         <StatsCard

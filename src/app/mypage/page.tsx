@@ -172,7 +172,7 @@ export default function MyPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">상호명</label>
-                <p className="text-gray-900">{userData?.businessNumber || '-'}</p>
+                <p className="text-gray-900">-</p>
               </div>
             </div>
             <div className="mt-4">

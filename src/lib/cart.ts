@@ -99,6 +99,7 @@ export const addToCart = async (
 ): Promise<CartItem[]> => {
   try {
     // 로컬 장바구니에서 현재 아이템들 가져오기
+    // eslint-disable-next-line prefer-const
     let cartItems = getLocalCart();
 
     // 기존 아이템이 있는지 확인

@@ -6,11 +6,11 @@ import { usePathname } from 'next/navigation';
 import { 
   HomeIcon,
   ShoppingBagIcon,
-  ClipboardListIcon,
+  ClipboardDocumentListIcon,
   UsersIcon,
   CubeIcon,
   ChartBarIcon,
-  SpeakerphoneIcon,
+  SpeakerWaveIcon,
   QuestionMarkCircleIcon,
   StarIcon,
   CogIcon
@@ -33,7 +33,7 @@ const AdminSidebar: React.FC = () => {
     { 
       name: '주문 관리', 
       href: '/admin/orders', 
-      icon: ClipboardListIcon 
+      icon: ClipboardDocumentListIcon 
     },
     { 
       name: '고객 관리', 
@@ -53,7 +53,7 @@ const AdminSidebar: React.FC = () => {
     { 
       name: '공지사항', 
       href: '/admin/notices', 
-      icon: SpeakerphoneIcon 
+      icon: SpeakerWaveIcon 
     },
     { 
       name: 'FAQ 관리', 

@@ -164,7 +164,7 @@ export default function SearchPage() {
     performSearch();
   }, [query, filters, sort]);
 
-  const handleFilterChange = (key: keyof ProductFilter, value: any) => {
+  const handleFilterChange = (key: keyof ProductFilter, value: string | boolean | undefined) => {
     setFilters(prev => ({
       ...prev,
       [key]: value
@@ -196,7 +196,7 @@ export default function SearchPage() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">검색 결과</h1>
         <p className="text-gray-600">
-          "<span className="font-semibold">{query}</span>"에 대한 검색 결과 {totalCount}개
+          &quot;<span className="font-semibold">{query}</span>&quot;에 대한 검색 결과 {totalCount}개
         </p>
       </div>
 
