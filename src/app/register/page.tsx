@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { signUp } from '@/lib/auth';
-import { createUserProfile } from '@/lib/users';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { auth, db, storage } from '@/lib/firebase';
+import { User } from '@/types';
 
 // 동적 렌더링 강제 설정
 export const dynamic = 'force-dynamic';
@@ -62,6 +65,13 @@ export default function Register() {
     });
   };
 
+  // 파일 업로드 함수
+  const uploadFile = async (file: File, path: string): Promise<string> => {
+    const storageRef = ref(storage, path);
+    const snapshot = await uploadBytes(storageRef, file);
+    return await getDownloadURL(snapshot.ref);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -85,27 +95,69 @@ export default function Register() {
     }
 
     try {
-      // Firebase 회원가입
-      const user = await signUp(formData.email, formData.password);
+      // 1. Firebase 회원가입
+      const userCredential = await createUserWithEmailAndPassword(
+        auth, 
+        formData.email, 
+        formData.password
+      );
+      const user = userCredential.user;
       
-      // 사용자 추가 정보 저장
-      await createUserProfile(user.uid, formData.email, {
+      // 2. 파일 업로드
+      const shopInteriorPhotoUrl = await uploadFile(
+        shopPhotos.shopInteriorPhoto,
+        `users/${user.uid}/shop_interior.jpg`
+      );
+      const shopSignPhotoUrl = await uploadFile(
+        shopPhotos.shopSignPhoto,
+        `users/${user.uid}/shop_sign.jpg`
+      );
+      
+      // 3. 사용자 프로필 생성 (승인 대기 상태)
+      const userData: Partial<User> = {
+        uid: user.uid,
+        email: formData.email,
         name: formData.name,
         phone: formData.phone,
         businessNumber: formData.businessNumber,
         companyName: formData.companyName,
-      });
+        shopInteriorPhotoUrl,
+        shopSignPhotoUrl,
+        role: 'user',
+        status: 'pending', // 승인 대기 상태
+        isAdmin: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      await setDoc(doc(db, 'users', user.uid), userData);
       
       if (process.env.NODE_ENV === 'development') {
-        console.log('회원가입 성공:', user);
-        console.log('추가 정보 저장 완료');
+        console.log('✅ 회원가입 성공:', user);
+        console.log('✅ 사용자 프로필 저장 완료');
       }
       
-      alert('회원가입에 성공했습니다! 로그인 페이지로 이동합니다.');
+      // 성공 메시지 표시 후 페이지 이동
+      setError('');
+      alert('회원가입이 완료되었습니다!\n관리자 승인 후 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동합니다.');
       router.push('/login');
     } catch (error: unknown) {
-      console.error('회원가입 실패:', error);
-      setError(error instanceof Error ? error.message : '회원가입 중 오류가 발생했습니다.');
+      console.error('❌ 회원가입 실패:', error);
+      
+      // 에러 메시지 설정
+      if (error instanceof Error) {
+        if (error.message.includes('email-already-in-use')) {
+          setError('이미 사용 중인 이메일입니다.');
+        } else if (error.message.includes('weak-password')) {
+          setError('비밀번호는 6자리 이상이어야 합니다.');
+        } else if (error.message.includes('invalid-email')) {
+          setError('유효하지 않은 이메일 주소입니다.');
+        } else {
+          setError(error.message);
+        }
+      } else {
+        setError('회원가입 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
     } finally {
       setLoading(false);
     }

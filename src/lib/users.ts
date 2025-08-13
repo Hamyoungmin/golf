@@ -1,135 +1,160 @@
 import { 
-  doc, 
-  getDoc, 
-  setDoc, 
-  updateDoc, 
-  deleteDoc 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  orderBy
 } from 'firebase/firestore';
-import { getFirebaseFirestore } from './firebase';
-import { User as UserType } from '@/types';
+import { db } from './firebase';
+import { User } from '@/types';
 
-// Firestore에서 사용자 정보 조회
-export const getUserData = async (uid: string): Promise<UserType | null> => {
+// 특정 사용자 정보 가져오기
+export async function getUserData(userId: string): Promise<User | null> {
   try {
-    const db = getFirebaseFirestore();
-    if (!db) throw new Error('Firestore를 사용할 수 없습니다.');
+    const docRef = doc(db, 'users', userId);
+    const docSnap = await getDoc(docRef);
 
-    const userRef = doc(db, 'users', uid);
-    const userSnap = await getDoc(userRef);
-
-    if (userSnap.exists()) {
-      const data = userSnap.data();
+    if (docSnap.exists()) {
+      const data = docSnap.data();
       return {
         ...data,
-        uid,
+        uid: docSnap.id,
         createdAt: data.createdAt?.toDate() || new Date(),
-      } as UserType;
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        approvedAt: data.approvedAt?.toDate(),
+      } as User;
     }
 
     return null;
   } catch (error) {
-    console.error('Error fetching user data:', error);
-    throw new Error('사용자 정보를 불러오는 중 오류가 발생했습니다.');
+    console.error('사용자 정보 가져오기 오류:', error);
+    return null;
   }
-};
+}
 
-// 사용자 정보 저장/업데이트
-export const saveUserData = async (
-  uid: string, 
-  userData: Partial<UserType>
-): Promise<void> => {
+// 모든 사용자 목록 가져오기 (관리자용)
+export async function getAllUsers(): Promise<User[]> {
   try {
-    const db = getFirebaseFirestore();
-    if (!db) throw new Error('Firestore를 사용할 수 없습니다.');
+    const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    
+    const users = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        uid: doc.id,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        approvedAt: data.approvedAt?.toDate(),
+      } as User;
+    });
 
-    const userRef = doc(db, 'users', uid);
-    const userSnap = await getDoc(userRef);
+    return users;
+  } catch (error) {
+    console.error('사용자 목록 가져오기 오류:', error);
+    return [];
+  }
+}
 
-    if (userSnap.exists()) {
-      // 기존 사용자 정보 업데이트
-      await updateDoc(userRef, {
-        ...userData,
-        updatedAt: new Date(),
-      });
-    } else {
-      // 새 사용자 정보 생성
-      await setDoc(userRef, {
-        uid,
-        ...userData,
-        isAdmin: false, // 기본값으로 일반 사용자
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+// 사용자 정보 생성/업데이트
+export async function createOrUpdateUser(userId: string, userData: Partial<User>): Promise<boolean> {
+  try {
+    const docRef = doc(db, 'users', userId);
+    const now = new Date();
+    
+    const updateData = {
+      ...userData,
+      updatedAt: now,
+    };
+
+    // 문서가 존재하지 않으면 createdAt도 설정
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      updateData.createdAt = now;
     }
+
+    await setDoc(docRef, updateData, { merge: true });
+    return true;
   } catch (error) {
-    console.error('Error saving user data:', error);
-    throw new Error('사용자 정보 저장 중 오류가 발생했습니다.');
-  }
-};
-
-// 회원가입 시 추가 정보 저장
-export const createUserProfile = async (
-  uid: string,
-  email: string,
-  additionalData: {
-    name: string;
-    phone: string;
-    businessNumber: string;
-    companyName: string;
-  }
-): Promise<void> => {
-  try {
-    await saveUserData(uid, {
-      email,
-      ...additionalData,
-    });
-  } catch (error) {
-    console.error('Error creating user profile:', error);
-    throw new Error('사용자 프로필 생성 중 오류가 발생했습니다.');
-  }
-};
-
-// 사용자 정보 업데이트
-export const updateUserProfile = async (
-  uid: string, 
-  updateData: Partial<UserType>
-): Promise<void> => {
-  try {
-    const db = getFirebaseFirestore();
-    if (!db) throw new Error('Firestore를 사용할 수 없습니다.');
-
-    const userRef = doc(db, 'users', uid);
-    await updateDoc(userRef, {
-      ...updateData,
-      updatedAt: new Date(),
-    });
-  } catch (error) {
-    console.error('Error updating user profile:', error);
-    throw new Error('사용자 정보 업데이트 중 오류가 발생했습니다.');
-  }
-};
-
-// 사용자 정보 삭제
-export const deleteUserData = async (uid: string): Promise<void> => {
-  try {
-    const db = getFirebaseFirestore();
-    if (!db) throw new Error('Firestore를 사용할 수 없습니다.');
-
-    const userRef = doc(db, 'users', uid);
-    await deleteDoc(userRef);
-  } catch (error) {
-    console.error('Error deleting user data:', error);
-    throw new Error('사용자 정보 삭제 중 오류가 발생했습니다.');
-  }
-};
-
-// 관리자 권한 확인
-export const isUserAdmin = async (uid: string): Promise<boolean> => {
-  try {
-    const userData = await getUserData(uid);
-    return userData?.isAdmin || false;
-  } catch (error) {
-    console.error('Error checking admin status:', error);
+    console.error('사용자 정보 업데이트 오류:', error);
     return false;
   }
-};
+}
+
+// 사용자 승인 상태 업데이트
+export async function updateUserStatus(
+  userId: string, 
+  status: 'approved' | 'rejected', 
+  adminId: string,
+  rejectionReason?: string
+): Promise<boolean> {
+  try {
+    const docRef = doc(db, 'users', userId);
+            const updateData: Partial<User> = {
+      status,
+      updatedAt: new Date(),
+    };
+
+    if (status === 'approved') {
+      updateData.approvedAt = new Date();
+      updateData.approvedBy = adminId;
+    } else if (status === 'rejected' && rejectionReason) {
+      updateData.rejectionReason = rejectionReason;
+    }
+
+    await updateDoc(docRef, updateData);
+    return true;
+  } catch (error) {
+    console.error('사용자 상태 업데이트 오류:', error);
+    return false;
+  }
+}
+
+// 대기 중인 사용자 목록 가져오기
+export async function getPendingUsers(): Promise<User[]> {
+  try {
+    const q = query(
+      collection(db, 'users'),
+      where('status', '==', 'pending'),
+      orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    
+    const users = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        uid: doc.id,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        approvedAt: data.approvedAt?.toDate(),
+      } as User;
+    });
+
+    return users;
+  } catch (error) {
+    console.error('대기 중인 사용자 목록 가져오기 오류:', error);
+    return [];
+  }
+}
+
+// 사용자 프로필 업데이트
+export async function updateUserProfile(userId: string, profileData: Partial<User>): Promise<boolean> {
+  try {
+    const docRef = doc(db, 'users', userId);
+    const updateData = {
+      ...profileData,
+      updatedAt: new Date(),
+    };
+
+    await updateDoc(docRef, updateData);
+    return true;
+  } catch (error) {
+    console.error('사용자 프로필 업데이트 오류:', error);
+    return false;
+  }
+}

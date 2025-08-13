@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserOrders, getOrderStatusText, getOrderStatusColor } from '@/lib/orders';
-import { Order, OrderStatus } from '@/types';
+import { Order } from '@/types';
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -14,6 +14,9 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<string>('orders');
+
+
 
   // 로그인 체크
   useEffect(() => {
@@ -31,7 +34,7 @@ export default function OrdersPage() {
 
       try {
         setLoading(true);
-        const userOrders = await getUserOrders(user.uid, 50); // 최대 50개
+        const userOrders = await getUserOrders(user.uid, 50);
         setOrders(userOrders);
       } catch (error) {
         console.error('주문 목록 로드 오류:', error);
@@ -43,6 +46,8 @@ export default function OrdersPage() {
     fetchOrders();
   }, [user]);
 
+
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ko-KR').format(price) + '원';
   };
@@ -52,24 +57,7 @@ export default function OrdersPage() {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
     }).format(date);
-  };
-
-  // 상태별 필터링
-  const filteredOrders = selectedStatus === 'all' 
-    ? orders 
-    : orders.filter(order => order.status === selectedStatus);
-
-  // 상태별 개수 계산
-  const statusCounts = {
-    all: orders.length,
-    pending: orders.filter(order => order.status === 'pending').length,
-    paid: orders.filter(order => order.status === 'paid').length,
-    shipped: orders.filter(order => order.status === 'shipped').length,
-    delivered: orders.filter(order => order.status === 'delivered').length,
-    cancelled: orders.filter(order => order.status === 'cancelled').length,
   };
 
   if (authLoading || loading) {
@@ -81,209 +69,332 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">주문 내역</h1>
-          <p className="text-gray-600 mt-2">총 {orders.length}개의 주문이 있습니다.</p>
+    <div className="min-h-screen bg-white">
+      <div className="container mx-auto px-4 py-8">
+        
+        {/* 제목 */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">주문조회</h1>
         </div>
-        <Link 
-          href="/mypage"
-          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          ← 마이페이지
-        </Link>
-      </div>
 
-      {/* 상태별 탭 */}
-      <div className="bg-white border rounded-lg p-4 mb-6">
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setSelectedStatus('all')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              selectedStatus === 'all' 
-                ? 'bg-orange-500 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            전체 ({statusCounts.all})
-          </button>
-          <button
-            onClick={() => setSelectedStatus('pending')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              selectedStatus === 'pending' 
-                ? 'bg-orange-500 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            주문 접수 ({statusCounts.pending})
-          </button>
-          <button
-            onClick={() => setSelectedStatus('paid')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              selectedStatus === 'paid' 
-                ? 'bg-orange-500 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            결제 완료 ({statusCounts.paid})
-          </button>
-          <button
-            onClick={() => setSelectedStatus('shipped')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              selectedStatus === 'shipped' 
-                ? 'bg-orange-500 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            배송 중 ({statusCounts.shipped})
-          </button>
-          <button
-            onClick={() => setSelectedStatus('delivered')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              selectedStatus === 'delivered' 
-                ? 'bg-orange-500 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            배송 완료 ({statusCounts.delivered})
-          </button>
-          <button
-            onClick={() => setSelectedStatus('cancelled')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              selectedStatus === 'cancelled' 
-                ? 'bg-orange-500 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            주문 취소 ({statusCounts.cancelled})
-          </button>
-        </div>
-      </div>
+        <br />
+        <br />
+        <br />
+        <br />
 
-      {/* 주문 목록 */}
-      {filteredOrders.length === 0 ? (
-        <div className="bg-white border rounded-lg p-16 text-center">
-          <div className="mb-4">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mx-auto text-gray-400">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-              <path d="M9 3v18"/>
-              <path d="M16 3v18"/>
-              <path d="M3 9h18"/>
-              <path d="M3 16h18"/>
-            </svg>
+        {/* 탭 메뉴 */}
+        <div className="flex justify-start mb-8">
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab('orders')}
+              className="w-48 h-16 text-base font-bold border border-solid"
+              style={{ 
+                backgroundColor: activeTab === 'orders' ? '#000000' : '#ffffff',
+                color: activeTab === 'orders' ? '#ffffff !important' : '#000000 !important',
+                borderColor: '#000000',
+                borderWidth: '1px',
+                borderStyle: 'solid'
+              }}
+            >
+              <span style={{ color: activeTab === 'orders' ? '#ffffff' : '#000000', fontWeight: 'bold' }}>
+                주문내역조회 ({orders.length})
+              </span>
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('returns')}
+              className="w-48 h-16 text-base font-bold border border-solid border-l-0"
+              style={{ 
+                backgroundColor: activeTab === 'returns' ? '#000000' : '#ffffff',
+                color: activeTab === 'returns' ? '#ffffff !important' : '#000000 !important',
+                borderColor: '#000000',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderLeft: '0'
+              }}
+            >
+              <span style={{ color: activeTab === 'returns' ? '#ffffff' : '#000000', fontWeight: 'bold' }}>
+                취소/반품/교환 내역 (0)
+              </span>
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('past')}
+              className="w-48 h-16 text-base font-bold border border-solid border-l-0"
+              style={{ 
+                backgroundColor: activeTab === 'past' ? '#000000' : '#ffffff',
+                color: activeTab === 'past' ? '#ffffff !important' : '#000000 !important',
+                borderColor: '#000000',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderLeft: '0'
+              }}
+            >
+              <span style={{ color: activeTab === 'past' ? '#ffffff' : '#000000', fontWeight: 'bold' }}>
+                과거주문내역 (0)
+              </span>
+            </button>
           </div>
-          <h3 className="text-lg font-semibold mb-2">주문 내역이 없습니다</h3>
-          <p className="text-gray-600 mb-6">
-            {selectedStatus === 'all' 
-              ? '아직 주문한 상품이 없습니다.' 
-              : `${getOrderStatusText(selectedStatus as OrderStatus)} 상태의 주문이 없습니다.`
-            }
-          </p>
-          <Link 
-            href="/"
-            className="inline-block px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-          >
-            쇼핑하러 가기
-          </Link>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredOrders.map((order) => (
-            <div key={order.orderId} className="bg-white border rounded-lg p-6">
-              {/* 주문 헤더 */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 pb-4 border-b border-gray-100">
-                <div>
-                  <h3 className="font-semibold text-lg mb-1">주문번호: {order.orderId}</h3>
-                  <p className="text-sm text-gray-600">{formatDate(order.createdAt)}</p>
-                </div>
-                <div className="flex items-center space-x-3 mt-2 sm:mt-0">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getOrderStatusColor(order.status)}`}>
-                    {getOrderStatusText(order.status)}
-                  </span>
-                  <Link 
-                    href={`/mypage/orders/${order.orderId}`}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
-                  >
-                    상세보기
-                  </Link>
-                </div>
-              </div>
 
-              {/* 주문 상품 */}
-              <div className="space-y-3 mb-4">
-                {order.items.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">{item.productName}</h4>
-                      <p className="text-sm text-gray-600">
-                        {formatPrice(item.price)} × {item.quantity}개
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{formatPrice(item.totalPrice)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+        {/* 탭별 콘텐츠 */}
+        {activeTab === 'orders' && (
+          <>
+            {/* 안내 텍스트 */}
+            <div className="mb-8">
+              <ul className="text-lg font-bold text-gray-800 space-y-3">
+                <li>• 기본적으로 최근 3개월간의 자료가 조회되며, 기간 검색시 주문처리완료 후 3개월 이내의 주문내역을 조회하실 수 있습니다.</li>
+                <li>• 완료 후 3개월 이상 경과한 주문은 <span className="font-black">[과거주문내역]</span>에서 확인할 수 있습니다.</li>
+                <li>• 주문번호를 클릭하시면 해당 주문에 대한 상세내역을 확인하실 수 있습니다.</li>
+              </ul>
+            </div>
 
-              {/* 주문 총액 */}
-              <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                <div>
-                  <p className="text-sm text-gray-600">
-                    결제방법: {order.paymentMethod === 'bank_transfer' ? '무통장 입금' : 
-                              order.paymentMethod === 'card' ? '신용카드' : 
-                              order.paymentMethod === 'kakao_pay' ? '카카오페이' : order.paymentMethod}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold text-orange-600">
-                    총 {formatPrice(order.totalAmount)}
-                  </p>
-                </div>
-              </div>
+            <br />
+            <br />
+            <br />
 
-              {/* 액션 버튼들 */}
-              <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
-                {order.status === 'pending' && (
-                  <button 
-                    className="px-4 py-2 border border-red-300 text-red-600 rounded-lg text-sm hover:bg-red-50 transition-colors"
-                    onClick={() => {
-                      if (confirm('주문을 취소하시겠습니까?')) {
-                        // 주문 취소 로직 (추후 구현)
-                        alert('주문 취소 기능은 고객센터로 문의해주세요.');
-                      }
-                    }}
-                  >
-                    주문 취소
-                  </button>
-                )}
-                {order.status === 'delivered' && (
-                  <button 
-                    className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm hover:bg-orange-600 transition-colors"
-                    onClick={() => {
-                      // 리뷰 작성 페이지로 이동 (추후 구현)
-                      alert('리뷰 작성 기능은 추후 제공될 예정입니다.');
-                    }}
-                  >
-                    리뷰 작성
-                  </button>
-                )}
-                <button 
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50 transition-colors"
-                  onClick={() => {
-                    // 재주문 기능 (추후 구현)
-                    alert('재주문 기능은 추후 제공될 예정입니다.');
-                  }}
-                >
-                  재주문
-                </button>
+            {/* 주문 상품 정보 */}
+            <div className="mb-8">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">주문 상품 정보</h3>
+              
+              <div className="overflow-x-auto border border-gray-200">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        주문일자<br />[주문번호]
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        이미지
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        상품정보
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        수량
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        상품구매금액
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        주문처리상태
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
+                        취소/교환/반품
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {orders.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-20 text-center text-gray-500">
+                          <div className="flex flex-col items-center">
+                            <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                            </svg>
+                            <p className="text-lg font-medium text-gray-700 mb-2">주문 내역이 없습니다</p>
+                            <p className="text-gray-500">주문하신 상품이 없습니다.</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      orders
+                        .filter(order => selectedStatus === 'all' || order.status === selectedStatus)
+                        .map((order) => 
+                          order.items.map((item, index) => (
+                            <tr key={`${order.orderId}-${index}`} className="hover:bg-gray-50">
+                              {index === 0 && (
+                                <td className="px-4 py-4 text-center border-r border-gray-200" rowSpan={order.items.length}>
+                                  <div className="text-sm">
+                                    <div className="font-medium text-gray-900 mb-1">{formatDate(order.createdAt)}</div>
+                                    <div className="text-blue-600 hover:text-blue-800 cursor-pointer">
+                                      <Link href={`/mypage/orders/${order.orderId}`}>
+                                        [{order.orderId.slice(0, 8)}...]
+                                      </Link>
+                                    </div>
+                                  </div>
+                                </td>
+                              )}
+                              <td className="px-4 py-4 text-center border-r border-gray-200">
+                                <div className="w-20 h-20 bg-gray-100 rounded flex items-center justify-center mx-auto">
+                                  <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"/>
+                                  </svg>
+                                </div>
+                              </td>
+                              <td className="px-4 py-4 text-left border-r border-gray-200">
+                                <div className="text-sm">
+                                  <div className="font-medium text-gray-900 mb-1">{item.productName}</div>
+                                  <div className="text-gray-500 text-xs">
+                                    옵션: 기본 옵션
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-4 py-4 text-center border-r border-gray-200 text-sm text-gray-900">
+                                {item.quantity}
+                              </td>
+                              <td className="px-4 py-4 text-center border-r border-gray-200 text-sm font-medium text-gray-900">
+                                {formatPrice(item.totalPrice)}
+                              </td>
+                              {index === 0 && (
+                                <td className="px-4 py-4 text-center border-r border-gray-200" rowSpan={order.items.length}>
+                                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getOrderStatusColor(order.status)}`}>
+                                    {getOrderStatusText(order.status)}
+                                  </span>
+                                </td>
+                              )}
+                              {index === 0 && (
+                                <td className="px-4 py-4 text-center text-sm" rowSpan={order.items.length}>
+                                  <div className="space-y-1">
+                                    <button className="block w-full px-3 py-1 text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 rounded">
+                                      취소신청
+                                    </button>
+                                    <button className="block w-full px-3 py-1 text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 rounded">
+                                      교환신청
+                                    </button>
+                                    <button className="block w-full px-3 py-1 text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 rounded">
+                                      반품신청
+                                    </button>
+                                  </div>
+                                </td>
+                              )}
+                            </tr>
+                          ))
+                        )
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          </>
+        )}
+
+        {activeTab === 'returns' && (
+          <div className="mb-8">
+            <div className="mb-8">
+              <ul className="text-lg font-bold text-gray-800 space-y-3">
+                <li>• 취소, 반품, 교환 신청 내역을 확인하실 수 있습니다.</li>
+                <li>• 처리 상태별로 확인이 가능하며, 상세 내역을 클릭하여 자세한 정보를 확인하실 수 있습니다.</li>
+                <li>• 문의사항이 있으시면 고객센터로 연락 주시기 바랍니다.</li>
+              </ul>
+            </div>
+
+            <br />
+            <br />
+            <br />
+
+            <div className="mb-8">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">취소/반품/교환 내역</h3>
+              
+              <div className="overflow-x-auto border border-gray-200">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        신청일자<br />[신청번호]
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        이미지
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        상품정보
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        수량
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        신청유형
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        처리상태
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
+                        비고
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    <tr>
+                      <td colSpan={7} className="px-6 py-20 text-center text-gray-500">
+                        <div className="flex flex-col items-center">
+                          <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                          </svg>
+                          <p className="text-lg font-medium text-gray-700 mb-2">취소/반품/교환 내역이 없습니다</p>
+                          <p className="text-gray-500">신청하신 내역이 없습니다.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'past' && (
+          <div className="mb-8">
+            <div className="mb-8">
+              <ul className="text-lg font-bold text-gray-800 space-y-3">
+                <li>• 완료 후 3개월 이상 경과한 주문 내역을 확인하실 수 있습니다.</li>
+                <li>• 과거 주문 내역은 최대 2년까지 조회 가능합니다.</li>
+                <li>• 상세 주문 정보가 필요하시면 고객센터로 문의해 주시기 바랍니다.</li>
+              </ul>
+            </div>
+
+            <br />
+            <br />
+            <br />
+
+            <div className="mb-8">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">과거 주문 내역</h3>
+              
+              <div className="overflow-x-auto border border-gray-200">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        주문일자<br />[주문번호]
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        이미지
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        상품정보
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        수량
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        상품구매금액
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                        주문처리상태
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
+                        비고
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    <tr>
+                      <td colSpan={7} className="px-6 py-20 text-center text-gray-500">
+                        <div className="flex flex-col items-center">
+                          <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                          </svg>
+                          <p className="text-lg font-medium text-gray-700 mb-2">과거 주문 내역이 없습니다</p>
+                          <p className="text-gray-500">3개월 이상 경과한 주문이 없습니다.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

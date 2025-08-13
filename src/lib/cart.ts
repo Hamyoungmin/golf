@@ -1,15 +1,5 @@
-import { 
-  doc, 
-  getDoc, 
-  setDoc, 
-  updateDoc,
-  collection,
-  query,
-  where,
-  getDocs
-} from 'firebase/firestore';
-import { getFirebaseFirestore } from './firebase';
-import { Cart, CartItem } from '@/types';
+// Firebase 제거됨: 로컬스토리지 기능만 사용
+import { CartItem } from '@/types';
 
 // 로컬스토리지 키
 const CART_STORAGE_KEY = 'golf_cart';
@@ -49,45 +39,15 @@ export const clearLocalCart = (): void => {
   }
 };
 
-// Firestore에서 사용자 장바구니 조회
+// Firebase 제거됨: 더미 함수들
 export const getUserCart = async (userId: string): Promise<CartItem[]> => {
-  try {
-    const db = getFirebaseFirestore();
-    if (!db) throw new Error('Firestore를 사용할 수 없습니다.');
-
-    const cartRef = doc(db, 'carts', userId);
-    const cartSnap = await getDoc(cartRef);
-
-    if (cartSnap.exists()) {
-      const cartData = cartSnap.data() as Cart;
-      return cartData.items || [];
-    }
-
-    return [];
-  } catch (error) {
-    console.error('사용자 장바구니 조회 오류:', error);
-    throw new Error('장바구니를 불러오는 중 오류가 발생했습니다.');
-  }
+  // 로컬 장바구니만 반환
+  return getLocalCart();
 };
 
-// Firestore에 사용자 장바구니 저장
 export const saveUserCart = async (userId: string, cartItems: CartItem[]): Promise<void> => {
-  try {
-    const db = getFirebaseFirestore();
-    if (!db) throw new Error('Firestore를 사용할 수 없습니다.');
-
-    const cartRef = doc(db, 'carts', userId);
-    const cartData: Cart = {
-      userId,
-      items: cartItems,
-      updatedAt: new Date(),
-    };
-
-    await setDoc(cartRef, cartData);
-  } catch (error) {
-    console.error('사용자 장바구니 저장 오류:', error);
-    throw new Error('장바구니 저장 중 오류가 발생했습니다.');
-  }
+  // 로컬스토리지만 사용
+  saveLocalCart(cartItems);
 };
 
 // 장바구니에 상품 추가
@@ -201,38 +161,10 @@ export const clearCart = async (userId?: string): Promise<void> => {
   }
 };
 
-// 로그인 시 서버 장바구니와 로컬 장바구니 동기화
+// Firebase 제거됨: 로컬 장바구니만 반환
 export const syncCartOnLogin = async (userId: string): Promise<CartItem[]> => {
-  try {
-    const localCart = getLocalCart();
-    const serverCart = await getUserCart(userId);
-
-    // 로컬 장바구니와 서버 장바구니 병합
-    const mergedCart = [...serverCart];
-
-    localCart.forEach(localItem => {
-      const existingServerItem = mergedCart.find(
-        serverItem => serverItem.productId === localItem.productId
-      );
-
-      if (existingServerItem) {
-        // 수량을 더함 (로컬에서 추가한 것 + 서버에 있던 것)
-        existingServerItem.quantity += localItem.quantity;
-      } else {
-        // 새 아이템 추가
-        mergedCart.push(localItem);
-      }
-    });
-
-    // 병합된 장바구니를 서버와 로컬에 저장
-    await saveUserCart(userId, mergedCart);
-    saveLocalCart(mergedCart);
-
-    return mergedCart;
-  } catch (error) {
-    console.error('장바구니 동기화 오류:', error);
-    throw new Error('장바구니 동기화 중 오류가 발생했습니다.');
-  }
+  // 로컬 장바구니만 반환
+  return getLocalCart();
 };
 
 // 장바구니 총 아이템 수 계산

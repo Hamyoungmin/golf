@@ -4,8 +4,11 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PhoneCall from "@/components/PhoneCall";
 import NoticeButton from "@/components/NoticeButton";
+import AuthGuard from "@/components/AuthGuard";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { WishlistProvider } from "@/contexts/WishlistContext";
+import { RecentlyViewedProvider } from "@/contexts/RecentlyViewedContext";
 
 export const metadata: Metadata = {
   title: "팬더골프 PANDAGOLF - 골프상회 도매몰",
@@ -22,13 +25,19 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <CartProvider>
-            <Header />
-            <main>
-              {children}
-            </main>
-            <Footer />
-            <NoticeButton />
-            <PhoneCall />
+            <WishlistProvider>
+              <RecentlyViewedProvider>
+                <AuthGuard>
+                  <Header />
+                  <main>
+                    {children}
+                  </main>
+                  <Footer />
+                  <NoticeButton />
+                  <PhoneCall />
+                </AuthGuard>
+              </RecentlyViewedProvider>
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </body>

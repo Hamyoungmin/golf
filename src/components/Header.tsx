@@ -43,6 +43,7 @@ const Header = () => {
     { name: '캘러웨이', href: '/drivers/callaway' },
     { name: '테일러메이드', href: '/drivers/taylormade' },
     { name: '혼마', href: '/drivers/honma' },
+    { name: '젝시오', href: '/drivers/xxio' },
     { name: '브리지스톤', href: '/drivers/bridgestone' },
     { name: '기타', href: '/drivers/others' }
   ];
@@ -52,6 +53,7 @@ const Header = () => {
     { name: '캘러웨이', href: '/woods/callaway' },
     { name: '테일러메이드', href: '/woods/taylormade' },
     { name: '혼마', href: '/woods/honma' },
+    { name: '젝시오', href: '/woods/xxio' },
     { name: '브리지스톤', href: '/woods/bridgestone' },
     { name: '기타', href: '/woods/others' }
   ];
@@ -61,6 +63,7 @@ const Header = () => {
     { name: '캘러웨이', href: '/utilities/callaway' },
     { name: '테일러메이드', href: '/utilities/taylormade' },
     { name: '혼마', href: '/utilities/honma' },
+    { name: '젝시오', href: '/utilities/xxio' },
     { name: '브리지스톤', href: '/utilities/bridgestone' },
     { name: '기타', href: '/utilities/others' }
   ];
@@ -70,6 +73,7 @@ const Header = () => {
     { name: '캘러웨이', href: '/wedges/callaway' },
     { name: '테일러메이드', href: '/wedges/taylormade' },
     { name: '혼마', href: '/wedges/honma' },
+    { name: '젝시오', href: '/wedges/xxio' },
     { name: '브리지스톤', href: '/wedges/bridgestone' },
     { name: '기타', href: '/wedges/others' }
   ];
@@ -79,6 +83,7 @@ const Header = () => {
     { name: '캘러웨이', href: '/putters/callaway' },
     { name: '테일러메이드', href: '/putters/taylormade' },
     { name: '혼마', href: '/putters/honma' },
+    { name: '젝시오', href: '/putters/xxio' },
     { name: '브리지스톤', href: '/putters/bridgestone' },
     { name: '기타', href: '/putters/others' }
   ];
@@ -88,6 +93,7 @@ const Header = () => {
     { name: '캘러웨이', href: '/left-handed/callaway' },
     { name: '테일러메이드', href: '/left-handed/taylormade' },
     { name: '혼마', href: '/left-handed/honma' },
+    { name: '젝시오', href: '/left-handed/xxio' },
     { name: '브리지스톤', href: '/left-handed/bridgestone' },
     { name: '기타', href: '/left-handed/others' }
   ];
@@ -97,6 +103,7 @@ const Header = () => {
     { name: '캘러웨이', href: '/womens/callaway' },
     { name: '테일러메이드', href: '/womens/taylormade' },
     { name: '혼마', href: '/womens/honma' },
+    { name: '젝시오', href: '/womens/xxio' },
     { name: '브리지스톤', href: '/womens/bridgestone' },
     { name: '기타', href: '/womens/others' }
   ];

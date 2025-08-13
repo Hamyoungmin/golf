@@ -7,7 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { createOrder } from '@/lib/orders';
 import { getUserData } from '@/lib/users';
-import { CartItem, Product, Address, User as UserType } from '@/types';
+import { createPaymentInfo, COMPANY_BANK_ACCOUNTS } from '@/lib/payments';
+import { CartItem, Product, Address, User as UserType, PaymentMethod } from '@/types';
 
 // 임시 상품 데이터 (실제로는 Firebase에서 가져와야 함)
 const sampleProducts: Product[] = [
@@ -63,7 +64,7 @@ export default function CheckoutPage() {
   });
 
   // 결제 방법
-  const [paymentMethod, setPaymentMethod] = useState<string>('bank_transfer');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bank_transfer');
 
   // 주문자 동의
   const [agreements, setAgreements] = useState({
@@ -194,9 +195,26 @@ export default function CheckoutPage() {
         userId: user.uid,
         items: orderItems,
         totalAmount,
+        status: 'pending',
         shippingAddress: shippingInfo,
         paymentMethod,
       });
+
+      // 주문 생성 확인
+      if (!orderId) {
+        throw new Error('주문 생성에 실패했습니다.');
+      }
+
+      // 결제 정보 생성 (계좌이체인 경우)
+      if (paymentMethod === 'bank_transfer') {
+        await createPaymentInfo({
+          orderId: orderId as string,
+          userId: user.uid,
+          paymentMethod,
+          amount: totalAmount,
+          status: 'pending',
+        });
+      }
 
       // 장바구니 비우기
       await clearCart();
@@ -324,34 +342,52 @@ export default function CheckoutPage() {
                   name="paymentMethod"
                   value="bank_transfer"
                   checked={paymentMethod === 'bank_transfer'}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
                   className="mr-3"
                 />
                 <span>무통장 입금</span>
               </label>
-              <label className="flex items-center">
+              <label className="flex items-center opacity-50">
                 <input
                   type="radio"
                   name="paymentMethod"
                   value="card"
                   checked={paymentMethod === 'card'}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
                   className="mr-3"
+                  disabled
                 />
-                <span>신용카드</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="kakao_pay"
-                  checked={paymentMethod === 'kakao_pay'}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="mr-3"
-                />
-                <span>카카오페이</span>
+                <span>신용카드 (준비중)</span>
               </label>
             </div>
+            
+            {/* 계좌이체 선택 시 계좌 정보 표시 */}
+            {paymentMethod === 'bank_transfer' && (
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3 text-blue-800">입금 계좌 정보</h3>
+                <div className="space-y-3">
+                  {COMPANY_BANK_ACCOUNTS.map((account, index) => (
+                    <div key={index} className="bg-white p-3 rounded border">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-blue-800">{account.bankName}</span>
+                        <span className="text-sm text-gray-600">예금주: {account.accountHolder}</span>
+                      </div>
+                      <div className="text-lg font-bold text-blue-900 mt-1">
+                        {account.accountNumber}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 text-sm text-blue-700">
+                  <p className="font-semibold">입금 시 주의사항:</p>
+                  <ul className="list-disc list-inside mt-2 space-y-1">
+                    <li>주문 완료 후 3일 이내에 입금해주세요.</li>
+                    <li>입금자명을 주문자명과 동일하게 입력해주세요.</li>
+                    <li>입금 확인 후 배송이 시작됩니다.</li>
+                  </ul>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 약관 동의 */}

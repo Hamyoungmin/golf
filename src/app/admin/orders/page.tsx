@@ -10,8 +10,9 @@ import {
 } from '@heroicons/react/24/outline';
 import DataTable from '@/components/admin/DataTable';
 import { getAllOrders, getOrderStatusText, getOrderStatusColor } from '@/lib/orders';
+import { getPendingPayments } from '@/lib/payments';
 import { getUserData } from '@/lib/users';
-import { Order, OrderStatus, User } from '@/types';
+import { Order, OrderStatus, User, PaymentInfo } from '@/types';
 
 export default function AdminOrdersPage() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function AdminOrdersPage() {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [userCache, setUserCache] = useState<{ [key: string]: User }>({});
 
-  const orderStatuses: OrderStatus[] = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
+  const orderStatuses: OrderStatus[] = ['pending', 'payment_pending', 'paid', 'shipped', 'delivered', 'cancelled'];
 
   useEffect(() => {
     fetchOrders();

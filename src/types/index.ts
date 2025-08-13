@@ -26,7 +26,17 @@ export interface User {
   phone?: string;
   address?: Address;
   isAdmin: boolean;
+  role: 'admin' | 'user';
+  status: 'pending' | 'approved' | 'rejected';
+  businessNumber?: string;
+  companyName?: string;
+  shopInteriorPhotoUrl?: string;
+  shopSignPhotoUrl?: string;
+  rejectionReason?: string;
+  approvedAt?: Date;
+  approvedBy?: string; // 관리자 UID
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Address {
@@ -58,7 +68,41 @@ export interface OrderItem {
   totalPrice: number;
 }
 
-export type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
+export type OrderStatus = 'pending' | 'payment_pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
+
+// 결제 관련 타입 정의
+export type PaymentMethod = 'bank_transfer' | 'card' | 'cash';
+
+export interface BankTransferInfo {
+  bankName: string;
+  accountNumber: string;
+  accountHolder: string;
+  transferAmount: number;
+  depositorName: string;
+  transferDate?: Date;
+  transferNote?: string;
+}
+
+export interface PaymentInfo {
+  orderId: string;
+  userId: string;
+  paymentMethod: PaymentMethod;
+  amount: number;
+  status: 'pending' | 'confirmed' | 'rejected';
+  bankTransferInfo?: BankTransferInfo;
+  verifiedAt?: Date;
+  verifiedBy?: string; // 관리자 ID
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// 계좌 정보 타입 정의
+export interface BankAccount {
+  bankName: string;
+  accountNumber: string;
+  accountHolder: string;
+}
 
 // 장바구니 관련 타입 정의
 export interface CartItem {
@@ -92,9 +136,21 @@ export interface Wishlist {
   updatedAt: Date;
 }
 
+// 최근 본 상품 관련 타입 정의
+export interface RecentlyViewedItem {
+  productId: string;
+  viewedAt: Date;
+}
+
+export interface RecentlyViewed {
+  userId: string;
+  items: RecentlyViewedItem[];
+  updatedAt: Date;
+}
+
 // 카테고리 타입 정의
 export type Category = 'drivers' | 'irons' | 'putters' | 'wedges' | 'woods' | 'utilities';
-export type Brand = 'titleist' | 'taylormade' | 'callaway' | 'honma' | 'bridgestone' | 'others';
+export type Brand = 'titleist' | 'taylormade' | 'callaway' | 'honma' | 'xxio' | 'bridgestone' | 'others';
 
 // 검색 및 필터링 관련 타입
 export interface ProductFilter {

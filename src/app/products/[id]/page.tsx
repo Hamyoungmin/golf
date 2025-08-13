@@ -7,6 +7,8 @@ import { getProduct } from '@/lib/products';
 import { Product } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
+import { useRecentlyViewed } from '@/contexts/RecentlyViewedContext';
 
 // 임시 샘플 상품 데이터 (실제로는 Firebase에서 가져와야 함)
 const sampleProducts: Product[] = [
@@ -158,6 +160,8 @@ export default function ProductDetail() {
   const router = useRouter();
   const { user } = useAuth();
   const { addToCart: addToCartContext } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToRecentlyViewed } = useRecentlyViewed();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -179,6 +183,16 @@ export default function ProductDetail() {
         }
         
         setProduct(foundProduct);
+        
+        // 로그인한 사용자인 경우 최근 본 상품에 추가
+        if (user && foundProduct) {
+          try {
+            await addToRecentlyViewed(foundProduct.id);
+          } catch (error) {
+            console.error('최근 본 상품 추가 오류:', error);
+            // 최근 본 상품 추가 실패는 전체 페이지 로드를 방해하지 않음
+          }
+        }
       } catch (err) {
         console.error('상품 조회 오류:', err);
         setError('상품을 불러오는 중 오류가 발생했습니다.');
@@ -188,7 +202,7 @@ export default function ProductDetail() {
     };
 
     fetchProduct();
-  }, [params.id]);
+  }, [params.id, user, addToRecentlyViewed]);
 
   const handleAddToCart = async () => {
     if (!user) {
@@ -242,6 +256,37 @@ export default function ProductDetail() {
 
   const handleContactInquiry = () => {
     alert('상품 문의는 고객센터(전화)로 연락주세요.');
+  };
+
+  const handleWishlistToggle = async () => {
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      router.push('/login');
+      return;
+    }
+
+    if (!product) return;
+
+    try {
+      if (isInWishlist(product.id)) {
+        const success = await removeFromWishlist(product.id);
+        if (success) {
+          alert('관심상품에서 제거되었습니다.');
+        } else {
+          alert('관심상품 제거 중 오류가 발생했습니다.');
+        }
+      } else {
+        const success = await addToWishlist(product.id);
+        if (success) {
+          alert('관심상품에 추가되었습니다.');
+        } else {
+          alert('관심상품 추가 중 오류가 발생했습니다.');
+        }
+      }
+    } catch (error) {
+      console.error('위시리스트 토글 오류:', error);
+      alert('오류가 발생했습니다.');
+    }
   };
 
   if (loading) {
@@ -371,6 +416,30 @@ export default function ProductDetail() {
                   +
                 </button>
               </div>
+            </div>
+
+            {/* 찜하기 버튼 */}
+            <div className="mb-4">
+              <button
+                onClick={handleWishlistToggle}
+                className={`w-full py-3 px-6 rounded-lg text-lg font-bold transition-all duration-300 flex items-center justify-center space-x-2 ${
+                  isInWishlist(product.id)
+                    ? 'bg-pink-500 text-white hover:bg-pink-600 border-2 border-pink-600'
+                    : 'bg-white text-pink-600 hover:bg-pink-50 border-2 border-pink-300 hover:border-pink-400'
+                }`}
+              >
+                <svg 
+                  className={`w-6 h-6 transition-transform duration-300 ${isInWishlist(product.id) ? 'scale-110' : ''}`}
+                  fill={isInWishlist(product.id) ? 'currentColor' : 'none'} 
+                  stroke={isInWishlist(product.id) ? 'none' : 'currentColor'} 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+                <span>
+                  {isInWishlist(product.id) ? '관심상품에서 제거' : '관심상품에 추가'}
+                </span>
+              </button>
             </div>
 
             {/* 구매 버튼들 */}

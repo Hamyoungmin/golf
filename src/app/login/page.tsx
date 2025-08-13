@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { signIn } from '@/lib/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { useAuth } from '@/contexts/AuthContext';
 
 // 동적 렌더링 강제 설정
 export const dynamic = 'force-dynamic';
@@ -16,6 +18,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { userData } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -30,15 +33,50 @@ export default function Login() {
     setError('');
 
     try {
-      const user = await signIn(formData.email, formData.password);
+      // Firebase 로그인
+      const userCredential = await signInWithEmailAndPassword(
+        auth, 
+        formData.email, 
+        formData.password
+      );
+      
       if (process.env.NODE_ENV === 'development') {
-        console.log('로그인 성공:', user);
+        console.log('✅ 로그인 성공:', userCredential.user);
       }
-      alert('로그인에 성공했습니다!');
-      router.push('/'); // 메인 페이지로 이동
+      
+      // AuthContext에서 사용자 데이터를 가져올 때까지 잠시 대기
+      setTimeout(() => {
+        // 로그인 성공 - 페이지 이동은 AuthContext에서 처리될 예정
+        alert('로그인에 성공했습니다!');
+        router.push('/'); // 메인 페이지로 이동
+      }, 1000);
+      
     } catch (error: unknown) {
-      console.error('로그인 실패:', error);
-      setError(error instanceof Error ? error.message : '로그인 중 오류가 발생했습니다.');
+      console.error('❌ 로그인 실패:', error);
+      console.log('🔍 에러 상세 정보:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        code: (error as {code?: string})?.code || 'Unknown code',
+        stack: (error as {stack?: string})?.stack || 'No stack trace'
+      });
+      
+      // 에러 메시지 설정
+      if (error instanceof Error) {
+        if (error.message.includes('user-not-found')) {
+          setError('등록되지 않은 이메일입니다.');
+        } else if (error.message.includes('wrong-password') || error.message.includes('invalid-credential')) {
+          setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+        } else if (error.message.includes('invalid-email')) {
+          setError('유효하지 않은 이메일 주소입니다.');
+        } else if (error.message.includes('too-many-requests')) {
+          setError('로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.');
+        } else if (error.message.includes('network-request-failed')) {
+          setError('네트워크 오류입니다. 인터넷 연결을 확인해주세요.');
+        } else {
+          setError(`로그인 실패: ${error.message}`);
+        }
+      } else {
+        setError('로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
     } finally {
       setLoading(false);
     }

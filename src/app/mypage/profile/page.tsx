@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserData, updateUserProfile } from '@/lib/users';
 import { User as UserType, Address } from '@/types';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/lib/firebase';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -27,6 +29,16 @@ export default function ProfilePage() {
     city: '',
     state: '',
     zipCode: '',
+  });
+
+  const [shopPhotos, setShopPhotos] = useState({
+    shopInteriorPhoto: null as File | null,
+    shopSignPhoto: null as File | null
+  });
+
+  const [currentPhotoUrls, setCurrentPhotoUrls] = useState({
+    shopInteriorPhotoUrl: '',
+    shopSignPhotoUrl: ''
   });
 
   // 로그인 체크
@@ -52,13 +64,18 @@ export default function ProfilePage() {
           setFormData({
             name: data.name || '',
             phone: data.phone || '',
-            businessNumber: '',
-            companyName: '',
+            businessNumber: data.businessNumber || '',
+            companyName: data.companyName || '',
           });
           
           if (data.address) {
             setAddressData(data.address);
           }
+          
+          setCurrentPhotoUrls({
+            shopInteriorPhotoUrl: data.shopInteriorPhotoUrl || '',
+            shopSignPhotoUrl: data.shopSignPhotoUrl || ''
+          });
         }
       } catch (error) {
         console.error('사용자 정보 로드 오류:', error);
@@ -82,6 +99,23 @@ export default function ProfilePage() {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    const fieldName = e.target.name as 'shopInteriorPhoto' | 'shopSignPhoto';
+    
+    setShopPhotos(prev => ({
+      ...prev,
+      [fieldName]: file
+    }));
+  };
+
+  // 파일 업로드 함수
+  const uploadFile = async (file: File, path: string): Promise<string> => {
+    const storageRef = ref(storage, path);
+    const snapshot = await uploadBytes(storageRef, file);
+    return await getDownloadURL(snapshot.ref);
   };
 
   const validateForm = () => {
@@ -116,11 +150,31 @@ export default function ProfilePage() {
     setSaving(true);
 
     try {
-      const updateData: Partial<UserType> = {
+      let updateData: Partial<UserType> = {
         name: formData.name,
         phone: formData.phone,
+        businessNumber: formData.businessNumber,
+        companyName: formData.companyName,
         address: addressData,
+        updatedAt: new Date(),
       };
+
+      // 새로 업로드할 사진이 있는 경우 업로드
+      if (shopPhotos.shopInteriorPhoto) {
+        const shopInteriorPhotoUrl = await uploadFile(
+          shopPhotos.shopInteriorPhoto,
+          `users/${user.uid}/shop_interior_updated.jpg`
+        );
+        updateData.shopInteriorPhotoUrl = shopInteriorPhotoUrl;
+      }
+
+      if (shopPhotos.shopSignPhoto) {
+        const shopSignPhotoUrl = await uploadFile(
+          shopPhotos.shopSignPhoto,
+          `users/${user.uid}/shop_sign_updated.jpg`
+        );
+        updateData.shopSignPhotoUrl = shopSignPhotoUrl;
+      }
 
       await updateUserProfile(user.uid, updateData);
       alert('회원정보가 성공적으로 수정되었습니다.');
@@ -128,6 +182,19 @@ export default function ProfilePage() {
       // 데이터 다시 로드
       const updatedData = await getUserData(user.uid);
       setUserData(updatedData);
+      
+      // 사진 상태 초기화
+      setShopPhotos({
+        shopInteriorPhoto: null,
+        shopSignPhoto: null
+      });
+      
+      if (updatedData) {
+        setCurrentPhotoUrls({
+          shopInteriorPhotoUrl: updatedData.shopInteriorPhotoUrl || '',
+          shopSignPhotoUrl: updatedData.shopSignPhotoUrl || ''
+        });
+      }
     } catch (error) {
       console.error('회원정보 수정 오류:', error);
       alert('회원정보 수정 중 오류가 발생했습니다.');
@@ -145,209 +212,370 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">회원정보 수정</h1>
-          <p className="text-gray-600 mt-2">개인정보를 안전하게 관리하세요.</p>
+    <div className="container" style={{ maxWidth: '500px', margin: '50px auto', padding: '20px' }}>
+      <div style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '8px', 
+        padding: '40px',
+        backgroundColor: '#fff'
+      }}>
+        <h1 style={{ 
+          textAlign: 'center', 
+          marginBottom: '30px',
+          fontSize: '24px',
+          fontWeight: 'bold'
+        }}>
+          회원정보 수정
+        </h1>
+        
+        <div style={{
+          backgroundColor: '#fff3cd',
+          border: '1px solid #ffeaa7',
+          borderRadius: '4px',
+          padding: '15px',
+          marginBottom: '30px',
+          fontSize: '14px',
+          color: '#856404'
+        }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display: 'inline-block', marginRight: '8px', verticalAlign: 'middle'}}>
+            <path d="M12 17v5"></path>
+            <path d="M9 10.76a2 2 0 0 1 1.11-1.79L16 6a1 1 0 0 1 1.49.79L17 8.26a2 2 0 0 1-1.11 1.79L11 13a1 1 0 0 1-1.49-.79z"></path>
+          </svg> 
+          <strong>개인정보를 안전하게 관리하세요.</strong>
         </div>
-        <Link 
-          href="/mypage"
-          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          ← 마이페이지
-        </Link>
-      </div>
-
-      <div className="max-w-4xl mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* 기본 정보 */}
-          <div className="bg-white border rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-6">기본 정보</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  이메일 *
-                </label>
-                <input
-                  type="email"
-                  value={user?.email || ''}
-                  disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
-                />
-                <p className="text-xs text-gray-500 mt-1">이메일은 변경할 수 없습니다.</p>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  이름 *
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => handleFormChange('name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="이름을 입력하세요"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  연락처 *
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handleFormChange('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="010-0000-0000"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  사업자등록번호 *
-                </label>
-                <input
-                  type="text"
-                  value={formData.businessNumber}
-                  onChange={(e) => handleFormChange('businessNumber', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="000-00-00000"
-                />
-              </div>
-              
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  상호명 *
-                </label>
-                <input
-                  type="text"
-                  value={formData.companyName}
-                  onChange={(e) => handleFormChange('companyName', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="상호명을 입력하세요"
-                />
-              </div>
-            </div>
+        
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px',
+              fontWeight: '500'
+            }}>
+              이메일 *
+            </label>
+            <input
+              type="email"
+              value={user?.email || ''}
+              disabled
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '16px',
+                backgroundColor: '#f5f5f5',
+                color: '#666'
+              }}
+            />
+            <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+              * 이메일은 변경할 수 없습니다.
+            </p>
+          </div>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px',
+              fontWeight: '500'
+            }}>
+              담당자명 *
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => handleFormChange('name', e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '16px'
+              }}
+            />
+          </div>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px',
+              fontWeight: '500'
+            }}>
+              연락처 *
+            </label>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => handleFormChange('phone', e.target.value)}
+              placeholder="010-0000-0000"
+              required
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '16px'
+              }}
+            />
+          </div>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px',
+              fontWeight: '500'
+            }}>
+              사업자등록번호 *
+            </label>
+            <input
+              type="text"
+              value={formData.businessNumber}
+              onChange={(e) => handleFormChange('businessNumber', e.target.value)}
+              placeholder="000-00-00000"
+              required
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '16px'
+              }}
+            />
+          </div>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px',
+              fontWeight: '500'
+            }}>
+              상호명 *
+            </label>
+            <input
+              type="text"
+              value={formData.companyName}
+              onChange={(e) => handleFormChange('companyName', e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '16px'
+              }}
+            />
           </div>
 
           {/* 주소 정보 */}
-          <div className="bg-white border rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-6">주소 정보</h2>
-            
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    우편번호
-                  </label>
-                  <input
-                    type="text"
-                    value={addressData.zipCode}
-                    onChange={(e) => handleAddressChange('zipCode', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="우편번호"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    시/도
-                  </label>
-                  <input
-                    type="text"
-                    value={addressData.state}
-                    onChange={(e) => handleAddressChange('state', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="시/도"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  시/군/구
-                </label>
-                <input
-                  type="text"
-                  value={addressData.city}
-                  onChange={(e) => handleAddressChange('city', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="시/군/구"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  상세주소
-                </label>
-                <input
-                  type="text"
-                  value={addressData.street}
-                  onChange={(e) => handleAddressChange('street', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="상세주소"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 비밀번호 변경 안내 */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-blue-800 mb-3">비밀번호 변경</h3>
-            <p className="text-blue-700 mb-4">
-              보안을 위해 비밀번호 변경은 별도 인증 과정을 거쳐야 합니다.
-            </p>
-            <button
-              type="button"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              onClick={() => {
-                alert('비밀번호 변경 기능은 추후 제공될 예정입니다.');
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px',
+              fontWeight: '500'
+            }}>
+              우편번호
+            </label>
+            <input
+              type="text"
+              value={addressData.zipCode}
+              onChange={(e) => handleAddressChange('zipCode', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '16px'
               }}
-            >
-              비밀번호 변경
-            </button>
+            />
           </div>
-
-          {/* 회원 탈퇴 안내 */}
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-red-800 mb-3">회원 탈퇴</h3>
-            <p className="text-red-700 mb-4">
-              회원 탈퇴 시 모든 개인정보와 주문 내역이 삭제되며, 복구할 수 없습니다.
-            </p>
-            <button
-              type="button"
-              className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
-              onClick={() => {
-                if (confirm('정말로 회원 탈퇴를 하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-                  alert('회원 탈퇴 기능은 고객센터로 문의해주세요.');
-                }
+          
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px',
+              fontWeight: '500'
+            }}>
+              기본주소
+            </label>
+            <input
+              type="text"
+              value={addressData.state}
+              onChange={(e) => handleAddressChange('state', e.target.value)}
+              placeholder="시/도"
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '16px',
+                marginBottom: '8px'
               }}
-            >
-              회원 탈퇴
-            </button>
+            />
+            <input
+              type="text"
+              value={addressData.city}
+              onChange={(e) => handleAddressChange('city', e.target.value)}
+              placeholder="시/군/구"
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '16px'
+              }}
+            />
+          </div>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px',
+              fontWeight: '500'
+            }}>
+              나머지 주소(선택 입력 가능)
+            </label>
+            <input
+              type="text"
+              value={addressData.street}
+              onChange={(e) => handleAddressChange('street', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '16px'
+              }}
+            />
           </div>
 
-          {/* 저장 버튼 */}
-          <div className="flex justify-end space-x-4">
-            <Link
-              href="/mypage"
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              취소
-            </Link>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-            >
-              {saving ? '저장 중...' : '저장하기'}
-            </button>
+          {/* 샵 내부 사진 */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px',
+              fontWeight: '500'
+            }}>
+              샵 내부 사진
+            </label>
+            {currentPhotoUrls.shopInteriorPhotoUrl && (
+              <div style={{ marginBottom: '10px' }}>
+                <img 
+                  src={currentPhotoUrls.shopInteriorPhotoUrl} 
+                  alt="현재 샵 내부 사진" 
+                  style={{ 
+                    width: '100px', 
+                    height: '100px', 
+                    objectFit: 'cover', 
+                    borderRadius: '4px',
+                    border: '1px solid #ddd'
+                  }} 
+                />
+                <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+                  현재 등록된 사진
+                </p>
+              </div>
+            )}
+            <input
+              type="file"
+              name="shopInteriorPhoto"
+              accept="image/*"
+              onChange={handleFileChange}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '16px',
+                backgroundColor: '#fff'
+              }}
+            />
+            <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+              * 새 사진을 선택하면 기존 사진이 교체됩니다.
+            </p>
           </div>
+
+          {/* 샵 간판 사진 */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px',
+              fontWeight: '500'
+            }}>
+              샵 간판 사진
+            </label>
+            {currentPhotoUrls.shopSignPhotoUrl && (
+              <div style={{ marginBottom: '10px' }}>
+                <img 
+                  src={currentPhotoUrls.shopSignPhotoUrl} 
+                  alt="현재 샵 간판 사진" 
+                  style={{ 
+                    width: '100px', 
+                    height: '100px', 
+                    objectFit: 'cover', 
+                    borderRadius: '4px',
+                    border: '1px solid #ddd'
+                  }} 
+                />
+                <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+                  현재 등록된 사진
+                </p>
+              </div>
+            )}
+            <input
+              type="file"
+              name="shopSignPhoto"
+              accept="image/*"
+              onChange={handleFileChange}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '16px',
+                backgroundColor: '#fff'
+              }}
+            />
+            <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+              * 새 사진을 선택하면 기존 사진이 교체됩니다.
+            </p>
+          </div>
+          
+          <button
+            type="submit"
+            disabled={saving}
+            style={{
+              width: '100%',
+              padding: '12px',
+              backgroundColor: saving ? '#ccc' : '#ff6b35',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '16px',
+              fontWeight: '500',
+              marginBottom: '20px',
+              cursor: saving ? 'not-allowed' : 'pointer',
+              opacity: saving ? 0.6 : 1
+            }}
+          >
+            {saving ? '저장 중...' : '정보 저장'}
+          </button>
         </form>
+        
+        <div style={{ 
+          textAlign: 'center',
+          fontSize: '14px',
+          color: '#666'
+        }}>
+          <Link 
+            href="/mypage" 
+            style={{ 
+              color: '#ff6b35',
+              textDecoration: 'underline'
+            }}
+          >
+            마이페이지로 돌아가기
+          </Link>
+        </div>
       </div>
     </div>
   );

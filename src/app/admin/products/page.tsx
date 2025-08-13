@@ -34,9 +34,9 @@ export default function AdminProductsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await getProducts(currentPage, 20, filter);
-      setProducts(response.data);
-      setTotalPages(response.pagination.totalPages);
+      const productList = await getProducts(filter, undefined, 20);
+      setProducts(productList);
+      setTotalPages(Math.ceil(productList.length / 20));
     } catch (error) {
       console.error('상품 목록 로딩 실패:', error);
     } finally {
