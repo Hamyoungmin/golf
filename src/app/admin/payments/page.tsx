@@ -278,7 +278,7 @@ export default function AdminPaymentsPage() {
       {/* 결제 테이블 */}
       <div className="bg-white shadow rounded-lg">
         <DataTable
-          data={filteredPayments.map(payment => ({ ...payment, id: payment.orderId || payment.id || 'unknown' }))}
+          data={filteredPayments.map(payment => ({ ...payment, id: payment.orderId || 'unknown' }))}
           columns={columns}
           loading={loading}
           emptyMessage="입금 내역이 없습니다."
