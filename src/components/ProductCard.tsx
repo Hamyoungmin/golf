@@ -12,12 +12,49 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
+  category?: string;
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product, category }: ProductCardProps) => {
+  // 카테고리별 URL 매핑
+  const getCategoryPath = (category?: string) => {
+    switch (category?.toLowerCase()) {
+      case '드라이버':
+      case 'drivers':
+        return 'drivers';
+      case '우드':
+      case 'woods':
+        return 'woods';
+      case '아이언':
+      case 'irons':
+        return 'irons';
+      case '웨지':
+      case 'wedges':
+        return 'wedges';
+      case '퍼터':
+      case 'putters':
+        return 'putters';
+      case '유틸리티':
+      case 'utilities':
+        return 'utilities';
+      case '여성용':
+      case 'womens':
+        return 'womens';
+      case '키즈':
+      case 'kids':
+        return 'kids';
+      case '좌타용':
+      case 'left-handed':
+        return 'left-handed';
+      default:
+        return 'products';
+    }
+  };
+
+  const categoryPath = getCategoryPath(category);
   return (
     <div className="product-card" style={{ position: 'relative', cursor: 'pointer' }}>
-      <Link href={`/products/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+      <Link href={`/${categoryPath}/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
         <div className="product-image">
           {product.image ? (
             <Image 

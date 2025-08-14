@@ -51,7 +51,7 @@ const ProductList = ({ title, subtitle, products, totalCount, category }: Produc
       
       <div className="product-grid">
         {currentProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} category={category} />
         ))}
       </div>
       
