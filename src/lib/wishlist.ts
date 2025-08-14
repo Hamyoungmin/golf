@@ -102,9 +102,42 @@ export async function getWishlistProducts(userId: string): Promise<Product[]> {
 
     const products: Product[] = [];
     
+    // 상품 상세 페이지의 샘플 데이터 (fallback용)
+    const sampleProducts = [
+      {
+        id: '1',
+        name: '캘러웨이 로그 드라이버',
+        price: '140,000원',
+        category: 'drivers',
+        brand: 'callaway',
+        images: ['/d1.jpg'],
+        description: '캘러웨이의 최신 로그(ROGUE) 드라이버입니다. 혁신적인 기술과 뛰어난 성능으로 최고의 비거리와 정확성을 제공합니다. 모든 레벨의 골퍼에게 적합한 고성능 드라이버입니다.',
+        stock: 5,
+        specifications: {
+          '로프트': '10.5도',
+          '샤프트': 'Aldila Rogue MAX 65',
+          '플렉스': 'S',
+          '클럽 길이': '45.5인치',
+          '헤드 볼륨': '460cc'
+        },
+        isWomens: false,
+        isKids: false,
+        isLeftHanded: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+    ];
+    
     // 각 상품 ID에 대해 상품 정보를 가져옴
     for (const productId of wishlist.productIds) {
-      const product = await getProduct(productId);
+      // 먼저 Firebase에서 찾아보기
+      let product = await getProduct(productId);
+      
+      // Firebase에서 찾지 못했으면 샘플 데이터에서 찾기
+      if (!product) {
+        product = sampleProducts.find(p => p.id === productId) || null;
+      }
+      
       if (product) {
         products.push(product);
       }

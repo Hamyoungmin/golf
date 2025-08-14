@@ -14,19 +14,19 @@ import { useRecentlyViewed } from '@/contexts/RecentlyViewedContext';
 const sampleProducts: Product[] = [
   {
     id: '1',
-    name: 'TW717 455 10.5도 비자드 55 R',
-    price: '가격문의',
-    category: 'drivers',
+    name: '타이틀리스트 917 우드',
+    price: '150,000원',
+    category: 'woods',
     brand: 'titleist',
-    images: ['https://images.unsplash.com/photo-1551524164-6cf2ac531c3b?w=600&h=400&fit=crop'],
-    description: '타이틀리스트의 프리미엄 드라이버입니다. 최신 기술이 적용된 고성능 골프 클럽으로, 정확성과 비거리를 동시에 만족시켜줍니다.',
-    stock: 5,
+    images: ['/o2.png'],
+    description: '타이틀리스트의 인기 917 우드입니다. 뛰어난 관용성과 비거리를 제공하며, 다양한 라이에서 안정적인 성능을 보여줍니다. 중상급자부터 프로까지 선호하는 고품질 우드입니다.',
+    stock: 3,
     specifications: {
-      '로프트': '10.5도',
-      '샤프트': '비자드 55',
-      '플렉스': 'R',
-      '클럽 길이': '45인치',
-      '헤드 볼륨': '455cc'
+      '로프트': '15도',
+      '샤프트': 'Diamana D+ 70',
+      '플렉스': 'S',
+      '클럽 길이': '42.5인치',
+      '헤드 볼륨': '170cc'
     },
     isWomens: false,
     isKids: false,
@@ -232,6 +232,7 @@ export default function ProductDetail() {
 
       await addToCartContext(product.id, quantity, numericPrice);
       alert(`${product.name}이(가) 장바구니에 추가되었습니다.`);
+      router.push('/cart');
     } catch (error) {
       console.error('장바구니 추가 오류:', error);
       alert('장바구니 추가 중 오류가 발생했습니다.');
@@ -305,7 +306,7 @@ export default function ProductDetail() {
           <p className="mb-4">{error || '상품을 찾을 수 없습니다.'}</p>
           <Link 
             href="/" 
-            className="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600"
+            className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
           >
             홈으로 돌아가기
           </Link>
@@ -335,7 +336,7 @@ export default function ProductDetail() {
                   key={index}
                   onClick={() => setSelectedImage(index)}
                   className={`w-20 h-20 border-2 rounded ${
-                    selectedImage === index ? 'border-orange-500' : 'border-gray-300'
+                    selectedImage === index ? 'border-blue-500' : 'border-gray-300'
                   }`}
                 >
                   <img
@@ -360,14 +361,14 @@ export default function ProductDetail() {
           <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
           
           <div className="mb-6">
-            <span className="text-3xl font-bold text-orange-600">
+            <span className="text-3xl font-bold text-blue-600">
               {product.price}
             </span>
             {product.stock === 0 && (
               <span className="ml-4 text-red-500 font-semibold">품절</span>
             )}
             {product.stock > 0 && product.stock <= 5 && (
-              <span className="ml-4 text-orange-500 text-sm">
+              <span className="ml-4 text-blue-600 text-lg font-semibold">
                 재고 {product.stock}개 남음
               </span>
             )}
@@ -419,22 +420,54 @@ export default function ProductDetail() {
             </div>
 
             {/* 찜하기 버튼 */}
-            <div className="mb-4">
+            <div style={{ marginBottom: '16px' }}>
               <button
                 onClick={handleWishlistToggle}
-                className={`w-full py-3 px-6 rounded-lg text-lg font-bold transition-all duration-300 flex items-center justify-center space-x-2 ${
-                  isInWishlist(product.id)
-                    ? 'bg-pink-500 text-white hover:bg-pink-600 border-2 border-pink-600'
-                    : 'bg-white text-pink-600 hover:bg-pink-50 border-2 border-pink-300 hover:border-pink-400'
-                }`}
+                style={{
+                  width: '100%',
+                  padding: '12px 24px',
+                  backgroundColor: isInWishlist(product.id) ? '#ec4899' : 'white',
+                  color: isInWishlist(product.id) ? 'white' : '#ec4899',
+                  border: `2px solid #ec4899`,
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => {
+                  if (isInWishlist(product.id)) {
+                    e.currentTarget.style.backgroundColor = '#db2777';
+                  } else {
+                    e.currentTarget.style.backgroundColor = '#fdf2f8';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (isInWishlist(product.id)) {
+                    e.currentTarget.style.backgroundColor = '#ec4899';
+                  } else {
+                    e.currentTarget.style.backgroundColor = 'white';
+                  }
+                }}
               >
                 <svg 
-                  className={`w-6 h-6 transition-transform duration-300 ${isInWishlist(product.id) ? 'scale-110' : ''}`}
+                  style={{ 
+                    width: '20px', 
+                    height: '20px',
+                    transform: isInWishlist(product.id) ? 'scale(1.1)' : 'scale(1)',
+                    transition: 'transform 0.2s ease'
+                  }}
                   fill={isInWishlist(product.id) ? 'currentColor' : 'none'} 
                   stroke={isInWishlist(product.id) ? 'none' : 'currentColor'} 
                   viewBox="0 0 24 24"
+                  strokeWidth="2"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                 </svg>
                 <span>
                   {isInWishlist(product.id) ? '관심상품에서 제거' : '관심상품에 추가'}
@@ -455,30 +488,80 @@ export default function ProductDetail() {
               )}
               
               {/* 메인 구매 버튼들 */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
+                gap: '16px'
+              }}>
                 {/* 바로 구매 버튼 */}
-                <div className="border-2 border-blue-700 rounded-lg bg-blue-600 p-1">
-                  <button
-                    onClick={handleBuyNow}
-                    disabled={product.stock === 0 || product.price === '가격문의'}
-                    className="w-full bg-blue-500 text-black py-5 px-6 rounded-md text-lg font-bold hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
-                    title={product.price === '가격문의' ? '가격 문의 후 이용 가능합니다' : ''}
-                  >
-                    <span>바로 구매</span>
-                  </button>
-                </div>
+                <button
+                  onClick={handleBuyNow}
+                  disabled={product.stock === 0 || product.price === '가격문의'}
+                  style={{
+                    width: '100%',
+                    padding: '16px 24px',
+                    backgroundColor: product.stock === 0 || product.price === '가격문의' ? '#9ca3af' : '#60a5fa',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: product.stock === 0 || product.price === '가격문의' ? 'not-allowed' : 'pointer',
+                    transition: 'background-color 0.2s ease',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  title={product.price === '가격문의' ? '가격 문의 후 이용 가능합니다' : ''}
+                  onMouseEnter={(e) => {
+                    if (product.stock > 0 && product.price !== '가격문의') {
+                      e.currentTarget.style.backgroundColor = '#3b82f6';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (product.stock > 0 && product.price !== '가격문의') {
+                      e.currentTarget.style.backgroundColor = '#60a5fa';
+                    }
+                  }}
+                >
+                  바로 구매
+                </button>
                 
                 {/* 장바구니 버튼 */}
-                <div className="border-2 border-red-700 rounded-lg bg-red-600 p-1">
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={product.stock === 0 || product.price === '가격문의'}
-                    className="w-full bg-red-500 text-black py-5 px-6 rounded-md text-lg font-bold hover:bg-red-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
-                    title={product.price === '가격문의' ? '가격 문의 후 이용 가능합니다' : ''}
-                  >
-                    <span>장바구니</span>
-                  </button>
-                </div>
+                <button
+                  onClick={handleAddToCart}
+                  disabled={product.stock === 0 || product.price === '가격문의'}
+                  style={{
+                    width: '100%',
+                    padding: '16px 24px',
+                    backgroundColor: product.stock === 0 || product.price === '가격문의' ? '#9ca3af' : '#f87171',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: product.stock === 0 || product.price === '가격문의' ? 'not-allowed' : 'pointer',
+                    transition: 'background-color 0.2s ease',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  title={product.price === '가격문의' ? '가격 문의 후 이용 가능합니다' : ''}
+                  onMouseEnter={(e) => {
+                    if (product.stock > 0 && product.price !== '가격문의') {
+                      e.currentTarget.style.backgroundColor = '#ef4444';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (product.stock > 0 && product.price !== '가격문의') {
+                      e.currentTarget.style.backgroundColor = '#f87171';
+                    }
+                  }}
+                >
+                  장바구니
+                </button>
               </div>
             </div>
           </div>

@@ -1,7 +1,7 @@
 import ProductList from '@/components/ProductList';
 
 const titleistWoods = [
-  { id: 1, name: 'TSR2 15도 TSP111 50 SR', price: '가격문의', image: null },
+  { id: 1, name: '타이틀리스트 917 우드', price: '150,000원', image: '/o2.png' },
   { id: 2, name: 'TSR3 15도 TSP110 60 S', price: '가격문의', image: null },
   { id: 3, name: 'TSi2 15도 TSP322 55 SR', price: '가격문의', image: null },
   { id: 4, name: 'TSi3 15도 TENSEI CK Pro Orange 70 S', price: '가격문의', image: null },

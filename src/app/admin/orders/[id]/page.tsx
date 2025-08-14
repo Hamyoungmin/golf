@@ -199,27 +199,88 @@ export default function AdminOrderDetailPage() {
 
             {/* 주문 상태 변경 */}
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">주문 상태 변경</h2>
+              <h2 className="text-lg font-medium text-gray-900 mb-4">주문 관리</h2>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex flex-wrap gap-2">
-                  {(['pending', 'paid', 'shipped', 'delivered', 'cancelled'] as OrderStatus[]).map(status => (
-                    <button
-                      key={status}
-                      onClick={() => handleStatusChange(status)}
-                      disabled={order.status === status || updating}
-                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                        order.status === status
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                      }`}
-                    >
-                      {getOrderStatusText(status)}
-                    </button>
-                  ))}
+                {/* pending 상태일 때 주문 수락/거절 버튼 */}
+                {order.status === 'pending' && (
+                  <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <h3 className="text-sm font-medium text-yellow-800 mb-3">새로운 주문이 접수되었습니다</h3>
+                    <p className="text-sm text-yellow-700 mb-4">
+                      주문 내용을 확인하신 후 수락 또는 거절해주세요. 수락하시면 고객에게 결제 안내가 발송됩니다.
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => handleStatusChange('payment_pending')}
+                        disabled={updating}
+                        className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        주문 수락
+                      </button>
+                      <button
+                        onClick={() => {
+                          const reason = prompt('주문 거절 사유를 입력해주세요:');
+                          if (reason) {
+                            handleStatusChange('cancelled');
+                          }
+                        }}
+                        disabled={updating}
+                        className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        주문 거절
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 일반 상태 변경 버튼들 */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">주문 상태 변경</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {(['pending', 'payment_pending', 'paid', 'shipped', 'delivered', 'cancelled'] as OrderStatus[]).map(status => (
+                      <button
+                        key={status}
+                        onClick={() => handleStatusChange(status)}
+                        disabled={order.status === status || updating}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                          order.status === status
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                        }`}
+                      >
+                        {getOrderStatusText(status)}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
+                {/* 결제 확인 섹션 */}
+                {order.status === 'payment_pending' && (
+                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="text-sm font-medium text-blue-800 mb-3">결제 대기 중</h4>
+                    <p className="text-sm text-blue-700 mb-4">
+                      고객에게 결제 안내가 발송되었습니다. 입금 확인 후 &apos;결제 완료&apos;로 상태를 변경해주세요.
+                    </p>
+                    <div className="bg-white p-3 rounded border">
+                      <p className="text-sm font-medium text-gray-700">계좌 정보</p>
+                      <p className="text-sm text-gray-600">신한은행 110-123-456789 (주)골프샵</p>
+                      <p className="text-sm text-gray-600">입금액: {formatPrice(order.totalAmount)}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* 배송 시작 섹션 */}
                 {order.status === 'paid' && (
-                  <div className="mt-4">
+                  <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <h4 className="text-sm font-medium text-green-800 mb-3">배송 준비</h4>
+                    <p className="text-sm text-green-700 mb-4">
+                      결제가 완료되었습니다. 상품을 포장하고 배송을 시작해주세요.
+                    </p>
                     <label className="block text-sm font-medium text-gray-700 mb-2">송장번호</label>
                     <div className="flex gap-2">
                       <input
@@ -231,8 +292,10 @@ export default function AdminOrderDetailPage() {
                       />
                       <button
                         onClick={() => {
-                          if (trackingNumber) {
+                          if (trackingNumber.trim()) {
                             handleStatusChange('shipped');
+                          } else {
+                            alert('송장번호를 입력해주세요.');
                           }
                         }}
                         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -240,6 +303,22 @@ export default function AdminOrderDetailPage() {
                         배송 시작
                       </button>
                     </div>
+                  </div>
+                )}
+
+                {/* 배송 완료 섹션 */}
+                {order.status === 'shipped' && (
+                  <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                    <h4 className="text-sm font-medium text-purple-800 mb-3">배송 중</h4>
+                    <p className="text-sm text-purple-700 mb-4">
+                      상품이 배송 중입니다. 고객이 상품을 받으면 &apos;배송 완료&apos;로 상태를 변경해주세요.
+                    </p>
+                    <button
+                      onClick={() => handleStatusChange('delivered')}
+                      className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                    >
+                      배송 완료 처리
+                    </button>
                   </div>
                 )}
               </div>
@@ -306,8 +385,19 @@ export default function AdminOrderDetailPage() {
                 결제 정보
               </h3>
               <div className="space-y-2 text-sm">
-                <p><span className="font-medium">결제 방법:</span> {order.paymentMethod}</p>
+                <p><span className="font-medium">결제 방법:</span> 무통장입금</p>
                 <p><span className="font-medium">결제 금액:</span> {formatPrice(order.totalAmount)}</p>
+                {order.status === 'payment_pending' && (
+                  <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                    <p className="text-xs text-yellow-700 font-medium">결제 대기 중</p>
+                    <p className="text-xs text-yellow-600">고객이 입금할 때까지 대기</p>
+                  </div>
+                )}
+                {order.status === 'paid' && (
+                  <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded">
+                    <p className="text-xs text-green-700 font-medium">결제 완료</p>
+                  </div>
+                )}
               </div>
             </div>
 

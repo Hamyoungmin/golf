@@ -242,7 +242,7 @@ function SearchContent() {
                   ))}
                   <button
                     onClick={() => handleFilterChange('category', undefined)}
-                    className="text-sm text-orange-600 hover:text-orange-700"
+                    className="text-sm text-blue-600 hover:text-blue-700"
                   >
                     전체
                   </button>
@@ -273,7 +273,7 @@ function SearchContent() {
                   ))}
                   <button
                     onClick={() => handleFilterChange('brand', undefined)}
-                    className="text-sm text-orange-600 hover:text-orange-700"
+                    className="text-sm text-blue-600 hover:text-blue-700"
                   >
                     전체
                   </button>
@@ -318,7 +318,7 @@ function SearchContent() {
                       onChange={(e) => handleFilterChange('inStock', e.target.checked ? true : undefined)}
                       className="mr-2"
                     />
-                    <span className="text-sm">재고 있음</span>
+                    <span className="text-lg font-semibold text-blue-600">재고 있음</span>
                   </label>
                 </div>
               </div>
@@ -389,7 +389,7 @@ function SearchContent() {
                 </button>
                 <Link
                   href="/"
-                  className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors"
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                 >
                   전체 상품 보기
                 </Link>

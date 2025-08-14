@@ -192,7 +192,7 @@ export default function NoticeDetailPage() {
           <p className="text-gray-600 mb-6">요청하신 공지사항이 존재하지 않거나 삭제되었습니다.</p>
           <Link 
             href="/notice" 
-            className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors"
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
           >
             공지사항 목록으로
           </Link>
@@ -280,7 +280,7 @@ export default function NoticeDetailPage() {
                   <span className="text-sm text-gray-500">이전글</span>
                   <Link 
                     href={`/notice/${prevNotice.id}`}
-                    className="font-medium hover:text-orange-500 transition-colors"
+                    className="font-medium hover:text-blue-500 transition-colors"
                   >
                     {prevNotice.title}
                   </Link>
@@ -297,7 +297,7 @@ export default function NoticeDetailPage() {
                   <span className="text-sm text-gray-500">다음글</span>
                   <Link 
                     href={`/notice/${nextNotice.id}`}
-                    className="font-medium hover:text-orange-500 transition-colors"
+                    className="font-medium hover:text-blue-500 transition-colors"
                   >
                     {nextNotice.title}
                   </Link>

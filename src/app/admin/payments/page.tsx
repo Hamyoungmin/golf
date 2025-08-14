@@ -6,7 +6,6 @@ import {
   BanknotesIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ClockIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import DataTable from '@/components/admin/DataTable';
@@ -24,7 +23,7 @@ import { PaymentInfo, User, Order } from '@/types';
 
 export default function AdminPaymentsPage() {
   const router = useRouter();
-  const [payments, setPayments] = useState<PaymentInfo[]>([]);
+  const [payments, setPayments] = useState<Partial<PaymentInfo>[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'pending' | 'confirmed' | 'rejected'>('pending');
@@ -46,7 +45,7 @@ export default function AdminPaymentsPage() {
   const fetchPayments = async () => {
     try {
       setLoading(true);
-      let paymentList: PaymentInfo[];
+      let paymentList: Partial<PaymentInfo>[];
       
       if (selectedStatus === 'all') {
         paymentList = await getAllPayments(100);
@@ -61,8 +60,8 @@ export default function AdminPaymentsPage() {
       setPayments(paymentList);
 
       // 사용자 정보 및 주문 정보 캐싱
-      const uniqueUserIds = [...new Set(paymentList.map(payment => payment.userId))];
-      const uniqueOrderIds = [...new Set(paymentList.map(payment => payment.orderId))];
+      const uniqueUserIds = [...new Set(paymentList.map(payment => payment.userId).filter((id): id is string => Boolean(id)))];
+      const uniqueOrderIds = [...new Set(paymentList.map(payment => payment.orderId).filter((id): id is string => Boolean(id)))];
 
       // 사용자 정보 가져오기
       const userPromises = uniqueUserIds.map(async (userId) => {

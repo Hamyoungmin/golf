@@ -130,6 +130,7 @@ export default function RecentlyViewedPage() {
 
       await addToCart(product.id, 1, numericPrice);
       alert(`${product.name}이(가) 장바구니에 추가되었습니다.`);
+      router.push('/cart');
     } catch (error) {
       console.error('장바구니 추가 오류:', error);
       alert('장바구니 추가 중 오류가 발생했습니다.');
@@ -191,7 +192,7 @@ export default function RecentlyViewedPage() {
                 style={{
                   display: 'inline-block',
                   padding: '12px 20px',
-                  backgroundColor: '#ff6b35',
+                  backgroundColor: '#007bff',
                   color: 'white',
                   textDecoration: 'none',
                   borderRadius: '4px',
@@ -337,7 +338,7 @@ export default function RecentlyViewedPage() {
                       <div style={{ fontSize: '12px', color: '#666', marginBottom: '10px' }}>
                         브랜드: {product.brand} | 
                         {product.stock > 0 ? (
-                          <span style={{ color: '#28a745', marginLeft: '5px' }}>재고 있음</span>
+                          <span style={{ color: '#2563eb', marginLeft: '5px', fontSize: '16px', fontWeight: 'bold' }}>재고 있음</span>
                         ) : (
                           <span style={{ color: '#dc3545', marginLeft: '5px' }}>품절</span>
                         )}
@@ -443,7 +444,7 @@ export default function RecentlyViewedPage() {
                 style={{
                   display: 'inline-block',
                   padding: '12px 20px',
-                  backgroundColor: '#ff6b35',
+                  backgroundColor: '#007bff',
                   color: 'white',
                   textDecoration: 'none',
                   borderRadius: '4px',
@@ -456,23 +457,7 @@ export default function RecentlyViewedPage() {
             </div>
           </>
         )}
-        
-        <div style={{ 
-          textAlign: 'center',
-          fontSize: '14px',
-          color: '#666',
-          marginTop: '20px'
-        }}>
-          <Link 
-            href="/mypage" 
-            style={{ 
-              color: '#ff6b35',
-              textDecoration: 'underline'
-            }}
-          >
-            마이페이지로 돌아가기
-          </Link>
-        </div>
+
       </div>
     </div>
   );

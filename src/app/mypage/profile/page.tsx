@@ -150,7 +150,7 @@ export default function ProfilePage() {
     setSaving(true);
 
     try {
-      let updateData: Partial<UserType> = {
+      const updateData: Partial<UserType> = {
         name: formData.name,
         phone: formData.phone,
         businessNumber: formData.businessNumber,
@@ -560,22 +560,7 @@ export default function ProfilePage() {
             {saving ? '저장 중...' : '정보 저장'}
           </button>
         </form>
-        
-        <div style={{ 
-          textAlign: 'center',
-          fontSize: '14px',
-          color: '#666'
-        }}>
-          <Link 
-            href="/mypage" 
-            style={{ 
-              color: '#ff6b35',
-              textDecoration: 'underline'
-            }}
-          >
-            마이페이지로 돌아가기
-          </Link>
-        </div>
+
       </div>
     </div>
   );

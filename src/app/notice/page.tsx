@@ -181,7 +181,7 @@ export default function NoticePage() {
                 <div className="col-span-6">
                   <Link 
                     href={`/notice/${notice.id}`}
-                    className="hover:text-orange-500 transition-colors"
+                    className="hover:text-blue-500 transition-colors"
                   >
                     <h3 className={`${notice.isImportant ? 'font-bold text-red-600' : 'font-medium'} text-lg md:text-base mb-1`}>
                       {notice.title}
@@ -245,7 +245,7 @@ export default function NoticePage() {
                 onClick={() => setCurrentPage(page)}
                 className={`px-3 py-2 border rounded ${
                   currentPage === page
-                    ? 'bg-orange-500 text-white border-orange-500'
+                    ? 'bg-blue-500 text-white border-blue-500'
                     : 'border-gray-300 hover:bg-gray-50'
                 }`}
               >

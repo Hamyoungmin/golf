@@ -19,7 +19,7 @@ export default function SetupAdminPage() {
     try {
       // 현재 로그인한 사용자를 관리자로 만들기
       if (user && user.email === email) {
-        await updateUserProfile(user.uid, { isAdmin: true });
+        await updateUserProfile(user.uid, { role: 'admin' });
         alert('관리자 권한이 부여되었습니다. 페이지를 새로고침해주세요.');
         window.location.reload();
       } else {
@@ -53,12 +53,12 @@ export default function SetupAdminPage() {
               <div>
                 <p className="text-sm text-gray-600">현재 로그인한 계정:</p>
                 <p className="font-medium">{user.email}</p>
-                {userData?.isAdmin && (
+                {userData?.role === 'admin' && (
                   <p className="text-green-600 text-sm mt-2">✓ 이미 관리자입니다</p>
                 )}
               </div>
 
-              {!userData?.isAdmin && (
+              {userData?.role !== 'admin' && (
                 <>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
@@ -83,7 +83,7 @@ export default function SetupAdminPage() {
                 </>
               )}
 
-              {userData?.isAdmin && (
+              {userData?.role === 'admin' && (
                 <div className="space-y-4">
                   <a
                     href="/admin"

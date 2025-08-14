@@ -1,7 +1,7 @@
 import ProductList from '@/components/ProductList';
 
 const woodProducts = [
-  { id: 1, name: 'TW747 460 15도 디아마나 S', price: '가격문의', image: null },
+  { id: 1, name: '타이틀리스트 917 우드', price: '150,000원', image: '/o2.png' },
   { id: 2, name: 'RMX218 15도 모듀스 120 X', price: '가격문의', image: null },
   { id: 3, name: 'G425 MAX 15도 알타 CB 60 SR', price: '가격문의', image: null },
   { id: 4, name: 'SIM MAX 15도 벤타스 TR 6 S', price: '가격문의', image: null },

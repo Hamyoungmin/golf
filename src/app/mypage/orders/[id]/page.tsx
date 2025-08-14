@@ -109,7 +109,7 @@ export default function OrderDetailPage() {
           <p className="text-gray-600 mb-6">{error}</p>
           <Link 
             href="/mypage/orders" 
-            className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors"
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
           >
             주문 목록으로 돌아가기
           </Link>
@@ -151,23 +151,28 @@ export default function OrderDetailPage() {
             
             {/* 진행 단계 표시 */}
             <div className="flex items-center justify-between text-sm">
-              <div className={`text-center ${order.status === 'pending' || order.status === 'paid' || order.status === 'shipped' || order.status === 'delivered' ? 'text-orange-600' : 'text-gray-400'}`}>
-                <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${order.status === 'pending' || order.status === 'paid' || order.status === 'shipped' || order.status === 'delivered' ? 'bg-orange-600' : 'bg-gray-300'}`}></div>
+              <div className={`text-center ${['pending', 'payment_pending', 'paid', 'shipped', 'delivered'].includes(order.status) ? 'text-blue-600' : 'text-gray-400'}`}>
+                <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${['pending', 'payment_pending', 'paid', 'shipped', 'delivered'].includes(order.status) ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                 <span>주문접수</span>
               </div>
-              <div className={`flex-1 h-0.5 mx-2 ${order.status === 'paid' || order.status === 'shipped' || order.status === 'delivered' ? 'bg-orange-600' : 'bg-gray-300'}`}></div>
-              <div className={`text-center ${order.status === 'paid' || order.status === 'shipped' || order.status === 'delivered' ? 'text-orange-600' : 'text-gray-400'}`}>
-                <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${order.status === 'paid' || order.status === 'shipped' || order.status === 'delivered' ? 'bg-orange-600' : 'bg-gray-300'}`}></div>
+              <div className={`flex-1 h-0.5 mx-2 ${['payment_pending', 'paid', 'shipped', 'delivered'].includes(order.status) ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+              <div className={`text-center ${['payment_pending', 'paid', 'shipped', 'delivered'].includes(order.status) ? 'text-blue-600' : 'text-gray-400'}`}>
+                <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${['payment_pending', 'paid', 'shipped', 'delivered'].includes(order.status) ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                <span>결제대기</span>
+              </div>
+              <div className={`flex-1 h-0.5 mx-2 ${['paid', 'shipped', 'delivered'].includes(order.status) ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+              <div className={`text-center ${['paid', 'shipped', 'delivered'].includes(order.status) ? 'text-blue-600' : 'text-gray-400'}`}>
+                <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${['paid', 'shipped', 'delivered'].includes(order.status) ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                 <span>결제완료</span>
               </div>
-              <div className={`flex-1 h-0.5 mx-2 ${order.status === 'shipped' || order.status === 'delivered' ? 'bg-orange-600' : 'bg-gray-300'}`}></div>
-              <div className={`text-center ${order.status === 'shipped' || order.status === 'delivered' ? 'text-orange-600' : 'text-gray-400'}`}>
-                <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${order.status === 'shipped' || order.status === 'delivered' ? 'bg-orange-600' : 'bg-gray-300'}`}></div>
+              <div className={`flex-1 h-0.5 mx-2 ${['shipped', 'delivered'].includes(order.status) ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+              <div className={`text-center ${['shipped', 'delivered'].includes(order.status) ? 'text-blue-600' : 'text-gray-400'}`}>
+                <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${['shipped', 'delivered'].includes(order.status) ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                 <span>배송중</span>
               </div>
-              <div className={`flex-1 h-0.5 mx-2 ${order.status === 'delivered' ? 'bg-orange-600' : 'bg-gray-300'}`}></div>
-              <div className={`text-center ${order.status === 'delivered' ? 'text-orange-600' : 'text-gray-400'}`}>
-                <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${order.status === 'delivered' ? 'bg-orange-600' : 'bg-gray-300'}`}></div>
+              <div className={`flex-1 h-0.5 mx-2 ${order.status === 'delivered' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+              <div className={`text-center ${order.status === 'delivered' ? 'text-blue-600' : 'text-gray-400'}`}>
+                <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${order.status === 'delivered' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                 <span>배송완료</span>
               </div>
             </div>
@@ -246,29 +251,48 @@ export default function OrderDetailPage() {
               <hr />
               <div className="flex justify-between text-lg font-semibold">
                 <span>총 결제금액</span>
-                <span className="text-orange-600">{formatPrice(order.totalAmount)}</span>
+                <span className="text-blue-600">{formatPrice(order.totalAmount)}</span>
               </div>
             </div>
           </div>
 
-          {/* 결제 안내 (무통장 입금인 경우) */}
-          {order.paymentMethod === 'bank_transfer' && order.status === 'pending' && (
+          {/* 주문 상태별 안내 */}
+          {order.status === 'pending' && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-3 text-yellow-800">입금 안내</h3>
+              <h3 className="text-lg font-semibold mb-3 text-yellow-800">주문 접수 완료</h3>
               <div className="text-sm text-yellow-700 space-y-2">
-                <p><strong>입금 계좌:</strong> 농협 000-0000-0000-00</p>
-                <p><strong>예금주:</strong> 팬더골프</p>
+                <p>주문이 정상적으로 접수되었습니다.</p>
+                <p>관리자 확인 후 결제 안내를 드리겠습니다.</p>
+              </div>
+            </div>
+          )}
+          
+          {order.status === 'payment_pending' && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-3 text-blue-800">입금 안내</h3>
+              <div className="text-sm text-blue-700 space-y-2">
+                <p><strong>입금 계좌:</strong> 신한은행 110-123-456789</p>
+                <p><strong>예금주:</strong> (주)골프샵</p>
                 <p><strong>입금 금액:</strong> {formatPrice(order.totalAmount)}</p>
-                <p className="mt-3 text-yellow-600">
-                  ※ 입금 확인 후 배송 준비가 시작됩니다.
+                <p className="mt-3 text-blue-600">
+                  ※ 입금 확인 후 배솨 준비가 시작됩니다.
                 </p>
+              </div>
+            </div>
+          )}
+          
+          {order.status === 'paid' && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-3 text-green-800">결제 완료</h3>
+              <div className="text-sm text-green-700">
+                <p>결제가 완료되었습니다. 배송 준비 중입니다.</p>
               </div>
             </div>
           )}
 
           {/* 액션 버튼들 */}
           <div className="space-y-3">
-            {order.status === 'pending' && (
+            {(order.status === 'pending' || order.status === 'payment_pending') && (
               <button 
                 className="w-full px-4 py-3 border border-red-300 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition-colors"
                 onClick={() => {
@@ -283,7 +307,7 @@ export default function OrderDetailPage() {
             
             {order.status === 'delivered' && (
               <button 
-                className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors"
+                className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
                 onClick={() => {
                   alert('리뷰 작성 기능은 추후 제공될 예정입니다.');
                 }}

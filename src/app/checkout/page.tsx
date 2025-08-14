@@ -296,7 +296,7 @@ export default function CheckoutPage() {
                   value={shippingInfo.zipCode}
                   onChange={(e) => handleShippingInfoChange('zipCode', e.target.value)}
                   placeholder="우편번호를 입력하세요"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
@@ -306,7 +306,7 @@ export default function CheckoutPage() {
                   value={shippingInfo.state}
                   onChange={(e) => handleShippingInfoChange('state', e.target.value)}
                   placeholder="시/도를 입력하세요"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
@@ -316,7 +316,7 @@ export default function CheckoutPage() {
                   value={shippingInfo.city}
                   onChange={(e) => handleShippingInfoChange('city', e.target.value)}
                   placeholder="시/군/구를 입력하세요"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
@@ -326,7 +326,7 @@ export default function CheckoutPage() {
                   value={shippingInfo.street}
                   onChange={(e) => handleShippingInfoChange('street', e.target.value)}
                   placeholder="상세주소를 입력하세요"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -471,14 +471,14 @@ export default function CheckoutPage() {
               <hr />
               <div className="flex justify-between text-lg font-semibold">
                 <span>총 결제금액</span>
-                <span className="text-orange-600">{formatPrice(totalAmount)}</span>
+                <span className="text-blue-600">{formatPrice(totalAmount)}</span>
               </div>
             </div>
 
             <button
               onClick={handleOrder}
               disabled={loading}
-              className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               {loading ? '주문 처리 중...' : '결제하기'}
             </button>

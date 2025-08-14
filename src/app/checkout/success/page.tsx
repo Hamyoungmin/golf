@@ -169,7 +169,7 @@ function CheckoutSuccessContent() {
           <p className="text-gray-600 mb-6">{error}</p>
           <Link 
             href="/" 
-            className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors"
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
           >
             홈으로 돌아가기
           </Link>
@@ -191,7 +191,7 @@ function CheckoutSuccessContent() {
           </div>
           <h1 className="text-3xl font-bold mb-4 text-gray-800">주문이 완료되었습니다!</h1>
           <p className="text-gray-600 mb-6">
-            주문번호: <span className="font-semibold text-orange-600">{order.orderId}</span>
+            주문번호: <span className="font-semibold text-blue-600">{order.orderId}</span>
           </p>
           <p className="text-sm text-gray-500">
             주문 확인 및 배송 준비까지 1-2일 정도 소요됩니다.
@@ -257,7 +257,7 @@ function CheckoutSuccessContent() {
             <hr />
             <div className="flex justify-between text-lg font-semibold">
               <span>총 결제금액</span>
-              <span className="text-orange-600">{formatPrice(order.totalAmount)}</span>
+              <span className="text-blue-600">{formatPrice(order.totalAmount)}</span>
             </div>
           </div>
         </div>
@@ -417,7 +417,7 @@ function CheckoutSuccessContent() {
         <div className="flex flex-col sm:flex-row gap-4">
           <Link
             href={`/mypage/orders/${order.orderId}`}
-            className="flex-1 bg-orange-500 text-white text-center py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
+            className="flex-1 bg-blue-500 text-white text-center py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
           >
             주문 상세보기
           </Link>

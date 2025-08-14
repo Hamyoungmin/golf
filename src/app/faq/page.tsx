@@ -211,7 +211,7 @@ export default function FAQPage() {
                 placeholder="질문을 검색해보세요..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="absolute left-3 top-2.5 text-gray-400">
                 <circle cx="11" cy="11" r="8"/>
@@ -228,7 +228,7 @@ export default function FAQPage() {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   selectedCategory === category
-                    ? 'bg-orange-500 text-white'
+                    ? 'bg-blue-500 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -242,7 +242,7 @@ export default function FAQPage() {
         <div className="mt-4 pt-4 border-t">
           <button
             onClick={toggleAll}
-            className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
             {openItems.length === filteredFAQs.length ? '전체 닫기' : '전체 열기'}
           </button>
@@ -266,7 +266,7 @@ export default function FAQPage() {
               setSearchTerm('');
               setSelectedCategory('전체');
             }}
-            className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
             전체 FAQ 보기
           </button>
@@ -282,10 +282,10 @@ export default function FAQPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center mb-2">
-                      <span className="px-2 py-1 bg-orange-100 text-orange-600 text-xs font-medium rounded mr-3">
+                      <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs font-medium rounded mr-3">
                         {faq.category}
                       </span>
-                      <span className="text-orange-600 font-medium text-sm">Q.</span>
+                      <span className="text-blue-600 font-medium text-sm">Q.</span>
                     </div>
                     <h3 className="font-medium text-lg text-gray-900">
                       {faq.question}
@@ -309,9 +309,9 @@ export default function FAQPage() {
               
               {openItems.includes(faq.id) && (
                 <div className="px-6 pb-4">
-                  <div className="pl-8 border-l-2 border-orange-200">
+                  <div className="pl-8 border-l-2 border-blue-200">
                     <div className="flex items-start mb-2">
-                      <span className="text-orange-600 font-medium text-sm mr-2">A.</span>
+                      <span className="text-blue-600 font-medium text-sm mr-2">A.</span>
                     </div>
                     <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                       {faq.answer}

@@ -1,7 +1,7 @@
 import ProductList from '@/components/ProductList';
 
 const driverProducts = [
-  { id: 1, name: 'TW717 455 10.5도 비자드 55 R', price: '가격문의', image: null },
+  { id: 1, name: '캘러웨이 로그 드라이버', price: '140,000원', image: '/d1.jpg' },
   { id: 2, name: 'TR20 9.5도 비자드 43 S', price: '가격문의', image: null },
   { id: 3, name: '703리미티드 9.5도 TRPX FLEX SX', price: '가격문의', image: null },
   { id: 4, name: '703 8.5도 디아마나 7S', price: '가격문의', image: null },

@@ -11,7 +11,7 @@ import {
   limit as firestoreLimit
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { PaymentInfo, PaymentMethod, BankAccount } from '@/types';
+import { PaymentInfo, BankAccount } from '@/types';
 
 // 회사 계좌 정보
 export const COMPANY_BANK_ACCOUNTS: BankAccount[] = [
@@ -28,7 +28,7 @@ export const COMPANY_BANK_ACCOUNTS: BankAccount[] = [
 ];
 
 // 대기 중인 결제 목록 가져오기
-export async function getPendingPayments(limit?: number): Promise<PaymentInfo[]> {
+export async function getPendingPayments(limit?: number): Promise<Partial<PaymentInfo>[]> {
   try {
     let q = query(
       collection(db, 'payments'),
@@ -51,7 +51,7 @@ export async function getPendingPayments(limit?: number): Promise<PaymentInfo[]>
         updatedAt: data.updatedAt?.toDate() || new Date(),
         verifiedAt: data.verifiedAt?.toDate(),
         transferDate: data.bankTransferInfo?.transferDate?.toDate(),
-      } as PaymentInfo;
+      };
     });
 
     return payments;
@@ -62,7 +62,7 @@ export async function getPendingPayments(limit?: number): Promise<PaymentInfo[]>
 }
 
 // 모든 결제 정보 가져오기
-export async function getAllPayments(limit?: number): Promise<PaymentInfo[]> {
+export async function getAllPayments(limit?: number): Promise<Partial<PaymentInfo>[]> {
   try {
     let q = query(collection(db, 'payments'), orderBy('createdAt', 'desc'));
     
@@ -81,7 +81,7 @@ export async function getAllPayments(limit?: number): Promise<PaymentInfo[]> {
         updatedAt: data.updatedAt?.toDate() || new Date(),
         verifiedAt: data.verifiedAt?.toDate(),
         transferDate: data.bankTransferInfo?.transferDate?.toDate(),
-      } as PaymentInfo;
+      };
     });
 
     return payments;
@@ -110,7 +110,7 @@ export async function getPaymentInfo(orderId: string): Promise<PaymentInfo | nul
         updatedAt: data.updatedAt?.toDate() || new Date(),
         verifiedAt: data.verifiedAt?.toDate(),
         transferDate: data.bankTransferInfo?.transferDate?.toDate(),
-      } as PaymentInfo;
+      };
     }
 
     return null;
@@ -212,7 +212,7 @@ export async function getPaymentByOrderId(orderId: string): Promise<PaymentInfo 
         updatedAt: data.updatedAt?.toDate() || new Date(),
         verifiedAt: data.verifiedAt?.toDate(),
         transferDate: data.bankTransferInfo?.transferDate?.toDate(),
-      } as PaymentInfo;
+      };
     }
 
     return null;

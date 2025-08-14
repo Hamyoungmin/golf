@@ -82,8 +82,20 @@ export default function AdminOrdersPage() {
       key: 'orderId',
       header: '주문번호',
       render: (order: Order) => (
-        <div>
-          <p className="font-medium text-gray-900">{order.orderId}</p>
+        <div className="relative">
+          {order.status === 'pending' && (
+            <div className="absolute -left-2 top-0 w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+          )}
+          <p className={`font-medium ${
+            order.status === 'pending' ? 'text-red-600' : 'text-gray-900'
+          }`}>
+            {order.orderId}
+            {order.status === 'pending' && (
+              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                NEW
+              </span>
+            )}
+          </p>
           <p className="text-xs text-gray-500">{formatDate(order.createdAt)}</p>
         </div>
       ),
