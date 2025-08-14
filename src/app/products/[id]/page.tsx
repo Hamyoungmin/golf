@@ -121,6 +121,73 @@ const sampleProducts: Product[] = [
     isLeftHanded: false,
     createdAt: new Date(),
     updatedAt: new Date(),
+  },
+  // 캘러웨이 드라이버들
+  {
+    id: 'callaway-driver-1',
+    name: 'PARADYM 10.5도 Project X HZRDUS Smoke IM10 60',
+    price: '가격문의',
+    category: 'drivers',
+    brand: 'callaway',
+    images: ['https://images.unsplash.com/photo-1593111774240-d529f12af4ce?w=600&h=400&fit=crop'],
+    description: '캘러웨이의 최신 PARADYM 드라이버입니다. 혁신적인 기술과 디자인으로 최고의 성능을 제공합니다.',
+    stock: 5,
+    specifications: {
+      '로프트': '10.5도',
+      '샤프트': 'Project X HZRDUS Smoke IM10 60',
+      '플렉스': 'S',
+      '클럽 길이': '45.5인치',
+      '헤드 볼륨': '460cc'
+    },
+    isWomens: false,
+    isKids: false,
+    isLeftHanded: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'callaway-driver-2',
+    name: 'ROGUE ST MAX 10.5도 Fujikura VENTUS Blue 6 R',
+    price: '가격문의',
+    category: 'drivers',
+    brand: 'callaway',
+    images: ['https://images.unsplash.com/photo-1593111774240-d529f12af4ce?w=600&h=400&fit=crop'],
+    description: '캘러웨이 ROGUE ST MAX 드라이버로 탁월한 관용성과 비거리를 경험하세요.',
+    stock: 3,
+    specifications: {
+      '로프트': '10.5도',
+      '샤프트': 'Fujikura VENTUS Blue 6',
+      '플렉스': 'R',
+      '클럽 길이': '45.5인치',
+      '헤드 볼륨': '460cc'
+    },
+    isWomens: false,
+    isKids: false,
+    isLeftHanded: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'callaway-driver-3',
+    name: 'EPIC MAX LS 9도 Project X HZRDUS Smoke IM10',
+    price: '가격문의',
+    category: 'drivers',
+    brand: 'callaway',
+    images: ['https://images.unsplash.com/photo-1593111774240-d529f12af4ce?w=600&h=400&fit=crop'],
+    description: '캘러웨이 EPIC MAX LS 드라이버로 낮은 스핀과 강력한 비거리를 실현하세요.',
+    stock: 2,
+    specifications: {
+      '로프트': '9도',
+      '샤프트': 'Project X HZRDUS Smoke IM10',
+      '플렉스': 'S',
+      '클럽 길이': '45.5인치',
+      '헤드 볼륨': '460cc'
+    },
+    isWomens: false,
+    isKids: false,
+    isLeftHanded: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   }
 ];
 
