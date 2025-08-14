@@ -1,10 +1,33 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User as FirebaseUser, onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { User as UserType } from '@/types';
+
+// Firebase 함수들을 안전하게 import
+let FirebaseUser: any = null;
+let onAuthStateChanged: any = null;
+let firebaseSignOut: any = null;
+let doc: any = null;
+let getDoc: any = null;
+let setDoc: any = null;
+
+// Firebase가 사용 가능할 때만 함수들을 import
+if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+  try {
+    const firebaseAuth = require('firebase/auth');
+    const firestore = require('firebase/firestore');
+    
+    FirebaseUser = firebaseAuth.User;
+    onAuthStateChanged = firebaseAuth.onAuthStateChanged;
+    firebaseSignOut = firebaseAuth.signOut;
+    doc = firestore.doc;
+    getDoc = firestore.getDoc;
+    setDoc = firestore.setDoc;
+  } catch (error) {
+    console.warn('Firebase 함수 import 실패:', error);
+  }
+}
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -37,6 +60,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // 사용자 데이터 가져오기
   const fetchUserData = async (uid: string) => {
+    if (!getDoc || !doc || !db) return null;
+    
     try {
       const userDoc = await getDoc(doc(db, 'users', uid));
       if (userDoc.exists()) {
@@ -52,7 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // 사용자 데이터 업데이트
   const updateUserData = async (data: Partial<UserType>) => {
-    if (!user) return;
+    if (!user || !setDoc || !doc || !db) return;
     
     try {
       const userRef = doc(db, 'users', user.uid);
@@ -70,6 +95,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // 로그아웃
   const signOut = async () => {
+    if (!firebaseSignOut || !auth) {
+      setUser(null);
+      setUserData(null);
+      return;
+    }
+    
     try {
       await firebaseSignOut(auth);
       setUser(null);
@@ -82,7 +113,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Auth 상태 변화 감지
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    if (!onAuthStateChanged || !auth) {
+      setLoading(false);
+      return;
+    }
+    
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: any) => {
       setUser(firebaseUser);
       
       if (firebaseUser) {
