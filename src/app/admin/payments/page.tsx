@@ -218,16 +218,16 @@ export default function AdminPaymentsPage() {
     },
   ];
 
-  const filteredPayments = payments.filter(payment => {
+    const filteredPayments = payments.filter(payment => {
     if (searchTerm) {
-      const user = userCache[payment.userId];
+      const user = payment.userId ? userCache[payment.userId] : undefined;
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch = 
-        payment.orderId.toLowerCase().includes(searchLower) ||
+        (payment.orderId && payment.orderId.toLowerCase().includes(searchLower)) ||
         (user?.name && user.name.toLowerCase().includes(searchLower)) ||
         (user?.email && user.email.toLowerCase().includes(searchLower)) ||
         (payment.bankTransferInfo?.depositorName && 
-         payment.bankTransferInfo.depositorName.toLowerCase().includes(searchLower));
+          payment.bankTransferInfo.depositorName.toLowerCase().includes(searchLower));
       
       if (!matchesSearch) return false;
     }
