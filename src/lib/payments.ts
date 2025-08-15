@@ -1,4 +1,5 @@
 import { 
+  db,
   collection, 
   query, 
   where, 
@@ -9,8 +10,7 @@ import {
   updateDoc,
   orderBy,
   limit as firestoreLimit
-} from 'firebase/firestore';
-import { db } from './firebase';
+} from './firebase';
 import { PaymentInfo, BankAccount } from '@/types';
 
 // 회사 계좌 정보
@@ -42,7 +42,7 @@ export async function getPendingPayments(limit?: number): Promise<Partial<Paymen
     
     const querySnapshot = await getDocs(q);
     
-    const payments = querySnapshot.docs.map(doc => {
+    const payments = querySnapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,
@@ -72,7 +72,7 @@ export async function getAllPayments(limit?: number): Promise<Partial<PaymentInf
     
     const querySnapshot = await getDocs(q);
     
-    const payments = querySnapshot.docs.map(doc => {
+    const payments = querySnapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,
@@ -128,7 +128,7 @@ export async function createPaymentInfo(paymentData: Omit<PaymentInfo, 'id' | 'c
     
     const paymentInfo: PaymentInfo = {
       ...paymentData,
-      id: docRef.id,
+      // id: docRef.id,
       createdAt: now,
       updatedAt: now,
     };

@@ -1,4 +1,5 @@
 import { 
+  db,
   collection, 
   query, 
   where, 
@@ -13,8 +14,7 @@ import {
   startAfter,
   DocumentSnapshot,
   WhereFilterOp
-} from 'firebase/firestore';
-import { db } from './firebase';
+} from './firebase';
 import { Product, ProductFilter, ProductSort } from '@/types';
 
 // 상품 목록 가져오기 (필터링 및 페이지네이션 지원)
@@ -22,7 +22,7 @@ export async function getProducts(
   filter?: ProductFilter,
   sort?: ProductSort,
   limit?: number,
-  startAfterDoc?: DocumentSnapshot
+  startAfterDoc?: any
 ): Promise<Product[]> {
   try {
     let q = query(collection(db, 'products'));
@@ -66,7 +66,7 @@ export async function getProducts(
     }
 
     const querySnapshot = await getDocs(q);
-    const products = querySnapshot.docs.map(doc => {
+    const products = querySnapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,
@@ -198,7 +198,7 @@ export async function getProductCountByCategory(): Promise<Record<string, number
     const querySnapshot = await getDocs(collection(db, 'products'));
     const categoryCounts: Record<string, number> = {};
 
-    querySnapshot.docs.forEach(doc => {
+    querySnapshot.docs.forEach((doc: any) => {
       const data = doc.data();
       const category = data.category;
       categoryCounts[category] = (categoryCounts[category] || 0) + 1;
@@ -237,7 +237,7 @@ export async function getPopularProducts(limit: number = 8): Promise<Product[]> 
     );
 
     const querySnapshot = await getDocs(q);
-    const products = querySnapshot.docs.map(doc => {
+    const products = querySnapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,

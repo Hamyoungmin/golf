@@ -149,7 +149,7 @@ export default function AdminPaymentsPage() {
     {
       key: 'orderId',
       header: '주문번호',
-      render: (payment: PaymentInfo) => (
+      render: (payment: any) => (
         <div>
           <p className="font-medium text-blue-600 cursor-pointer hover:underline"
              onClick={() => router.push(`/admin/orders/${payment.orderId}`)}>
@@ -196,7 +196,7 @@ export default function AdminPaymentsPage() {
     {
       key: 'amount',
       header: '주문금액',
-      render: (payment: PaymentInfo) => (
+      render: (payment: any) => (
         <div>
           <span className="font-medium">{formatCurrency(payment.amount)}</span>
           {payment.bankTransferInfo && payment.bankTransferInfo.transferAmount !== payment.amount && (
@@ -210,7 +210,7 @@ export default function AdminPaymentsPage() {
     {
       key: 'status',
       header: '상태',
-      render: (payment: PaymentInfo) => (
+      render: (payment: any) => (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentStatusColor(payment.status)}`}>
           {getPaymentStatusText(payment.status)}
         </span>
@@ -289,7 +289,7 @@ export default function AdminPaymentsPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handlePaymentConfirm(payment.orderId, true);
+                      if (payment.orderId) handlePaymentConfirm(payment.orderId, true);
                     }}
                     disabled={processing === payment.orderId}
                     className="text-green-600 hover:text-green-900 flex items-center gap-1 disabled:opacity-50"
@@ -300,7 +300,7 @@ export default function AdminPaymentsPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handlePaymentConfirm(payment.orderId, false);
+                      if (payment.orderId) handlePaymentConfirm(payment.orderId, false);
                     }}
                     disabled={processing === payment.orderId}
                     className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50"

@@ -30,7 +30,7 @@ if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
 }
 
 interface AuthContextType {
-  user: FirebaseUser | null;
+  user: any | null;
   userData: UserType | null;
   loading: boolean;
   isAdmin: boolean;
@@ -54,7 +54,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [user, setUser] = useState<any | null>(null);
   const [userData, setUserData] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
 

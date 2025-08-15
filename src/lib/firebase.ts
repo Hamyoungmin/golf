@@ -5,21 +5,27 @@ const mockAuth = {
   signOut: () => Promise.resolve(),
 };
 
+// Mock functions that match Firestore API
+const mockCollection = (db: any, path: string) => ({
+  doc: (id?: string) => mockDoc(db, `${path}/${id || 'mock'}`),
+  add: () => Promise.resolve({ id: 'mock' }),
+  where: () => ({ get: () => Promise.resolve({ docs: [] }) }),
+  get: () => Promise.resolve({ docs: [] }),
+});
+
+const mockDoc = (db: any, path: string) => ({
+  get: () => Promise.resolve({ 
+    exists: false, 
+    data: () => null,
+    id: 'mock'
+  }),
+  set: () => Promise.resolve(),
+  update: () => Promise.resolve(),
+  delete: () => Promise.resolve(),
+});
+
 const mockDb = {
-  collection: () => ({
-    doc: () => ({
-      get: () => Promise.resolve({ exists: false, data: () => null }),
-      set: () => Promise.resolve(),
-      update: () => Promise.resolve(),
-    }),
-    add: () => Promise.resolve({ id: 'mock' }),
-    where: () => ({ get: () => Promise.resolve({ docs: [] }) }),
-  }),
-  doc: () => ({
-    get: () => Promise.resolve({ exists: false, data: () => null }),
-    set: () => Promise.resolve(),
-    update: () => Promise.resolve(),
-  }),
+  // This will be replaced by the actual functions when Firebase is initialized
 };
 
 const mockStorage = {
@@ -35,6 +41,31 @@ let auth: any = mockAuth;
 let db: any = mockDb;
 let storage: any = mockStorage;
 
+// Mock Firestore functions
+let collection: any = mockCollection;
+let doc: any = mockDoc;
+let getDoc: any = (docRef: any) => Promise.resolve({ 
+  exists: false, 
+  data: () => null,
+  id: 'mock'
+});
+let setDoc: any = () => Promise.resolve();
+let deleteDoc: any = () => Promise.resolve();
+let serverTimestamp: any = () => new Date();
+let query: any = (...args: any[]) => ({ get: () => Promise.resolve({ docs: [] }) });
+let where: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
+let getDocs: any = () => Promise.resolve({ docs: [] });
+let updateDoc: any = () => Promise.resolve();
+let arrayUnion: any = (...values: any[]) => values;
+let arrayRemove: any = (...values: any[]) => values;
+let orderBy: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
+let limit: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
+let startAfter: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
+
+// Types
+let DocumentSnapshot: any = {};
+let WhereFilterOp: any = {};
+
 // 환경변수가 모두 있는 경우에만 실제 Firebase 초기화
 if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY && 
     process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN && 
@@ -45,6 +76,28 @@ if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
     const { getAuth } = require('firebase/auth');
     const { getFirestore } = require('firebase/firestore');
     const { getStorage } = require('firebase/storage');
+    
+    // Import Firestore functions
+    const firestoreFunctions = require('firebase/firestore');
+    collection = firestoreFunctions.collection;
+    doc = firestoreFunctions.doc;
+    getDoc = firestoreFunctions.getDoc;
+    setDoc = firestoreFunctions.setDoc;
+    deleteDoc = firestoreFunctions.deleteDoc;
+    serverTimestamp = firestoreFunctions.serverTimestamp;
+    query = firestoreFunctions.query;
+    where = firestoreFunctions.where;
+    getDocs = firestoreFunctions.getDocs;
+    updateDoc = firestoreFunctions.updateDoc;
+    arrayUnion = firestoreFunctions.arrayUnion;
+    arrayRemove = firestoreFunctions.arrayRemove;
+    orderBy = firestoreFunctions.orderBy;
+    limit = firestoreFunctions.limit;
+    startAfter = firestoreFunctions.startAfter;
+    
+    // Types
+    DocumentSnapshot = firestoreFunctions.DocumentSnapshot;
+    WhereFilterOp = firestoreFunctions.WhereFilterOp;
     
     const firebaseConfig = {
       apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -63,5 +116,26 @@ if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
   }
 }
 
-export { auth, db, storage };
+export { 
+  auth, 
+  db, 
+  storage, 
+  collection, 
+  doc, 
+  getDoc, 
+  setDoc, 
+  deleteDoc, 
+  serverTimestamp,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+  orderBy,
+  limit,
+  startAfter,
+  DocumentSnapshot,
+  WhereFilterOp
+};
 export default app;

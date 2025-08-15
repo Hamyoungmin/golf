@@ -1,4 +1,5 @@
 import { 
+  db,
   doc,
   getDoc,
   setDoc,
@@ -10,8 +11,7 @@ import {
   getDocs,
   arrayUnion,
   arrayRemove
-} from 'firebase/firestore';
-import { db } from './firebase';
+} from './firebase';
 import { Wishlist, Product } from '@/types';
 import { getProduct } from './products';
 

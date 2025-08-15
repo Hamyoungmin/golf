@@ -1,4 +1,5 @@
 import { 
+  db,
   collection, 
   query, 
   where, 
@@ -10,8 +11,7 @@ import {
   orderBy, 
   limit as firestoreLimit,
   DocumentSnapshot
-} from 'firebase/firestore';
-import { db } from './firebase';
+} from './firebase';
 import { Order, OrderStatus } from '@/types';
 
 // 특정 사용자의 주문 목록 가져오기
@@ -28,7 +28,7 @@ export async function getUserOrders(userId: string, limit?: number): Promise<Ord
     }
 
     const querySnapshot = await getDocs(q);
-    const orders = querySnapshot.docs.map(doc => {
+    const orders = querySnapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,
@@ -46,7 +46,7 @@ export async function getUserOrders(userId: string, limit?: number): Promise<Ord
 }
 
 // 모든 주문 목록 가져오기 (관리자용)
-export async function getAllOrders(limit?: number, startAfter?: DocumentSnapshot, status?: OrderStatus): Promise<Order[]> {
+export async function getAllOrders(limit?: number, startAfter?: any, status?: OrderStatus): Promise<Order[]> {
   try {
     let q = query(
       collection(db, 'orders'),
@@ -66,7 +66,7 @@ export async function getAllOrders(limit?: number, startAfter?: DocumentSnapshot
     }
 
     const querySnapshot = await getDocs(q);
-    const orders = querySnapshot.docs.map(doc => {
+    const orders = querySnapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,

@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext';
 import { 
   getUserRecentlyViewed, 
   addToRecentlyViewed as addToRecentlyViewedAPI,
+  addToRecentlyViewedDebounced,
   removeFromRecentlyViewed as removeFromRecentlyViewedAPI,
   getRecentlyViewedProducts,
   removeMultipleFromRecentlyViewed as removeMultipleFromRecentlyViewedAPI,
@@ -34,7 +35,7 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
   const [recentlyViewedProductIds, setRecentlyViewedProductIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 최근 본 상품 데이터 로드
+  // 최근 본 상품 데이터 로드 (개선된 에러 핸들링)
   const loadRecentlyViewed = async () => {
     if (!user) {
       setRecentlyViewedItems([]);
@@ -45,10 +46,22 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const products = await getRecentlyViewedProducts(user.uid);
-      setRecentlyViewedItems(products);
-      setRecentlyViewedProductIds(products.map(p => p.id));
+      
+      // 데이터 유효성 검증
+      if (Array.isArray(products)) {
+        setRecentlyViewedItems(products);
+        setRecentlyViewedProductIds(products.map(p => p?.id).filter(Boolean));
+      } else {
+        console.warn('최근 본 상품 데이터가 배열이 아닙니다:', products);
+        setRecentlyViewedItems([]);
+        setRecentlyViewedProductIds([]);
+      }
     } catch (error) {
       console.error('최근 본 상품 로드 오류:', error);
+      
+      // 에러 발생 시에도 빈 배열로 초기화 (앱 크래시 방지)
+      setRecentlyViewedItems([]);
+      setRecentlyViewedProductIds([]);
     } finally {
       setLoading(false);
     }
@@ -59,15 +72,17 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
     loadRecentlyViewed();
   }, [user]);
 
-  // 최근 본 상품에 상품 추가
+  // 최근 본 상품에 상품 추가 (디바운스 적용)
   const addToRecentlyViewed = async (productId: string): Promise<boolean> => {
     if (!user) {
       return false;
     }
 
     try {
-      const success = await addToRecentlyViewedAPI(user.uid, productId);
+      // 디바운스된 함수 사용 (Firestore 요청 줄이기)
+      const success = await addToRecentlyViewedDebounced(user.uid, productId);
       if (success) {
+        // 로컬 상태 즉시 업데이트 (UI 반응성 향상)
         await refreshRecentlyViewed();
       }
       return success;
@@ -131,9 +146,20 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // 상품이 최근 본 상품에 있는지 확인
+  // 상품이 최근 본 상품에 있는지 확인 (로컬 캐시 우선 사용)
   const isInRecentlyViewed = (productId: string): boolean => {
-    return recentlyViewedProductIds.includes(productId);
+    // 로컬 상태에서 먼저 확인 (가장 빠른 응답)
+    if (recentlyViewedProductIds.includes(productId)) {
+      return true;
+    }
+    
+    // 추가적인 안전 장치: 배열이 유효한지 확인
+    if (!Array.isArray(recentlyViewedProductIds)) {
+      console.warn('recentlyViewedProductIds가 배열이 아닙니다:', recentlyViewedProductIds);
+      return false;
+    }
+    
+    return false;
   };
 
   // 최근 본 상품 새로고침

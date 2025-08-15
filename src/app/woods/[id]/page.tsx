@@ -58,14 +58,10 @@ export default function WoodProductPage() {
 
   // 최근 본 상품에 추가
   useEffect(() => {
-    addToRecentlyViewed({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      category: '우드'
-    });
-  }, [product, addToRecentlyViewed]);
+    if (product) {
+      addToRecentlyViewed(product.id.toString());
+    }
+  }, [product?.id, addToRecentlyViewed]);
 
   const handleAddToCart = () => {
     if (!user) {
@@ -73,13 +69,8 @@ export default function WoodProductPage() {
       return;
     }
     
-    addToCart({
-      productId: product.id.toString(),
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      quantity
-    });
+    const numericPrice = parseInt(product.price.replace(/[^0-9]/g, '')) || 0;
+    addToCart(product.id.toString(), quantity, numericPrice);
     
     alert('장바구니에 추가되었습니다.');
   };
@@ -98,10 +89,10 @@ export default function WoodProductPage() {
       category: '우드'
     };
 
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
+    if (isInWishlist(product.id.toString())) {
+      removeFromWishlist(product.id.toString());
     } else {
-      addToWishlist(wishlistItem);
+      addToWishlist(product.id.toString());
     }
   };
 
@@ -169,12 +160,12 @@ export default function WoodProductPage() {
               <button
                 onClick={handleWishlistToggle}
                 className={`p-3 rounded-lg border transition-colors ${
-                  isInWishlist(product.id)
+                  isInWishlist(product.id.toString())
                     ? 'bg-red-50 border-red-200 text-red-600'
                     : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                {isInWishlist(product.id) ? '♥' : '♡'}
+                {isInWishlist(product.id.toString()) ? '♥' : '♡'}
               </button>
             </div>
           </div>

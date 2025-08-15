@@ -184,12 +184,13 @@ export default function ProductDetail() {
         
         setProduct(foundProduct);
         
-        // 로그인한 사용자인 경우 최근 본 상품에 추가
+        // 로그인한 사용자인 경우 최근 본 상품에 추가 (에러 방지)
         if (user && foundProduct) {
           try {
+            // 디바운스된 함수 사용으로 Firestore 요청 최소화
             await addToRecentlyViewed(foundProduct.id);
           } catch (error) {
-            console.error('최근 본 상품 추가 오류:', error);
+            console.warn('최근 본 상품 추가 실패 (페이지 로드에는 영향 없음):', error);
             // 최근 본 상품 추가 실패는 전체 페이지 로드를 방해하지 않음
           }
         }
@@ -202,7 +203,7 @@ export default function ProductDetail() {
     };
 
     fetchProduct();
-  }, [params.id, user, addToRecentlyViewed]);
+  }, [params.id, user?.uid]);
 
   const handleAddToCart = async () => {
     if (!user) {
@@ -374,21 +375,330 @@ export default function ProductDetail() {
             )}
           </div>
 
-          <div className="mb-6">
-            <p className="text-gray-700 leading-relaxed">{product.description}</p>
+          {/* 상품 설명 섹션 - 홈페이지 스타일에 맞게 리디자인 */}
+          <div className="mb-8">
+            <div className="product-description-section" style={{
+              background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
+              borderRadius: '12px',
+              padding: '24px',
+              border: '1px solid #e9ecef',
+              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.05)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* 장식용 그라데이션 배경 - 찜하기 버튼 색상 적용 */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '4px',
+                background: 'linear-gradient(90deg, #ec4899 0%, #db2777 100%)'
+              }}></div>
+              
+              {/* 상품 설명 헤더 */}
+              <div className="product-description-header" style={{
+                marginBottom: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(236, 72, 153, 0.3)'
+                }}>
+                  <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                </div>
+                <h3 style={{
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  color: '#2c3e50',
+                  margin: '0'
+                }}>
+                  상품 소개
+                </h3>
+              </div>
+
+              {/* 메인 설명 */}
+              <div style={{
+                backgroundColor: '#ffffff',
+                borderRadius: '8px',
+                padding: '20px',
+                marginBottom: '20px',
+                border: '1px solid #f1f2f6',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
+              }}>
+                <p style={{
+                  fontSize: '16px',
+                  lineHeight: '1.7',
+                  color: '#495057',
+                  margin: '0',
+                  fontWeight: '400'
+                }}>
+                  {product.description}
+                </p>
+              </div>
+
+              {/* 상품 하이라이트 포인트 - 버튼 스타일과 일치하는 색상 적용 */}
+              <div className="product-highlights-grid" style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '12px',
+                marginTop: '16px'
+              }}>
+                {/* 찜하기 버튼 색상 (#ec4899) 적용 */}
+                <div className="product-highlight-item" style={{
+                  background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  border: '2px solid #ec4899',
+                  transition: 'all 0.3s ease',
+                  cursor: 'default'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(236, 72, 153, 0.3)';
+                  e.currentTarget.style.backgroundColor = '#fdf2f8';
+                  e.currentTarget.style.borderColor = '#db2777';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.borderColor = '#ec4899';
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(236, 72, 153, 0.3)'
+                    }}>
+                      <svg width="16" height="16" fill="white" viewBox="0 0 24 24">
+                        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                      </svg>
+                    </div>
+                    <span style={{ fontSize: '15px', fontWeight: '600', color: '#ec4899' }}>
+                      품질 보증
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '13px', color: '#6c757d', margin: '0', lineHeight: '1.4' }}>
+                    정품 인증 및 A/S 지원
+                  </p>
+                </div>
+
+                {/* 바로 구매 버튼 색상 (#60a5fa) 적용 */}
+                <div className="product-highlight-item" style={{
+                  background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 100%)',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  border: '2px solid #60a5fa',
+                  transition: 'all 0.3s ease',
+                  cursor: 'default'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(96, 165, 250, 0.3)';
+                  e.currentTarget.style.backgroundColor = '#eff6ff';
+                  e.currentTarget.style.borderColor = '#3b82f6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.borderColor = '#60a5fa';
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(96, 165, 250, 0.3)'
+                    }}>
+                      <svg width="16" height="16" fill="white" viewBox="0 0 24 24">
+                        <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </div>
+                    <span style={{ fontSize: '15px', fontWeight: '600', color: '#3b82f6' }}>
+                      전문 상담
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '13px', color: '#6c757d', margin: '0', lineHeight: '1.4' }}>
+                    골프 전문가 맞춤 추천
+                  </p>
+                </div>
+
+                {/* 장바구니 버튼 색상 (#f87171) 적용 */}
+                <div className="product-highlight-item" style={{
+                  background: 'linear-gradient(135deg, #fef2f2 0%, #ffffff 100%)',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  border: '2px solid #f87171',
+                  transition: 'all 0.3s ease',
+                  cursor: 'default'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(248, 113, 113, 0.3)';
+                  e.currentTarget.style.backgroundColor = '#fef2f2';
+                  e.currentTarget.style.borderColor = '#ef4444';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.borderColor = '#f87171';
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      background: 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(248, 113, 113, 0.3)'
+                    }}>
+                      <svg width="16" height="16" fill="white" viewBox="0 0 24 24">
+                        <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"/>
+                      </svg>
+                    </div>
+                    <span style={{ fontSize: '15px', fontWeight: '600', color: '#ef4444' }}>
+                      빠른 배송
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '13px', color: '#6c757d', margin: '0', lineHeight: '1.4' }}>
+                    2-3일 내 신속 배송
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* 상품 사양 */}
+          {/* 상품 사양 - 홈페이지 스타일에 맞게 리디자인 */}
           {Object.keys(product.specifications).length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">상품 사양</h3>
-              <div className="bg-gray-50 p-4 rounded">
-                {Object.entries(product.specifications).map(([key, value]) => (
-                  <div key={key} className="flex justify-between py-1 border-b border-gray-200 last:border-b-0">
-                    <span className="font-medium">{key}</span>
-                    <span>{value}</span>
+            <div className="mb-8">
+              <div className="product-specs-section" style={{
+                background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
+                borderRadius: '12px',
+                padding: '24px',
+                border: '1px solid #e9ecef',
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.05)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                {/* 장식용 그라데이션 배경 - 바로 구매 버튼 색상 적용 */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '4px',
+                  background: 'linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%)'
+                }}></div>
+                
+                {/* 상품 사양 헤더 */}
+                <div className="product-specs-header" style={{
+                  marginBottom: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(96, 165, 250, 0.3)'
+                  }}>
+                    <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
+                      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
                   </div>
-                ))}
+                  <h3 style={{
+                    fontSize: '20px',
+                    fontWeight: '600',
+                    color: '#2c3e50',
+                    margin: '0'
+                  }}>
+                    상품 사양
+                  </h3>
+                </div>
+
+                {/* 사양 목록 */}
+                <div style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '8px',
+                  padding: '20px',
+                  border: '1px solid #f1f2f6',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '24px'
+                  }}>
+                    {Object.entries(product.specifications).map(([key, value], index) => (
+                      <div 
+                        key={key} 
+                        className="spec-item"
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'flex-start',
+                          alignItems: 'center',
+                          gap: '0',
+                          padding: '16px 20px',
+                          margin: '8px 0',
+                          width: '100%',
+                          backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#ffffff',
+                          borderRadius: '8px',
+                          border: '1px solid #e9ecef',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateX(4px)';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(248, 113, 113, 0.2)';
+                          e.currentTarget.style.borderColor = '#f87171';
+                          e.currentTarget.style.backgroundColor = '#fef2f2';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateX(0)';
+                          e.currentTarget.style.boxShadow = 'none';
+                          e.currentTarget.style.borderColor = '#e9ecef';
+                          e.currentTarget.style.backgroundColor = index % 2 === 0 ? '#f8f9fa' : '#ffffff';
+                        }}
+                      >
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#2c3e50'
+                        }}>
+                          • {key}:{value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}

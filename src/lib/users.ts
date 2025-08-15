@@ -1,4 +1,5 @@
 import { 
+  db,
   collection, 
   query, 
   where, 
@@ -8,8 +9,7 @@ import {
   setDoc,
   updateDoc,
   orderBy
-} from 'firebase/firestore';
-import { db } from './firebase';
+} from './firebase';
 import { User } from '@/types';
 
 // 특정 사용자 정보 가져오기
@@ -42,7 +42,7 @@ export async function getAllUsers(): Promise<User[]> {
     const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
     
-    const users = querySnapshot.docs.map(doc => {
+    const users = querySnapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,
@@ -124,7 +124,7 @@ export async function getPendingUsers(): Promise<User[]> {
     );
     const querySnapshot = await getDocs(q);
     
-    const users = querySnapshot.docs.map(doc => {
+    const users = querySnapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,
