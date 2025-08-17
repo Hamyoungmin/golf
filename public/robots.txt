@@ -1,0 +1,20 @@
+# 골프상회 robots.txt
+User-agent: *
+Allow: /
+
+# 주요 페이지
+Allow: /drivers
+Allow: /woods
+Allow: /utilities
+Allow: /wedges
+Allow: /putters
+Allow: /left-handed
+Allow: /womens
+
+# 차단할 페이지
+Disallow: /admin
+Disallow: /api
+Disallow: /setup-admin
+
+# 사이트맵 위치 (추후 도메인 변경 시 업데이트)
+Sitemap: https://golf-sanghoe.com/sitemap.xml

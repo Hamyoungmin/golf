@@ -11,8 +11,8 @@ import { WishlistProvider } from "@/contexts/WishlistContext";
 import { RecentlyViewedProvider } from "@/contexts/RecentlyViewedContext";
 
 export const metadata: Metadata = {
-  title: "팬더골프 PANDAGOLF - 골프상회 도매몰",
-  description: "골프용품 전문 도매몰 팬더골프입니다. 드라이버, 아이언, 퍼터 등 다양한 골프용품을 만나보세요.",
+  title: "골프상회 - 골프용품 전문 도매몰",
+  description: "골프용품 전문 도매몰 골프상회입니다. 드라이버, 아이언, 퍼터 등 다양한 골프용품을 만나보세요.",
 };
 
 export default function RootLayout({

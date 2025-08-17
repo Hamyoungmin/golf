@@ -8,31 +8,27 @@ import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useRecentlyViewed } from '@/contexts/RecentlyViewedContext';
 
-// 드라이버 상품 데이터
-const driverProducts = [
-  { id: 1, name: '캘러웨이 로그 드라이버', price: '140,000원', image: '/d1.jpg', description: '캘러웨이의 최신 로그 드라이버입니다.', stock: 1 },
-  { id: 2, name: 'TR20 9.5도 비자드 43 S', price: '가격문의', image: null, description: 'TR20 고성능 드라이버입니다.', stock: 3 },
-  { id: 3, name: '703리미티드 9.5도 TRPX FLEX SX', price: '가격문의', image: null, description: '703 리미티드 에디션 드라이버입니다.', stock: 2 },
-  { id: 4, name: '703 8.5도 디아마나 7S', price: '가격문의', image: null, description: '703 드라이버 디아마나 샤프트 버전입니다.', stock: 1 },
-  { id: 5, name: 'KING F6 10.5도 5S', price: '가격문의', image: null, description: 'KING F6 고성능 드라이버입니다.', stock: 4 },
-  { id: 6, name: 'RMX216 10.5도 바사라 R', price: '가격문의', image: null, description: 'RMX216 드라이버입니다.', stock: 2 },
-  { id: 7, name: 'Z545 9.5도 RX-45 S', price: '가격문의', image: null, description: 'Z545 드라이버입니다.', stock: 1 },
-  { id: 8, name: '투어B JGR 10.5도 TG2-5 SR', price: '가격문의', image: null, description: '투어B JGR 드라이버입니다.', stock: 3 },
-  { id: 9, name: '투어B XD-3 9.5도 TX1 - 6S', price: '가격문의', image: null, description: '투어B XD-3 드라이버입니다.', stock: 2 },
-  { id: 10, name: 'J 015 9.5도 디아마나 BF 6S', price: '가격문의', image: null, description: 'J 015 드라이버입니다.', stock: 1 },
-  { id: 11, name: '스트롱럭 420 10.5도 래버 아모드 레디 로클롤 6X', price: '가격문의', image: null, description: '스트롱럭 420 드라이버입니다.', stock: 2 },
-  { id: 12, name: '온오프 파워트렌치 10도 60 S', price: '가격문의', image: null, description: '온오프 파워트렌치 드라이버입니다.', stock: 1 },
-  { id: 13, name: 'RMX218 9.5도 디아마나 60 S', price: '가격문의', image: null, description: 'RMX218 드라이버입니다.', stock: 3 },
-  { id: 14, name: 'RS F 10.5도 SR', price: '가격문의', image: null, description: 'RS F 드라이버입니다.', stock: 2 },
-  { id: 15, name: 'TW737 455 9.5도 비자드 S', price: '가격문의', image: null, description: 'TW737 455 드라이버입니다.', stock: 1 },
-  { id: 16, name: 'TW747 460 10.5도 SR', price: '가격문의', image: null, description: 'TW747 460 드라이버입니다.', stock: 4 },
-  { id: 17, name: 'XR16 10.5도 SR', price: '가격문의', image: null, description: 'XR16 드라이버입니다.', stock: 2 },
-  { id: 18, name: 'TOUR B XD-3 9.5도 디아마나BF 6S', price: '가격문의', image: null, description: 'TOUR B XD-3 드라이버입니다.', stock: 1 },
-  { id: 19, name: 'GR 10.5도 SR', price: '가격문의', image: null, description: 'GR 드라이버입니다.', stock: 3 },
-  { id: 20, name: 'ROUGR SUBZERO 10.5도 SR', price: '가격문의', image: null, description: 'ROUGR SUBZERO 드라이버입니다.', stock: 2 }
+// 왼손용 상품 데이터
+const leftHandedProducts = [
+  { 
+    id: 1, 
+    name: 'TaylorMade SIM2 Left 드라이버', 
+    price: '가격문의', 
+    image: null, 
+    description: '테일러메이드의 SIM2 왼손용 드라이버입니다. 왼손잡이 골퍼를 위해 특별히 설계된 고성능 드라이버로, 우수한 비거리와 관용성을 제공합니다.', 
+    stock: 3 
+  },
+  { 
+    id: 2, 
+    name: '캘러웨이 엘리트 10.5도', 
+    price: '600,000원', 
+    image: '/z1.jpg', 
+    description: '캘러웨이의 엘리트 10.5도 왼손용 드라이버입니다. 혁신적인 FLY-RS 기술과 AI 설계로 왼손잡이 골퍼에게 최적화된 성능을 제공합니다. 뛰어난 비거리와 정확성을 동시에 실현하는 프리미엄 왼손용 드라이버입니다.', 
+    stock: 5 
+  }
 ];
 
-export default function DriverProductPage() {
+export default function LeftHandedProductPage() {
   const params = useParams();
   const router = useRouter();
   const productId = Number(params.id);
@@ -43,15 +39,15 @@ export default function DriverProductPage() {
   
   const [quantity, setQuantity] = useState(1);
   
-  // 해당 ID의 드라이버 상품 찾기
-  const product = driverProducts.find(p => p.id === productId);
+  // 해당 ID의 왼손용 상품 찾기
+  const product = leftHandedProducts.find(p => p.id === productId);
   
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">상품을 찾을 수 없습니다</h1>
-          <p className="text-gray-600">요청하신 드라이버 상품이 존재하지 않습니다.</p>
+          <p className="text-gray-600">요청하신 왼손용 상품이 존재하지 않습니다.</p>
         </div>
       </div>
     );
@@ -67,7 +63,6 @@ export default function DriverProductPage() {
   const handleAddToCart = () => {
     if (!user) {
       alert('로그인이 필요합니다.');
-      router.push('/login');
       return;
     }
     
@@ -90,7 +85,6 @@ export default function DriverProductPage() {
   const handleWishlistToggle = () => {
     if (!user) {
       alert('로그인이 필요합니다.');
-      router.push('/login');
       return;
     }
 
@@ -99,7 +93,7 @@ export default function DriverProductPage() {
       name: product.name,
       price: product.price,
       image: product.image,
-      category: '드라이버'
+      category: '왼손용'
     };
 
     if (isInWishlist(product.id.toString())) {
@@ -143,28 +137,29 @@ export default function DriverProductPage() {
             <div className="space-y-4">
               <p className="text-gray-700 leading-relaxed">{product.description}</p>
               
-              <div className="bg-white p-4 rounded border-l-4 border-blue-500">
-                <h4 className="font-semibold text-gray-800 mb-2">성능 특징</h4>
+              <div className="bg-white p-4 rounded border-l-4 border-green-500">
+                <h4 className="font-semibold text-gray-800 mb-2">왼손용 특화 설계</h4>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• 뛰어난 비거리와 정확성</li>
-                  <li>• 높은 관용성으로 미스샷 커버</li>
-                  <li>• 프리미엄 소재 사용</li>
+                  <li>• 왼손잡이 골퍼를 위한 전용 설계</li>
+                  <li>• 최적화된 무게 중심과 밸런스</li>
+                  <li>• 왼쪽 타구 방향에 최적화</li>
+                  <li>• 프리미엄 왼손용 전용 기술</li>
                 </ul>
               </div>
 
-              <div className="bg-blue-50 p-4 rounded-lg mt-6">
+              <div className="bg-green-50 p-4 rounded-lg mt-6">
                 <h4 className="font-semibold text-gray-800 mb-3">추천 골퍼</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                   <div className="text-center p-3 bg-white rounded">
-                    <div className="font-medium text-blue-600">초보자</div>
+                    <div className="font-medium text-green-600">초보자</div>
                     <div className="text-gray-600 mt-1">쉬운 컨트롤</div>
                   </div>
                   <div className="text-center p-3 bg-white rounded">
-                    <div className="font-medium text-blue-600">중급자</div>
+                    <div className="font-medium text-green-600">중급자</div>
                     <div className="text-gray-600 mt-1">안정적 비거리</div>
                   </div>
                   <div className="text-center p-3 bg-white rounded">
-                    <div className="font-medium text-blue-600">상급자</div>
+                    <div className="font-medium text-green-600">상급자</div>
                     <div className="text-gray-600 mt-1">정밀한 샷</div>
                   </div>
                 </div>
@@ -179,11 +174,11 @@ export default function DriverProductPage() {
                   </div>
                   <div className="flex justify-between border-b border-gray-200 pb-1">
                     <span className="text-gray-600">페이스 소재:</span>
-                    <span className="font-medium">고강도 스틸</span>
+                    <span className="font-medium">고강도 카본</span>
                   </div>
                   <div className="flex justify-between border-b border-gray-200 pb-1">
                     <span className="text-gray-600">로프트각:</span>
-                    <span className="font-medium">9도 ~ 12도</span>
+                    <span className="font-medium">10.5도</span>
                   </div>
                   <div className="flex justify-between border-b border-gray-200 pb-1">
                     <span className="text-gray-600">헤드 볼륨:</span>
@@ -191,13 +186,23 @@ export default function DriverProductPage() {
                   </div>
                   <div className="flex justify-between border-b border-gray-200 pb-1">
                     <span className="text-gray-600">클럽 길이:</span>
-                    <span className="font-medium">45인치</span>
+                    <span className="font-medium">45.5인치</span>
                   </div>
                   <div className="flex justify-between border-b border-gray-200 pb-1">
-                    <span className="text-gray-600">그립:</span>
-                    <span className="font-medium">멀티 컴파운드</span>
+                    <span className="text-gray-600">손잡이:</span>
+                    <span className="font-medium">왼손용 전용</span>
                   </div>
                 </div>
+              </div>
+
+              <div className="bg-blue-50 p-4 rounded-lg mt-6">
+                <h4 className="font-semibold text-gray-800 mb-2">왼손용 전용 혜택</h4>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• 왼손잡이 골퍼를 위한 최적화된 설계</li>
+                  <li>• 전문 왼손용 피팅 서비스 제공</li>
+                  <li>• 왼손용 전용 샤프트 옵션</li>
+                  <li>• 왼쪽 타구 방향성 강화 기술</li>
+                </ul>
               </div>
 
               <div className="bg-yellow-50 p-4 rounded-lg mt-6">
@@ -266,16 +271,16 @@ export default function DriverProductPage() {
               </div>
             </div>
 
-            {/* 찜하기 버튼 */}
+            {/* 찜하기 버튼 - 왼손용에 맞게 녹색 색상 사용 */}
             <div style={{ marginBottom: '16px' }}>
               <button
                 onClick={handleWishlistToggle}
                 style={{
                   width: '100%',
                   padding: '12px 24px',
-                  backgroundColor: isInWishlist(product.id.toString()) ? '#ec4899' : 'white',
-                  color: isInWishlist(product.id.toString()) ? 'white' : '#ec4899',
-                  border: `2px solid #ec4899`,
+                  backgroundColor: isInWishlist(product.id.toString()) ? '#10b981' : 'white',
+                  color: isInWishlist(product.id.toString()) ? 'white' : '#10b981',
+                  border: `2px solid #10b981`,
                   borderRadius: '8px',
                   fontSize: '16px',
                   fontWeight: '600',
@@ -289,14 +294,14 @@ export default function DriverProductPage() {
                 }}
                 onMouseEnter={(e) => {
                   if (isInWishlist(product.id.toString())) {
-                    e.currentTarget.style.backgroundColor = '#db2777';
+                    e.currentTarget.style.backgroundColor = '#059669';
                   } else {
-                    e.currentTarget.style.backgroundColor = '#fdf2f8';
+                    e.currentTarget.style.backgroundColor = '#d1fae5';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (isInWishlist(product.id.toString())) {
-                    e.currentTarget.style.backgroundColor = '#ec4899';
+                    e.currentTarget.style.backgroundColor = '#10b981';
                   } else {
                     e.currentTarget.style.backgroundColor = 'white';
                   }
@@ -333,7 +338,6 @@ export default function DriverProductPage() {
                 onClick={() => {
                   if (!user) {
                     alert('로그인이 필요합니다.');
-                    router.push('/login');
                     return;
                   }
                   
@@ -349,7 +353,6 @@ export default function DriverProductPage() {
                   
                   // 상품을 장바구니에 담고 바로 체크아웃으로 이동
                   handleAddToCart();
-                  router.push('/checkout');
                 }}
                 disabled={product.stock === 0 || product.price === '가격문의'}
                 style={{
@@ -423,7 +426,7 @@ export default function DriverProductPage() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">카테고리:</span>
-                <span className="text-gray-800">드라이버</span>
+                <span className="text-gray-800">왼손용</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">상품 ID:</span>

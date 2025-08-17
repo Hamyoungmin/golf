@@ -29,7 +29,7 @@ export default function Drivers() {
       title="드라이버"
       subtitle="| Drivers"
       products={driverProducts}
-      totalCount={113}
+      totalCount={20}
       category="드라이버"
     />
   );

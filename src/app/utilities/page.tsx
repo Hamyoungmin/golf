@@ -1,7 +1,7 @@
 import ProductList from '@/components/ProductList';
 
 const utilityProducts = [
-  { id: 1, name: 'G425 23도 알타 CB 80 S', price: '가격문의', image: null },
+  { id: 1, name: '핑G425 5번 유틸리티', price: '190,000원', image: '/u1.jpg' },
   { id: 2, name: 'SIM MAX 22도 벤타스 TR 7 S', price: '가격문의', image: null },
   { id: 3, name: 'RMX218 24도 NS 950 S', price: '가격문의', image: null },
   { id: 4, name: 'TW747 24도 디아마나 8S', price: '가격문의', image: null },
@@ -29,7 +29,7 @@ export default function Utilities() {
       title="유틸리티"
       subtitle="| Utilities"
       products={utilityProducts}
-      totalCount={62}
+      totalCount={20}
       category="유틸리티"
     />
   );

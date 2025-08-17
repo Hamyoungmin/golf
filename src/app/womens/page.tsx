@@ -1,7 +1,7 @@
 import ProductList from '@/components/ProductList';
 
 const womensProducts = [
-  { id: 1, name: 'XXIO 12 Ladies 드라이버', price: '가격문의', image: null },
+  { id: 1, name: '젝시오 MP1200 11.5도', price: '550,000원', image: '/y1.jpg' },
   { id: 2, name: 'Callaway REVA Ladies 세트', price: '가격문의', image: null },
   { id: 3, name: 'TaylorMade KALEA Ladies 아이언', price: '가격문의', image: null },
   { id: 4, name: 'PING G Le3 Ladies 퍼터', price: '가격문의', image: null },
@@ -19,7 +19,7 @@ export default function Womens() {
       title="여성용"
       subtitle="| Ladies"
       products={womensProducts}
-      totalCount={28}
+      totalCount={10}
       category="여성용"
     />
   );

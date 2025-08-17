@@ -29,7 +29,7 @@ export default function Woods() {
       title="우드"
       subtitle="| Woods"
       products={woodProducts}
-      totalCount={85}
+      totalCount={20}
       category="우드"
     />
   );

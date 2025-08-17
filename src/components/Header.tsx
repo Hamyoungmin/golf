@@ -130,7 +130,7 @@ const Header = () => {
       <div className="container">
         <div className="header-top">
                   <Link href="/" className="logo">
-          골프상회 도매몰
+          골프상회
         </Link>
           <div className="auth-buttons">
             {/* 장바구니 아이콘 */}

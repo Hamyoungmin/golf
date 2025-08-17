@@ -1,7 +1,7 @@
 import ProductList from '@/components/ProductList';
 
 const putterProducts = [
-  { id: 1, name: 'SCOTTY CAMERON Newport 2', price: '가격문의', image: null },
+  { id: 1, name: '퍼터 핑 ANSER2 34인치', price: '130,000원', image: '/p1.jpg' },
   { id: 2, name: 'PING ANSER 2', price: '가격문의', image: null },
   { id: 3, name: 'TaylorMade Spider Tour', price: '가격문의', image: null },
   { id: 4, name: 'Odyssey WHITE HOT OG', price: '가격문의', image: null },
@@ -19,7 +19,7 @@ export default function Putters() {
       title="퍼터"
       subtitle="| Putters"
       products={putterProducts}
-      totalCount={45}
+      totalCount={10}
       category="퍼터"
     />
   );

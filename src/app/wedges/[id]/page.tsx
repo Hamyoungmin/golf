@@ -8,31 +8,38 @@ import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useRecentlyViewed } from '@/contexts/RecentlyViewedContext';
 
-// 드라이버 상품 데이터
-const driverProducts = [
-  { id: 1, name: '캘러웨이 로그 드라이버', price: '140,000원', image: '/d1.jpg', description: '캘러웨이의 최신 로그 드라이버입니다.', stock: 1 },
-  { id: 2, name: 'TR20 9.5도 비자드 43 S', price: '가격문의', image: null, description: 'TR20 고성능 드라이버입니다.', stock: 3 },
-  { id: 3, name: '703리미티드 9.5도 TRPX FLEX SX', price: '가격문의', image: null, description: '703 리미티드 에디션 드라이버입니다.', stock: 2 },
-  { id: 4, name: '703 8.5도 디아마나 7S', price: '가격문의', image: null, description: '703 드라이버 디아마나 샤프트 버전입니다.', stock: 1 },
-  { id: 5, name: 'KING F6 10.5도 5S', price: '가격문의', image: null, description: 'KING F6 고성능 드라이버입니다.', stock: 4 },
-  { id: 6, name: 'RMX216 10.5도 바사라 R', price: '가격문의', image: null, description: 'RMX216 드라이버입니다.', stock: 2 },
-  { id: 7, name: 'Z545 9.5도 RX-45 S', price: '가격문의', image: null, description: 'Z545 드라이버입니다.', stock: 1 },
-  { id: 8, name: '투어B JGR 10.5도 TG2-5 SR', price: '가격문의', image: null, description: '투어B JGR 드라이버입니다.', stock: 3 },
-  { id: 9, name: '투어B XD-3 9.5도 TX1 - 6S', price: '가격문의', image: null, description: '투어B XD-3 드라이버입니다.', stock: 2 },
-  { id: 10, name: 'J 015 9.5도 디아마나 BF 6S', price: '가격문의', image: null, description: 'J 015 드라이버입니다.', stock: 1 },
-  { id: 11, name: '스트롱럭 420 10.5도 래버 아모드 레디 로클롤 6X', price: '가격문의', image: null, description: '스트롱럭 420 드라이버입니다.', stock: 2 },
-  { id: 12, name: '온오프 파워트렌치 10도 60 S', price: '가격문의', image: null, description: '온오프 파워트렌치 드라이버입니다.', stock: 1 },
-  { id: 13, name: 'RMX218 9.5도 디아마나 60 S', price: '가격문의', image: null, description: 'RMX218 드라이버입니다.', stock: 3 },
-  { id: 14, name: 'RS F 10.5도 SR', price: '가격문의', image: null, description: 'RS F 드라이버입니다.', stock: 2 },
-  { id: 15, name: 'TW737 455 9.5도 비자드 S', price: '가격문의', image: null, description: 'TW737 455 드라이버입니다.', stock: 1 },
-  { id: 16, name: 'TW747 460 10.5도 SR', price: '가격문의', image: null, description: 'TW747 460 드라이버입니다.', stock: 4 },
-  { id: 17, name: 'XR16 10.5도 SR', price: '가격문의', image: null, description: 'XR16 드라이버입니다.', stock: 2 },
-  { id: 18, name: 'TOUR B XD-3 9.5도 디아마나BF 6S', price: '가격문의', image: null, description: 'TOUR B XD-3 드라이버입니다.', stock: 1 },
-  { id: 19, name: 'GR 10.5도 SR', price: '가격문의', image: null, description: 'GR 드라이버입니다.', stock: 3 },
-  { id: 20, name: 'ROUGR SUBZERO 10.5도 SR', price: '가격문의', image: null, description: 'ROUGR SUBZERO 드라이버입니다.', stock: 2 }
+// 웨지 상품 데이터
+const wedgeProducts = [
+  { 
+    id: 1, 
+    name: '웨지 클리브랜드 RTX6 56도', 
+    price: '120,000원', 
+    image: '/w.jpg', 
+    description: '클리브랜드의 RTX6 56도 웨지입니다. 혁신적인 ZipCore 기술과 진화된 그루브 디자인으로 탁월한 스핀과 컨트롤을 제공합니다. 다양한 샷 상황에서 뛰어난 성능을 발휘하는 프리미엄 웨지입니다.', 
+    stock: 7 
+  },
+  { id: 2, name: 'SM8 56도 14 DG S200', price: '가격문의', image: null, description: 'SM8 56도 웨지입니다.', stock: 2 },
+  { id: 3, name: 'RTX4 60도 9 NS 950 S', price: '가격문의', image: null, description: 'RTX4 60도 웨지입니다.', stock: 1 },
+  { id: 4, name: 'JAWS RAW 58도 12 KBS Hi-Rev 2.0', price: '가격문의', image: null, description: 'JAWS RAW 58도 웨지입니다.', stock: 4 },
+  { id: 5, name: 'CBX 50도 8 DG S300', price: '가격문의', image: null, description: 'CBX 50도 웨지입니다.', stock: 2 },
+  { id: 6, name: 'SM7 54도 12 DG S300', price: '가격문의', image: null, description: 'SM7 54도 웨지입니다.', stock: 1 },
+  { id: 7, name: 'RTX ZIPCORE 56도 14 NS 950 S', price: '가격문의', image: null, description: 'RTX ZIPCORE 웨지입니다.', stock: 3 },
+  { id: 8, name: 'GLIDE 3.0 58도 10 DG S200', price: '가격문의', image: null, description: 'GLIDE 3.0 웨지입니다.', stock: 2 },
+  { id: 9, name: 'SM8 60도 8 DG X100', price: '가격문의', image: null, description: 'SM8 60도 웨지입니다.', stock: 1 },
+  { id: 10, name: 'JAWS MD5 52도 12 KBS Hi-Rev', price: '가격문의', image: null, description: 'JAWS MD5 웨지입니다.', stock: 3 },
+  { id: 11, name: 'RTX4 54도 10 NS 950 S', price: '가격문의', image: null, description: 'RTX4 54도 웨지입니다.', stock: 1 },
+  { id: 12, name: 'SM9 58도 12 DG S400', price: '가격문의', image: null, description: 'SM9 58도 웨지입니다.', stock: 2 },
+  { id: 13, name: 'CBX2 56도 14 DG AMT', price: '가격문의', image: null, description: 'CBX2 웨지입니다.', stock: 4 },
+  { id: 14, name: 'GLIDE 2.0 60도 12 KBS 120', price: '가격문의', image: null, description: 'GLIDE 2.0 웨지입니다.', stock: 2 },
+  { id: 15, name: 'RTX ZIPCORE 50도 8 DG S300', price: '가격문의', image: null, description: 'RTX ZIPCORE 50도 웨지입니다.', stock: 1 },
+  { id: 16, name: 'SM7 60도 10 DG S200', price: '가격문의', image: null, description: 'SM7 60도 웨지입니다.', stock: 3 },
+  { id: 17, name: 'JAWS RAW 54도 14 NS 950', price: '가격문의', image: null, description: 'JAWS RAW 54도 웨지입니다.', stock: 2 },
+  { id: 18, name: 'CBX 58도 12 DG S400', price: '가격문의', image: null, description: 'CBX 58도 웨지입니다.', stock: 1 },
+  { id: 19, name: 'SM8 50도 12 DG S300', price: '가격문의', image: null, description: 'SM8 50도 웨지입니다.', stock: 4 },
+  { id: 20, name: 'RTX4 58도 8 KBS Hi-Rev', price: '가격문의', image: null, description: 'RTX4 58도 웨지입니다.', stock: 3 }
 ];
 
-export default function DriverProductPage() {
+export default function WedgeProductPage() {
   const params = useParams();
   const router = useRouter();
   const productId = Number(params.id);
@@ -43,15 +50,15 @@ export default function DriverProductPage() {
   
   const [quantity, setQuantity] = useState(1);
   
-  // 해당 ID의 드라이버 상품 찾기
-  const product = driverProducts.find(p => p.id === productId);
+  // 해당 ID의 웨지 상품 찾기
+  const product = wedgeProducts.find(p => p.id === productId);
   
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">상품을 찾을 수 없습니다</h1>
-          <p className="text-gray-600">요청하신 드라이버 상품이 존재하지 않습니다.</p>
+          <p className="text-gray-600">요청하신 웨지 상품이 존재하지 않습니다.</p>
         </div>
       </div>
     );
@@ -67,7 +74,6 @@ export default function DriverProductPage() {
   const handleAddToCart = () => {
     if (!user) {
       alert('로그인이 필요합니다.');
-      router.push('/login');
       return;
     }
     
@@ -90,7 +96,6 @@ export default function DriverProductPage() {
   const handleWishlistToggle = () => {
     if (!user) {
       alert('로그인이 필요합니다.');
-      router.push('/login');
       return;
     }
 
@@ -99,7 +104,7 @@ export default function DriverProductPage() {
       name: product.name,
       price: product.price,
       image: product.image,
-      category: '드라이버'
+      category: '웨지'
     };
 
     if (isInWishlist(product.id.toString())) {
@@ -146,9 +151,10 @@ export default function DriverProductPage() {
               <div className="bg-white p-4 rounded border-l-4 border-blue-500">
                 <h4 className="font-semibold text-gray-800 mb-2">성능 특징</h4>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• 뛰어난 비거리와 정확성</li>
-                  <li>• 높은 관용성으로 미스샷 커버</li>
-                  <li>• 프리미엄 소재 사용</li>
+                  <li>• 뛰어난 스핀 컨트롤과 정확성</li>
+                  <li>• 혁신적인 그루브 기술</li>
+                  <li>• 다양한 샷 상황에 최적화</li>
+                  <li>• 프리미엄 소재와 마감</li>
                 </ul>
               </div>
 
@@ -157,15 +163,15 @@ export default function DriverProductPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                   <div className="text-center p-3 bg-white rounded">
                     <div className="font-medium text-blue-600">초보자</div>
-                    <div className="text-gray-600 mt-1">쉬운 컨트롤</div>
+                    <div className="text-gray-600 mt-1">관용성 높은 샷</div>
                   </div>
                   <div className="text-center p-3 bg-white rounded">
                     <div className="font-medium text-blue-600">중급자</div>
-                    <div className="text-gray-600 mt-1">안정적 비거리</div>
+                    <div className="text-gray-600 mt-1">정확한 어프로치</div>
                   </div>
                   <div className="text-center p-3 bg-white rounded">
                     <div className="font-medium text-blue-600">상급자</div>
-                    <div className="text-gray-600 mt-1">정밀한 샷</div>
+                    <div className="text-gray-600 mt-1">다양한 샷 메이킹</div>
                   </div>
                 </div>
               </div>
@@ -175,27 +181,27 @@ export default function DriverProductPage() {
                 <div className="grid grid-cols-2 gap-y-2 text-sm">
                   <div className="flex justify-between border-b border-gray-200 pb-1">
                     <span className="text-gray-600">헤드 소재:</span>
-                    <span className="font-medium">티타늄</span>
+                    <span className="font-medium">연철 단조</span>
                   </div>
                   <div className="flex justify-between border-b border-gray-200 pb-1">
                     <span className="text-gray-600">페이스 소재:</span>
-                    <span className="font-medium">고강도 스틸</span>
+                    <span className="font-medium">밀드 페이스</span>
                   </div>
                   <div className="flex justify-between border-b border-gray-200 pb-1">
                     <span className="text-gray-600">로프트각:</span>
-                    <span className="font-medium">9도 ~ 12도</span>
+                    <span className="font-medium">56도</span>
                   </div>
                   <div className="flex justify-between border-b border-gray-200 pb-1">
-                    <span className="text-gray-600">헤드 볼륨:</span>
-                    <span className="font-medium">460cc</span>
+                    <span className="text-gray-600">바운스:</span>
+                    <span className="font-medium">14도</span>
                   </div>
                   <div className="flex justify-between border-b border-gray-200 pb-1">
                     <span className="text-gray-600">클럽 길이:</span>
-                    <span className="font-medium">45인치</span>
+                    <span className="font-medium">35.25인치</span>
                   </div>
                   <div className="flex justify-between border-b border-gray-200 pb-1">
                     <span className="text-gray-600">그립:</span>
-                    <span className="font-medium">멀티 컴파운드</span>
+                    <span className="font-medium">Golf Pride Tour Velvet</span>
                   </div>
                 </div>
               </div>
@@ -333,7 +339,6 @@ export default function DriverProductPage() {
                 onClick={() => {
                   if (!user) {
                     alert('로그인이 필요합니다.');
-                    router.push('/login');
                     return;
                   }
                   
@@ -349,7 +354,6 @@ export default function DriverProductPage() {
                   
                   // 상품을 장바구니에 담고 바로 체크아웃으로 이동
                   handleAddToCart();
-                  router.push('/checkout');
                 }}
                 disabled={product.stock === 0 || product.price === '가격문의'}
                 style={{
@@ -423,7 +427,7 @@ export default function DriverProductPage() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">카테고리:</span>
-                <span className="text-gray-800">드라이버</span>
+                <span className="text-gray-800">웨지</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">상품 ID:</span>

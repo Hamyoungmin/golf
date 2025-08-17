@@ -1,7 +1,7 @@
 import ProductList from '@/components/ProductList';
 
 const wedgeProducts = [
-  { id: 1, name: 'SM9 52도 10 DG S400', price: '가격문의', image: null },
+  { id: 1, name: '웨지 클리브랜드 RTX6 56도', price: '120,000원', image: '/w.jpg' },
   { id: 2, name: 'SM8 56도 14 DG S200', price: '가격문의', image: null },
   { id: 3, name: 'RTX4 60도 9 NS 950 S', price: '가격문의', image: null },
   { id: 4, name: 'JAWS RAW 58도 12 KBS Hi-Rev 2.0', price: '가격문의', image: null },
@@ -29,7 +29,7 @@ export default function Wedges() {
       title="웨지"
       subtitle="| Wedges"
       products={wedgeProducts}
-      totalCount={78}
+      totalCount={20}
       category="웨지"
     />
   );
