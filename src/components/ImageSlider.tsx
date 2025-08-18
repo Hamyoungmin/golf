@@ -71,13 +71,13 @@ const ImageSlider = () => {
                 <Image 
                   src={image.url} 
                   alt={image.title}
-                  width={400}
-                  height={200}
+                  width={600}
+                  height={300}
                   style={{
                     objectFit: 'contain',
                     filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                    maxWidth: '70%',
-                    maxHeight: '60%'
+                    maxWidth: '90%',
+                    maxHeight: '80%'
                   }}
                   priority={index === 0}
                 />
