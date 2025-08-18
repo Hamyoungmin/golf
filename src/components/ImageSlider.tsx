@@ -57,31 +57,18 @@ const ImageSlider = () => {
         <div className="slider-wrapper">
           {golfImages.map((image, index) => (
             <div key={index} className={`slide ${index === currentSlide ? 'active' : ''}`}>
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <Image 
-                  src={image.url} 
-                  alt={image.title}
-                  width={600}
-                  height={300}
-                  style={{
-                    objectFit: 'contain',
-                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                    maxWidth: '90%',
-                    maxHeight: '80%'
-                  }}
-                  priority={index === 0}
-                />
-              </div>
+              <Image 
+                src={image.url} 
+                alt={image.title}
+                fill
+                style={{
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                  background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                  padding: '40px'
+                }}
+                priority={index === 0}
+              />
               <div className="slide-overlay">
                 <h3 className="slide-title">{image.title}</h3>
               </div>
