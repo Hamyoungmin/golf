@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { updateUserProfile } from '@/lib/users';
 import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 
 export default function SetupAdminPage() {
   const { user, userData } = useAuth();
@@ -34,81 +35,355 @@ export default function SetupAdminPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            관리자 설정
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            초기 관리자 설정 페이지입니다. 
-            <br />
-            보안을 위해 설정 후 이 페이지를 삭제하세요.
-          </p>
-        </div>
-        
-        <div className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow">
-          {user ? (
-            <>
-              <div>
-                <p className="text-sm text-gray-600">현재 로그인한 계정:</p>
-                <p className="font-medium">{user.email}</p>
-                {userData?.role === 'admin' && (
-                  <p className="text-green-600 text-sm mt-2">✓ 이미 관리자입니다</p>
-                )}
-              </div>
+    <div className="container" style={{ maxWidth: '900px', margin: '50px auto', padding: '20px' }}>
+      <div style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '8px', 
+        padding: '30px',
+        backgroundColor: '#fff'
+      }}>
+        <h1 style={{ 
+          textAlign: 'center', 
+          marginBottom: '30px',
+          fontSize: '24px',
+          fontWeight: 'bold'
+        }}>
+          관리자 설정
+        </h1>
 
-              {userData?.role !== 'admin' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
+        {/* 안내 메시지 */}
+        <div style={{ marginBottom: '25px' }}>
+          <div style={{
+            padding: '15px',
+            backgroundColor: '#f9f9f9',
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+            textAlign: 'center'
+          }}>
+            <p style={{ 
+              fontSize: '14px', 
+              color: '#666', 
+              marginBottom: '5px' 
+            }}>
+              초기 관리자 설정 페이지입니다.
+            </p>
+            <p style={{ 
+              fontSize: '12px', 
+              color: '#d32f2f' 
+            }}>
+              ⚠️ 보안을 위해 설정 후 이 페이지를 삭제하세요.
+            </p>
+          </div>
+        </div>
+
+        {user ? (
+          <>
+            {/* 현재 계정 정보 */}
+            <div style={{ marginBottom: '25px' }}>
+              <h3 style={{ 
+                fontWeight: 'bold', 
+                marginBottom: '15px',
+                fontSize: '18px',
+                borderBottom: '1px solid #e0e0e0',
+                paddingBottom: '8px'
+              }}>
+                현재 로그인 계정
+              </h3>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+                <div>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '5px',
+                    fontWeight: '500',
+                    fontSize: '14px'
+                  }}>
+                    이메일
+                  </label>
+                  <div style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    backgroundColor: '#f5f5f5',
+                    fontSize: '14px'
+                  }}>
+                    {user.email}
+                  </div>
+                </div>
+                
+                <div>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '5px',
+                    fontWeight: '500',
+                    fontSize: '14px'
+                  }}>
+                    현재 권한
+                  </label>
+                  <div style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    backgroundColor: userData?.role === 'admin' ? '#e8f5e8' : '#f5f5f5',
+                    fontSize: '14px',
+                    color: userData?.role === 'admin' ? '#2e7d32' : '#333'
+                  }}>
+                    {userData?.role === 'admin' ? '✓ 관리자' : '일반 사용자'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {userData?.role !== 'admin' ? (
+              <>
+                {/* 관리자 설정 */}
+                <div style={{ marginBottom: '25px' }}>
+                  <h3 style={{ 
+                    fontWeight: 'bold', 
+                    marginBottom: '15px',
+                    fontSize: '18px',
+                    borderBottom: '1px solid #e0e0e0',
+                    paddingBottom: '8px'
+                  }}>
+                    관리자 권한 부여
+                  </h3>
+                  
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ 
+                      display: 'block', 
+                      marginBottom: '5px',
+                      fontWeight: '500',
+                      fontSize: '14px'
+                    }}>
                       확인을 위해 이메일을 다시 입력하세요
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                       placeholder="your@email.com"
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        fontSize: '14px'
+                      }}
                     />
                   </div>
 
-                  <button
-                    onClick={makeAdmin}
-                    disabled={loading}
-                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-                  >
-                    {loading ? '처리 중...' : '관리자로 설정'}
-                  </button>
-                </>
-              )}
-
-              {userData?.role === 'admin' && (
-                <div className="space-y-4">
-                  <a
-                    href="/admin"
-                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
-                  >
-                    관리자 페이지로 이동
-                  </a>
-                  <p className="text-xs text-red-600 text-center">
-                    ⚠️ 주의: 이 페이지(/setup-admin)는 보안을 위해 삭제해주세요
-                  </p>
+                  <div style={{ textAlign: 'center' }}>
+                    <button
+                      onClick={makeAdmin}
+                      disabled={loading}
+                      style={{
+                        padding: '10px 20px',
+                        backgroundColor: loading ? '#ccc' : '#007bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: loading ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {loading ? '처리 중...' : '관리자로 설정'}
+                    </button>
+                  </div>
                 </div>
-              )}
-            </>
-          ) : (
-            <div>
-              <p className="text-center text-gray-600">먼저 로그인해주세요.</p>
-              <a
+              </>
+            ) : (
+              <>
+                {/* 관리자 액세스 */}
+                <div style={{ marginBottom: '25px' }}>
+                  <h3 style={{ 
+                    fontWeight: 'bold', 
+                    marginBottom: '15px',
+                    fontSize: '18px',
+                    borderBottom: '1px solid #e0e0e0',
+                    paddingBottom: '8px'
+                  }}>
+                    관리자 메뉴
+                  </h3>
+                  
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(3, 1fr)', 
+                    gap: '10px',
+                    marginBottom: '15px'
+                  }}>
+                    <Link 
+                      href="/admin"
+                      style={{
+                        display: 'block',
+                        padding: '12px 8px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        textAlign: 'center',
+                        textDecoration: 'none',
+                        color: '#333',
+                        backgroundColor: '#f9f9f9',
+                        fontSize: '13px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      📊 대시보드
+                    </Link>
+
+                    <Link 
+                      href="/admin/products"
+                      style={{
+                        display: 'block',
+                        padding: '12px 8px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        textAlign: 'center',
+                        textDecoration: 'none',
+                        color: '#333',
+                        backgroundColor: '#f9f9f9',
+                        fontSize: '13px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      📦 상품관리
+                    </Link>
+
+                    <Link 
+                      href="/admin/orders"
+                      style={{
+                        display: 'block',
+                        padding: '12px 8px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        textAlign: 'center',
+                        textDecoration: 'none',
+                        color: '#333',
+                        backgroundColor: '#f9f9f9',
+                        fontSize: '13px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      🛍️ 주문관리
+                    </Link>
+
+                    <Link 
+                      href="/admin/payments"
+                      style={{
+                        display: 'block',
+                        padding: '12px 8px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        textAlign: 'center',
+                        textDecoration: 'none',
+                        color: '#333',
+                        backgroundColor: '#f9f9f9',
+                        fontSize: '13px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      💰 결제관리
+                    </Link>
+
+                    <Link 
+                      href="/admin/users"
+                      style={{
+                        display: 'block',
+                        padding: '12px 8px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        textAlign: 'center',
+                        textDecoration: 'none',
+                        color: '#333',
+                        backgroundColor: '#f9f9f9',
+                        fontSize: '13px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      👥 사용자관리
+                    </Link>
+
+                    <Link 
+                      href="/"
+                      style={{
+                        display: 'block',
+                        padding: '12px 8px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        textAlign: 'center',
+                        textDecoration: 'none',
+                        color: '#333',
+                        backgroundColor: '#f9f9f9',
+                        fontSize: '13px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      🏠 홈페이지
+                    </Link>
+                  </div>
+
+                  <div style={{ textAlign: 'center' }}>
+                    <Link
+                      href="/admin"
+                      style={{
+                        display: 'inline-block',
+                        padding: '10px 20px',
+                        backgroundColor: '#28a745',
+                        color: 'white',
+                        textDecoration: 'none',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      관리자 페이지로 이동
+                    </Link>
+                  </div>
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <div style={{ marginBottom: '25px' }}>
+            <h3 style={{ 
+              fontWeight: 'bold', 
+              marginBottom: '15px',
+              fontSize: '18px',
+              borderBottom: '1px solid #e0e0e0',
+              paddingBottom: '8px'
+            }}>
+              로그인 필요
+            </h3>
+            
+            <div style={{ 
+              textAlign: 'center', 
+              padding: '40px 20px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              backgroundColor: '#f9f9f9',
+              color: '#666'
+            }}>
+              <p style={{ marginBottom: '15px', fontSize: '16px' }}>먼저 로그인해주세요.</p>
+              <Link 
                 href="/login"
-                className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                style={{
+                  display: 'inline-block',
+                  padding: '10px 20px',
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  textDecoration: 'none',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
               >
                 로그인 페이지로 이동
-              </a>
+              </Link>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
