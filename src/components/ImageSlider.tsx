@@ -62,8 +62,10 @@ const ImageSlider = () => {
                 alt={image.title}
                 fill
                 style={{
-                  objectFit: 'cover',
-                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
+                  objectFit: image.url === '/bridgestone-logo.jpg' ? 'cover' : 'contain',
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                  background: image.url === '/bridgestone-logo.jpg' ? 'transparent' : 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                  padding: image.url === '/bridgestone-logo.jpg' ? '0' : '40px'
                 }}
                 priority={index === 0}
               />
