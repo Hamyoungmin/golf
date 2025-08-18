@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { updateUserProfile } from '@/lib/users';
+import { updateUserProfile, grantAdminRole } from '@/lib/users';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 
@@ -9,6 +9,8 @@ export default function SetupAdminPage() {
   const { user, userData } = useAuth();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [otherUserEmail, setOtherUserEmail] = useState('');
+  const [grantLoading, setGrantLoading] = useState(false);
 
   const makeAdmin = async () => {
     if (!email) {
@@ -31,6 +33,27 @@ export default function SetupAdminPage() {
       alert('관리자 설정에 실패했습니다.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const grantAdminToOtherUser = async () => {
+    if (!otherUserEmail) {
+      alert('이메일을 입력해주세요.');
+      return;
+    }
+
+    setGrantLoading(true);
+    try {
+      const result = await grantAdminRole(otherUserEmail);
+      alert(result.message);
+      if (result.success) {
+        setOtherUserEmail('');
+      }
+    } catch (error) {
+      console.error('관리자 권한 부여 실패:', error);
+      alert('관리자 권한 부여에 실패했습니다.');
+    } finally {
+      setGrantLoading(false);
     }
   };
 
@@ -339,6 +362,62 @@ export default function SetupAdminPage() {
                     >
                       관리자 페이지로 이동
                     </Link>
+                  </div>
+                </div>
+
+                {/* 다른 사용자에게 관리자 권한 부여 */}
+                <div style={{ marginBottom: '25px' }}>
+                  <h3 style={{ 
+                    fontWeight: 'bold', 
+                    marginBottom: '15px',
+                    fontSize: '18px',
+                    borderBottom: '1px solid #e0e0e0',
+                    paddingBottom: '8px'
+                  }}>
+                    다른 사용자에게 관리자 권한 부여
+                  </h3>
+                  
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ 
+                      display: 'block', 
+                      marginBottom: '5px',
+                      fontWeight: '500',
+                      fontSize: '14px'
+                    }}>
+                      관리자로 지정할 사용자의 이메일
+                    </label>
+                    <input
+                      type="email"
+                      value={otherUserEmail}
+                      onChange={(e) => setOtherUserEmail(e.target.value)}
+                      placeholder="예: dudals7334@naver.com"
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ textAlign: 'center' }}>
+                    <button
+                      onClick={grantAdminToOtherUser}
+                      disabled={grantLoading}
+                      style={{
+                        padding: '10px 20px',
+                        backgroundColor: grantLoading ? '#ccc' : '#28a745',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: grantLoading ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {grantLoading ? '처리 중...' : '관리자 권한 부여'}
+                    </button>
                   </div>
                 </div>
               </>

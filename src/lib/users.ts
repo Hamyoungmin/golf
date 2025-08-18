@@ -158,3 +158,61 @@ export async function updateUserProfile(userId: string, profileData: Partial<Use
     return false;
   }
 }
+
+// 이메일로 사용자 찾기
+export async function getUserByEmail(email: string): Promise<User | null> {
+  try {
+    const q = query(collection(db, 'users'), where('email', '==', email));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      return null;
+    }
+
+    const doc = querySnapshot.docs[0];
+    const data = doc.data();
+    return {
+      ...data,
+      uid: doc.id,
+      createdAt: data.createdAt?.toDate() || new Date(),
+      updatedAt: data.updatedAt?.toDate() || new Date(),
+      approvedAt: data.approvedAt?.toDate(),
+    } as User;
+  } catch (error) {
+    console.error('이메일로 사용자 찾기 오류:', error);
+    return null;
+  }
+}
+
+// 관리자 권한 부여
+export async function grantAdminRole(email: string): Promise<{ success: boolean; message: string }> {
+  try {
+    // 1. 이메일로 사용자 찾기
+    const user = await getUserByEmail(email);
+    
+    if (!user) {
+      return { success: false, message: '해당 이메일의 사용자를 찾을 수 없습니다.' };
+    }
+
+    // 2. 이미 관리자인지 확인
+    if (user.role === 'admin') {
+      return { success: false, message: '이미 관리자 권한을 가진 사용자입니다.' };
+    }
+
+    // 3. 관리자 권한 부여
+    const updateResult = await updateUserProfile(user.uid, {
+      role: 'admin',
+      isAdmin: true,
+      status: 'approved' // 관리자는 자동으로 승인 상태로 변경
+    });
+
+    if (updateResult) {
+      return { success: true, message: `${email} 계정에 관리자 권한이 부여되었습니다.` };
+    } else {
+      return { success: false, message: '관리자 권한 부여 중 오류가 발생했습니다.' };
+    }
+  } catch (error) {
+    console.error('관리자 권한 부여 오류:', error);
+    return { success: false, message: '관리자 권한 부여 중 오류가 발생했습니다.' };
+  }
+}
