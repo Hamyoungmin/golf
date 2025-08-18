@@ -1,4 +1,4 @@
-  'use client';
+'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -43,6 +43,7 @@ const ProductCard = ({ product, category }: ProductCardProps) => {
       case '키즈':
       case 'kids':
         return 'kids';
+      case '왼손용':
       case '좌타용':
       case 'left-handed':
         return 'left-handed';

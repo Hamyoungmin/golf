@@ -3,14 +3,14 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-content">
         <div className="footer-section">
-          <h3>골프 상회</h3>
+          <h3>골프상회</h3>
           <div className="footer-info-grid">
             <div className="footer-row">
               <span><strong>법인명</strong> 골프상회</span>
               <span><strong>대표</strong> 권혁규</span>
-              <span><strong>주소</strong> 서울특별시 종로구 청계천로 100</span>
-              <span><strong>사업자번호</strong> 000-00-00000</span>
-              <span><strong>통신판매업신고번호</strong> 서울</span>
+                             <span><strong>주소</strong> 경기도 수원시 권선구 세지로28번길 15-30 104호</span>
+              <span><strong>사업자번호</strong> 740-47-00888</span>
+                             <span><strong>통신판매업</strong> 제 2023-화성봉담-0314호</span>
             </div>
             <div className="footer-row">
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

@@ -331,7 +331,7 @@ export default function ProfilePage() {
               type="text"
               value={formData.businessNumber}
               onChange={(e) => handleFormChange('businessNumber', e.target.value)}
-              placeholder="000-00-00000"
+              placeholder="740-47-00888"
               required
               style={{
                 width: '100%',

@@ -326,7 +326,7 @@ export default function Register() {
               name="businessNumber"
               value={formData.businessNumber}
               onChange={handleChange}
-              placeholder="000-00-00000"
+              placeholder="740-47-00888"
               required
               style={{
                 width: '100%',

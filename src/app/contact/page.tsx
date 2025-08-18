@@ -139,8 +139,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold mb-1">전화 문의</h3>
-                  <p className="text-gray-600 text-sm mb-2">평일 09:00 - 18:00<br />토요일 09:00 - 13:00</p>
-                  <p className="font-medium">02-1234-5678</p>
+                  <p className="text-gray-600 text-sm mb-2">24시간 연중무휴</p>
+                  <p className="font-medium">010-7236-8400</p>
                 </div>
               </div>
 
@@ -155,7 +155,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold mb-1">이메일 문의</h3>
                   <p className="text-gray-600 text-sm mb-2">24시간 접수 가능</p>
-                  <p className="font-medium">support@pandagolf.co.kr</p>
+                  <p className="font-medium">crover.kk@gmail.com</p>
                 </div>
               </div>
 
@@ -170,8 +170,8 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold mb-1">오시는 길</h3>
                   <p className="text-gray-600 text-sm">
-                    서울시 강남구 테헤란로 123<br />
-                    골프타워 5층 팬더골프
+                    경기도 수원시 권선구 세지로28번길 15-30 104호<br />
+                    골프상회
                   </p>
                 </div>
               </div>

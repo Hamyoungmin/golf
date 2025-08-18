@@ -12,20 +12,21 @@ import { useRecentlyViewed } from '@/contexts/RecentlyViewedContext';
 const leftHandedProducts = [
   { 
     id: 1, 
-    name: 'TaylorMade SIM2 Left 드라이버', 
-    price: '가격문의', 
-    image: null, 
-    description: '테일러메이드의 SIM2 왼손용 드라이버입니다. 왼손잡이 골퍼를 위해 특별히 설계된 고성능 드라이버로, 우수한 비거리와 관용성을 제공합니다.', 
-    stock: 3 
-  },
-  { 
-    id: 2, 
     name: '캘러웨이 엘리트 10.5도', 
     price: '600,000원', 
     image: '/z1.jpg', 
     description: '캘러웨이의 엘리트 10.5도 왼손용 드라이버입니다. 혁신적인 FLY-RS 기술과 AI 설계로 왼손잡이 골퍼에게 최적화된 성능을 제공합니다. 뛰어난 비거리와 정확성을 동시에 실현하는 프리미엄 왼손용 드라이버입니다.', 
     stock: 5 
-  }
+  },
+  { id: 2, name: '왼손용 드라이버 LH-002', price: '가격문의', image: null, description: '왼손용 드라이버 LH-002입니다.', stock: 0 },
+  { id: 3, name: '왼손용 페어웨이우드 LH-003', price: '가격문의', image: null, description: '왼손용 페어웨이우드 LH-003입니다.', stock: 0 },
+  { id: 4, name: '왼손용 아이언세트 LH-004', price: '가격문의', image: null, description: '왼손용 아이언세트 LH-004입니다.', stock: 0 },
+  { id: 5, name: '왼손용 웨지 LH-005', price: '가격문의', image: null, description: '왼손용 웨지 LH-005입니다.', stock: 0 },
+  { id: 6, name: '왼손용 퍼터 LH-006', price: '가격문의', image: null, description: '왼손용 퍼터 LH-006입니다.', stock: 0 },
+  { id: 7, name: '왼손용 하이브리드 LH-007', price: '가격문의', image: null, description: '왼손용 하이브리드 LH-007입니다.', stock: 0 },
+  { id: 8, name: '왼손용 유틸리티 LH-008', price: '가격문의', image: null, description: '왼손용 유틸리티 LH-008입니다.', stock: 0 },
+  { id: 9, name: '왼손용 샌드웨지 LH-009', price: '가격문의', image: null, description: '왼손용 샌드웨지 LH-009입니다.', stock: 0 },
+  { id: 10, name: '왼손용 칩퍼 LH-010', price: '가격문의', image: null, description: '왼손용 칩퍼 LH-010입니다.', stock: 0 }
 ];
 
 export default function LeftHandedProductPage() {
@@ -137,7 +138,7 @@ export default function LeftHandedProductPage() {
             <div className="space-y-4">
               <p className="text-gray-700 leading-relaxed">{product.description}</p>
               
-              <div className="bg-white p-4 rounded border-l-4 border-green-500">
+              <div className="bg-white p-4 rounded border-l-4 border-blue-500">
                 <h4 className="font-semibold text-gray-800 mb-2">왼손용 특화 설계</h4>
                 <ul className="text-sm text-gray-600 space-y-1">
                   <li>• 왼손잡이 골퍼를 위한 전용 설계</li>
@@ -147,19 +148,19 @@ export default function LeftHandedProductPage() {
                 </ul>
               </div>
 
-              <div className="bg-green-50 p-4 rounded-lg mt-6">
+              <div className="bg-blue-50 p-4 rounded-lg mt-6">
                 <h4 className="font-semibold text-gray-800 mb-3">추천 골퍼</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                   <div className="text-center p-3 bg-white rounded">
-                    <div className="font-medium text-green-600">초보자</div>
+                    <div className="font-medium text-blue-600">초보자</div>
                     <div className="text-gray-600 mt-1">쉬운 컨트롤</div>
                   </div>
                   <div className="text-center p-3 bg-white rounded">
-                    <div className="font-medium text-green-600">중급자</div>
+                    <div className="font-medium text-blue-600">중급자</div>
                     <div className="text-gray-600 mt-1">안정적 비거리</div>
                   </div>
                   <div className="text-center p-3 bg-white rounded">
-                    <div className="font-medium text-green-600">상급자</div>
+                    <div className="font-medium text-blue-600">상급자</div>
                     <div className="text-gray-600 mt-1">정밀한 샷</div>
                   </div>
                 </div>
@@ -271,16 +272,16 @@ export default function LeftHandedProductPage() {
               </div>
             </div>
 
-            {/* 찜하기 버튼 - 왼손용에 맞게 녹색 색상 사용 */}
+            {/* 찜하기 버튼 */}
             <div style={{ marginBottom: '16px' }}>
               <button
                 onClick={handleWishlistToggle}
                 style={{
                   width: '100%',
                   padding: '12px 24px',
-                  backgroundColor: isInWishlist(product.id.toString()) ? '#10b981' : 'white',
-                  color: isInWishlist(product.id.toString()) ? 'white' : '#10b981',
-                  border: `2px solid #10b981`,
+                  backgroundColor: isInWishlist(product.id.toString()) ? '#ec4899' : 'white',
+                  color: isInWishlist(product.id.toString()) ? 'white' : '#ec4899',
+                  border: `2px solid #ec4899`,
                   borderRadius: '8px',
                   fontSize: '16px',
                   fontWeight: '600',
@@ -292,27 +293,11 @@ export default function LeftHandedProductPage() {
                   justifyContent: 'center',
                   gap: '8px'
                 }}
-                onMouseEnter={(e) => {
-                  if (isInWishlist(product.id.toString())) {
-                    e.currentTarget.style.backgroundColor = '#059669';
-                  } else {
-                    e.currentTarget.style.backgroundColor = '#d1fae5';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (isInWishlist(product.id.toString())) {
-                    e.currentTarget.style.backgroundColor = '#10b981';
-                  } else {
-                    e.currentTarget.style.backgroundColor = 'white';
-                  }
-                }}
               >
                 <svg 
                   style={{ 
                     width: '20px', 
-                    height: '20px',
-                    transform: isInWishlist(product.id.toString()) ? 'scale(1.1)' : 'scale(1)',
-                    transition: 'transform 0.2s ease'
+                    height: '20px'
                   }}
                   fill={isInWishlist(product.id.toString()) ? 'currentColor' : 'none'} 
                   stroke={isInWishlist(product.id.toString()) ? 'none' : 'currentColor'} 
@@ -333,7 +318,6 @@ export default function LeftHandedProductPage() {
               gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
               gap: '16px'
             }}>
-              {/* 바로 구매 버튼 */}
               <button
                 onClick={() => {
                   if (!user) {
@@ -351,7 +335,6 @@ export default function LeftHandedProductPage() {
                     return;
                   }
                   
-                  // 상품을 장바구니에 담고 바로 체크아웃으로 이동
                   handleAddToCart();
                 }}
                 disabled={product.stock === 0 || product.price === '가격문의'}
@@ -371,21 +354,10 @@ export default function LeftHandedProductPage() {
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}
-                onMouseEnter={(e) => {
-                  if (product.stock > 0 && product.price !== '가격문의') {
-                    e.currentTarget.style.backgroundColor = '#3b82f6';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (product.stock > 0 && product.price !== '가격문의') {
-                    e.currentTarget.style.backgroundColor = '#60a5fa';
-                  }
-                }}
               >
                 바로 구매
               </button>
               
-              {/* 장바구니 버튼 */}
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0 || product.price === '가격문의'}
@@ -404,16 +376,6 @@ export default function LeftHandedProductPage() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
-                }}
-                onMouseEnter={(e) => {
-                  if (product.stock > 0 && product.price !== '가격문의') {
-                    e.currentTarget.style.backgroundColor = '#ef4444';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (product.stock > 0 && product.price !== '가격문의') {
-                    e.currentTarget.style.backgroundColor = '#f87171';
-                  }
                 }}
               >
                 장바구니

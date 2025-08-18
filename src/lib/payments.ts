@@ -18,12 +18,12 @@ export const COMPANY_BANK_ACCOUNTS: BankAccount[] = [
   {
     bankName: '국민은행',
     accountNumber: '123456-78-901234',
-    accountHolder: '골프샵'
+    accountHolder: '골프상회'
   },
   {
     bankName: '신한은행', 
     accountNumber: '234567-89-012345',
-    accountHolder: '골프샵'
+    accountHolder: '골프상회'
   }
 ];
 
