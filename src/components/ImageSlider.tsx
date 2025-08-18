@@ -6,27 +6,27 @@ import Image from 'next/image';
 const ImageSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // 골프 관련 이미지들 (Unsplash에서 고품질 골프 이미지)
+  // 골프 브랜드 로고 이미지들
   const golfImages = [
     {
-      url: 'https://images.unsplash.com/photo-1530549387789-4c1017266635?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      title: '아름다운 골프 코스에서의 완벽한 샷'
+      url: '/callaway-logo.jpg',
+      title: 'Callaway - 혁신적인 골프 기술의 선두주자'
     },
     {
-      url: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      title: '프리미엄 골프 클럽 컬렉션'
+      url: '/taylormade-logo.jpg',
+      title: 'TaylorMade - 프로 골퍼들이 신뢰하는 브랜드'
     },
     {
-      url: 'https://images.unsplash.com/photo-1587174486073-ae5e5cec365d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      title: '정밀한 퍼팅을 위한 최고급 퍼터'
+      url: '/bridgestone-logo.jpg',
+      title: 'Bridgestone Golf - 정밀함과 성능의 완벽한 조화'
     },
     {
-      url: 'https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      title: '전문가를 위한 골프 아이언 세트'
+      url: '/xxio-logo.jpg',
+      title: 'XXIO - 프리미엄 골프의 새로운 경험'
     },
     {
-      url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      title: '완벽한 골프 라운드를 위한 모든 것'
+      url: '/titleist-logo.jpg',
+      title: 'Titleist - 골프 역사의 전설적인 브랜드'
     }
   ];
 
@@ -57,15 +57,31 @@ const ImageSlider = () => {
         <div className="slider-wrapper">
           {golfImages.map((image, index) => (
             <div key={index} className={`slide ${index === currentSlide ? 'active' : ''}`}>
-              <Image 
-                src={image.url} 
-                alt={image.title}
-                className="slide-image"
-                fill
-                style={{objectFit: 'cover'}}
-                priority={index === 0}
-                sizes="100vw"
-              />
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Image 
+                  src={image.url} 
+                  alt={image.title}
+                  width={400}
+                  height={200}
+                  style={{
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                    maxWidth: '70%',
+                    maxHeight: '60%'
+                  }}
+                  priority={index === 0}
+                />
+              </div>
               <div className="slide-overlay">
                 <h3 className="slide-title">{image.title}</h3>
               </div>
