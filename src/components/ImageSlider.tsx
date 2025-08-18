@@ -62,10 +62,8 @@ const ImageSlider = () => {
                 alt={image.title}
                 fill
                 style={{
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                  background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-                  padding: '40px'
+                  objectFit: 'cover',
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
                 }}
                 priority={index === 0}
               />
