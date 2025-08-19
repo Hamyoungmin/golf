@@ -8,6 +8,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, db, storage } from '@/lib/firebase';
 import { User } from '@/types';
+import { useToast } from '@/hooks/useToast';
 
 // 동적 렌더링 강제 설정
 export const dynamic = 'force-dynamic';
@@ -32,6 +33,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { showToast, ToastComponent } = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFormData = {
@@ -101,8 +103,8 @@ export default function Register() {
       if (!isFirebaseEnabled) {
         // Firebase가 비활성화된 경우 임시 회원가입 처리
         console.log('🔧 Firebase가 비활성화됨 - 임시 회원가입 처리');
-        alert('개발 모드: 회원가입이 완료되었습니다! 관리자로 로그인됩니다.');
-        router.push('/admin');
+        showToast('🎉 회원가입이 완료되었습니다! 관리자로 로그인됩니다.', 'success');
+        setTimeout(() => router.push('/admin'), 1500);
         return;
       }
 
@@ -150,8 +152,8 @@ export default function Register() {
       
       // 성공 메시지 표시 후 페이지 이동
       setError('');
-      alert('회원가입이 완료되었습니다!\n관리자 승인 후 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동합니다.');
-      router.push('/login');
+      showToast('🎊 회원가입이 완료되었습니다! 관리자 승인 후 서비스를 이용하실 수 있습니다.', 'success');
+      setTimeout(() => router.push('/login'), 2000);
     } catch (error: unknown) {
       console.error('❌ 회원가입 실패:', error);
       
@@ -184,21 +186,23 @@ export default function Register() {
     formData.confirmPassword === '';
 
   return (
-    <div className="container" style={{ maxWidth: '500px', margin: '50px auto', padding: '20px' }}>
-      <div style={{ 
-        border: '1px solid #e0e0e0', 
-        borderRadius: '8px', 
-        padding: '40px',
-        backgroundColor: '#fff'
-      }}>
-        <h1 style={{ 
-          textAlign: 'center', 
-          marginBottom: '30px',
-          fontSize: '24px',
-          fontWeight: 'bold'
+    <>
+      <ToastComponent />
+      <div className="container" style={{ maxWidth: '500px', margin: '50px auto', padding: '20px' }}>
+        <div style={{ 
+          border: '1px solid #e0e0e0', 
+          borderRadius: '8px', 
+          padding: '40px',
+          backgroundColor: '#fff'
         }}>
-          회원가입
-        </h1>
+          <h1 style={{ 
+            textAlign: 'center', 
+            marginBottom: '30px',
+            fontSize: '24px',
+            fontWeight: 'bold'
+          }}>
+            회원가입
+          </h1>
         
         <div style={{
           backgroundColor: '#fff3cd',
@@ -510,6 +514,6 @@ export default function Register() {
           </Link>
         </div>
       </div>
-    </div>
+    </>
   );
 }

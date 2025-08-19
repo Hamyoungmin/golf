@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/useToast';
 
 // 동적 렌더링 강제 설정
 export const dynamic = 'force-dynamic';
@@ -19,6 +20,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const router = useRouter();
   const { userData } = useAuth();
+  const { showToast, ToastComponent } = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -44,8 +46,8 @@ export default function Login() {
           console.log('🔧 Firebase가 비활성화됨 - 관리자 임시 로그인 처리');
           // localStorage에 임시 관리자 이메일 저장
           localStorage.setItem('tempAdminEmail', formData.email);
-          alert('개발 모드: 관리자로 로그인되었습니다!');
-          router.push('/admin');
+          showToast('🎉 관리자로 로그인되었습니다!', 'success');
+          setTimeout(() => router.push('/admin'), 1000);
           return;
         } else {
           setError('관리자 권한이 없는 이메일입니다.');
@@ -67,8 +69,8 @@ export default function Login() {
       // AuthContext에서 사용자 데이터를 가져올 때까지 잠시 대기
       setTimeout(() => {
         // 로그인 성공 - 페이지 이동은 AuthContext에서 처리될 예정
-        alert('로그인에 성공했습니다!');
-        router.push('/'); // 메인 페이지로 이동
+        showToast('✨ 로그인에 성공했습니다!', 'success');
+        setTimeout(() => router.push('/'), 1000); // 메인 페이지로 이동
       }, 1000);
       
     } catch (error: unknown) {
@@ -103,21 +105,23 @@ export default function Login() {
   };
 
   return (
-    <div className="container" style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-      <div style={{ 
-        border: '1px solid #e0e0e0', 
-        borderRadius: '8px', 
-        padding: '40px',
-        backgroundColor: '#fff'
-      }}>
-        <h1 style={{ 
-          textAlign: 'center', 
-          marginBottom: '30px',
-          fontSize: '24px',
-          fontWeight: 'bold'
+    <>
+      <ToastComponent />
+      <div className="container" style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
+        <div style={{ 
+          border: '1px solid #e0e0e0', 
+          borderRadius: '8px', 
+          padding: '40px',
+          backgroundColor: '#fff'
         }}>
-          로그인
-        </h1>
+          <h1 style={{ 
+            textAlign: 'center', 
+            marginBottom: '30px',
+            fontSize: '24px',
+            fontWeight: 'bold'
+          }}>
+            로그인
+          </h1>
         
         {error && (
           <div style={{
@@ -220,6 +224,6 @@ export default function Login() {
           </Link>
         </div>
       </div>
-    </div>
+    </>
   );
 }
