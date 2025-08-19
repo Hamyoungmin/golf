@@ -5,8 +5,8 @@ import {
   ChartBarIcon,
   CurrencyDollarIcon,
   ShoppingBagIcon,
-  TrendingUpIcon,
-  TrendingDownIcon
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon
 } from '@heroicons/react/24/outline';
 import StatsCard from '@/components/admin/StatsCard';
 
@@ -115,7 +115,7 @@ export default function AnalyticsPage() {
         <StatsCard
           title="전환율"
           value={`${analyticsData.conversionRate}%`}
-          icon={TrendingUpIcon}
+          icon={ArrowTrendingUpIcon}
           iconColor="text-orange-600"
           trend={{ value: 0.5, isPositive: true }}
         />
@@ -230,9 +230,9 @@ export default function AnalyticsPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {Math.random() > 0.5 ? (
-                        <TrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
+                        <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
                       ) : (
-                        <TrendingDownIcon className="w-4 h-4 text-red-500 mr-1" />
+                        <ArrowTrendingDownIcon className="w-4 h-4 text-red-500 mr-1" />
                       )}
                       <span className={`text-sm font-medium ${Math.random() > 0.5 ? 'text-green-600' : 'text-red-600'}`}>
                         {(Math.random() * 20 + 5).toFixed(1)}%
