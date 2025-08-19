@@ -514,6 +514,7 @@ export default function Register() {
           </Link>
         </div>
       </div>
+      </div>
     </>
   );
 }
