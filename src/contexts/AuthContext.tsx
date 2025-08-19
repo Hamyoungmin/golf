@@ -54,9 +54,11 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  // Firebase가 비활성화된 경우 즉시 로딩 완료
+  const isFirebaseEnabled = !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
   const [user, setUser] = useState<any | null>(null);
   const [userData, setUserData] = useState<UserType | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isFirebaseEnabled); // Firebase가 없으면 즉시 false
 
   // 사용자 데이터 가져오기
   const fetchUserData = async (uid: string) => {
@@ -136,7 +138,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // Firebase가 비활성화된 경우 임시 관리자 권한 부여
-  const isFirebaseEnabled = !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
   const tempAdminAccess = !isFirebaseEnabled; // Firebase가 없으면 관리자 권한 부여
 
   const value = {
