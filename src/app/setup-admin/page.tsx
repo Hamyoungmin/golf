@@ -71,7 +71,7 @@ export default function SetupAdminPage() {
           fontSize: '24px',
           fontWeight: 'bold'
         }}>
-          관리자 설정
+            관리자 설정
         </h1>
 
         {/* 안내 메시지 */}
@@ -88,7 +88,7 @@ export default function SetupAdminPage() {
               color: '#666', 
               marginBottom: '5px' 
             }}>
-              초기 관리자 설정 페이지입니다.
+            초기 관리자 설정 페이지입니다. 
             </p>
             <p style={{ 
               fontSize: '12px', 
@@ -98,9 +98,9 @@ export default function SetupAdminPage() {
             </p>
           </div>
         </div>
-
-        {user ? (
-          <>
+        
+          {user ? (
+            <>
             {/* 현재 계정 정보 */}
             <div style={{ marginBottom: '25px' }}>
               <h3 style={{ 
@@ -135,7 +135,7 @@ export default function SetupAdminPage() {
                   </div>
                 </div>
                 
-                <div>
+              <div>
                   <label style={{ 
                     display: 'block', 
                     marginBottom: '5px',
@@ -157,7 +157,7 @@ export default function SetupAdminPage() {
                   </div>
                 </div>
               </div>
-            </div>
+              </div>
 
             {userData?.role !== 'admin' ? (
               <>
@@ -198,9 +198,9 @@ export default function SetupAdminPage() {
                   </div>
 
                   <div style={{ textAlign: 'center' }}>
-                    <button
-                      onClick={makeAdmin}
-                      disabled={loading}
+                  <button
+                    onClick={makeAdmin}
+                    disabled={loading}
                       style={{
                         padding: '10px 20px',
                         backgroundColor: loading ? '#ccc' : '#007bff',
@@ -211,9 +211,9 @@ export default function SetupAdminPage() {
                         fontWeight: '500',
                         cursor: loading ? 'not-allowed' : 'pointer'
                       }}
-                    >
-                      {loading ? '처리 중...' : '관리자로 설정'}
-                    </button>
+                  >
+                    {loading ? '처리 중...' : '관리자로 설정'}
+                  </button>
                   </div>
                 </div>
               </>
@@ -348,7 +348,7 @@ export default function SetupAdminPage() {
 
                   <div style={{ textAlign: 'center' }}>
                     <Link
-                      href="/admin"
+                    href="/admin"
                       style={{
                         display: 'inline-block',
                         padding: '10px 20px',
@@ -359,8 +359,8 @@ export default function SetupAdminPage() {
                         fontSize: '14px',
                         fontWeight: '500'
                       }}
-                    >
-                      관리자 페이지로 이동
+                  >
+                    관리자 페이지로 이동
                     </Link>
                   </div>
                 </div>
@@ -421,9 +421,9 @@ export default function SetupAdminPage() {
                   </div>
                 </div>
               </>
-            )}
-          </>
-        ) : (
+              )}
+            </>
+          ) : (
           <div style={{ marginBottom: '25px' }}>
             <h3 style={{ 
               fontWeight: 'bold', 
@@ -460,8 +460,8 @@ export default function SetupAdminPage() {
                 로그인 페이지로 이동
               </Link>
             </div>
-          </div>
-        )}
+            </div>
+          )}
 
       </div>
     </div>
