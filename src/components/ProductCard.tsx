@@ -22,6 +22,9 @@ const ProductCard = ({ product, category }: ProductCardProps) => {
       case '드라이버':
       case 'drivers':
         return 'drivers';
+      case '캘러웨이 드라이버':
+      case 'callaway drivers':
+        return 'drivers/callaway';
       case '우드':
       case 'woods':
         return 'woods';
