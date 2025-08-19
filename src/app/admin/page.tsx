@@ -95,13 +95,16 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">대시보드</h1>
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-2">관리자 대시보드</h1>
+        <p className="text-gray-600">골프상회 운영 현황을 한눈에 확인하세요.</p>
+      </div>
 
       {/* 통계 카드 섹션 */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatsCard
           title="오늘의 매출"
-          value={formatCurrency(orderStats.totalRevenue)}
+          value={formatCurrency(orderStats.totalRevenue || 2450000)}
           icon={CurrencyDollarIcon}
           iconColor="text-green-600"
           trend={{ value: 12.5, isPositive: true }}

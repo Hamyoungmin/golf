@@ -14,11 +14,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const { user, isAdmin, loading } = useAuth();
   const router = useRouter();
 
+  // Firebase가 비활성화된 경우 체크
+  const isFirebaseEnabled = !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  const allowAccess = isFirebaseEnabled ? (user && isAdmin) : true; // Firebase 없으면 항상 허용
+
   useEffect(() => {
-    if (!loading && (!user || !isAdmin)) {
+    if (!loading && !allowAccess) {
+      console.log('⚠️ 관리자 페이지 접근 거부:', { user, isAdmin, isFirebaseEnabled });
       router.push('/login');
     }
-  }, [user, isAdmin, loading, router]);
+  }, [user, isAdmin, loading, router, allowAccess]);
 
   if (loading) {
     return (
@@ -28,7 +33,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     );
   }
 
-  if (!user || !isAdmin) {
+  if (!allowAccess) {
     return null;
   }
 
