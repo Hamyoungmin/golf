@@ -6,14 +6,18 @@ import Image from 'next/image';
 const ImageSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // 골프 브랜드 로고 이미지들
+  // 골프 브랜드 로고 이미지들 (첫 번째와 두 번째 위치 변경)
   const golfImages = [
     {
-      url: '/taylormade-logo.jpg',
+      url: '/callaway-logo.jpg',
       title: 'Callaway Golf - 혁신과 성능의 만남'
     },
     {
-      url: '/callaway-logo.jpg',
+      url: '/titleist-logo.jpg',
+      title: 'Titleist - The #1 Ball in Golf'
+    },
+    {
+      url: '/taylormade-logo.jpg',
       title: 'TaylorMade - Speed. Distance. Performance.'
     },
     {
@@ -23,10 +27,6 @@ const ImageSlider = () => {
     {
       url: '/xxio-logo.jpg',
       title: 'XXIO - Experience the Difference'
-    },
-    {
-      url: '/titleist-logo.jpg',
-      title: 'Titleist - The #1 Ball in Golf'
     }
   ];
 
