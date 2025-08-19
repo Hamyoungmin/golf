@@ -97,16 +97,7 @@ export default function Register() {
     }
 
     try {
-      // Firebase가 활성화되어 있는지 확인
-      const isFirebaseEnabled = !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-      
-      if (!isFirebaseEnabled) {
-        // Firebase가 비활성화된 경우 임시 회원가입 처리
-        console.log('🔧 Firebase가 비활성화됨 - 임시 회원가입 처리');
-        showToast('🎉 회원가입이 완료되었습니다! 관리자로 로그인됩니다.', 'success');
-        setTimeout(() => router.push('/admin'), 1500);
-        return;
-      }
+
 
       // 1. Firebase 회원가입
       const userCredential = await createUserWithEmailAndPassword(
