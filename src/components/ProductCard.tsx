@@ -60,6 +60,25 @@ const ProductCard = ({ product, category }: ProductCardProps) => {
       }
     }
     
+    // 기타 브랜드 카테고리 처리
+    if (categoryLower.includes('기타')) {
+      if (categoryLower.includes('드라이버') || categoryLower.includes('driver')) {
+        return 'drivers/others';
+      } else if (categoryLower.includes('우드') || categoryLower.includes('wood')) {
+        return 'woods/others';
+      } else if (categoryLower.includes('아이언') || categoryLower.includes('iron')) {
+        return 'irons/others';
+      } else if (categoryLower.includes('웨지') || categoryLower.includes('wedge')) {
+        return 'wedges/others';
+      } else if (categoryLower.includes('퍼터') || categoryLower.includes('putter')) {
+        return 'putters/others';
+      } else if (categoryLower.includes('유틸리티') || categoryLower.includes('utility')) {
+        return 'utilities/others';
+      } else if (categoryLower.includes('여성용') || categoryLower.includes('women')) {
+        return 'womens/others';
+      }
+    }
+    
     // 일반 카테고리 처리
     switch (categoryLower) {
       case '드라이버':
