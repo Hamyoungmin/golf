@@ -119,8 +119,7 @@ export async function getPendingUsers(): Promise<User[]> {
   try {
     const q = query(
       collection(db, 'users'),
-      where('status', '==', 'pending'),
-      orderBy('createdAt', 'desc')
+      where('status', '==', 'pending')
     );
     const querySnapshot = await getDocs(q);
     
@@ -135,7 +134,8 @@ export async function getPendingUsers(): Promise<User[]> {
       } as User;
     });
 
-    return users;
+    // 클라이언트 사이드에서 생성일 기준으로 정렬 (최신순)
+    return users.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   } catch (error) {
     console.error('대기 중인 사용자 목록 가져오기 오류:', error);
     return [];

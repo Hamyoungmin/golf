@@ -32,12 +32,11 @@ export default function UsersManagement() {
     try {
       let q;
       if (filter === 'all') {
-        q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+        q = query(collection(db, 'users'));
       } else {
         q = query(
           collection(db, 'users'), 
-          where('status', '==', filter),
-          orderBy('createdAt', 'desc')
+          where('status', '==', filter)
         );
       }
       
@@ -49,7 +48,14 @@ export default function UsersManagement() {
         approvedAt: doc.data().approvedAt?.toDate(),
       })) as User[];
       
-      setUsers(usersData);
+      // 클라이언트 사이드에서 생성일 기준으로 정렬 (최신순)
+      const sortedUsers = usersData.sort((a, b) => {
+        const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+        const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+        return bTime - aTime;
+      });
+      
+      setUsers(sortedUsers);
     } catch (error) {
       console.error('사용자 목록 가져오기 실패:', error);
     } finally {

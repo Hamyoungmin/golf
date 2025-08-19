@@ -32,8 +32,7 @@ export async function getPendingPayments(limit?: number): Promise<Partial<Paymen
   try {
     let q = query(
       collection(db, 'payments'),
-      where('status', '==', 'pending'),
-      orderBy('createdAt', 'desc')
+      where('status', '==', 'pending')
     );
     
     if (limit) {
@@ -54,7 +53,12 @@ export async function getPendingPayments(limit?: number): Promise<Partial<Paymen
       };
     });
 
-    return payments;
+    // 클라이언트 사이드에서 생성일 기준으로 정렬 (최신순)
+    return payments.sort((a, b) => {
+      const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+      const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+      return bTime - aTime;
+    });
   } catch (error) {
     console.error('대기 중인 결제 목록 가져오기 오류:', error);
     return [];
@@ -64,7 +68,7 @@ export async function getPendingPayments(limit?: number): Promise<Partial<Paymen
 // 모든 결제 정보 가져오기
 export async function getAllPayments(limit?: number): Promise<Partial<PaymentInfo>[]> {
   try {
-    let q = query(collection(db, 'payments'), orderBy('createdAt', 'desc'));
+    let q = query(collection(db, 'payments'));
     
     if (limit) {
       q = query(q, firestoreLimit(limit));
@@ -84,7 +88,12 @@ export async function getAllPayments(limit?: number): Promise<Partial<PaymentInf
       };
     });
 
-    return payments;
+    // 클라이언트 사이드에서 생성일 기준으로 정렬 (최신순)
+    return payments.sort((a, b) => {
+      const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+      const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+      return bTime - aTime;
+    });
   } catch (error) {
     console.error('결제 목록 가져오기 오류:', error);
     return [];
