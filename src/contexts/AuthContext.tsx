@@ -135,12 +135,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  // Firebase가 비활성화된 경우 임시 관리자 권한 부여
+  const isFirebaseEnabled = !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  const tempAdminAccess = !isFirebaseEnabled; // Firebase가 없으면 관리자 권한 부여
+
   const value = {
-    user,
-    userData,
+    user: user || (tempAdminAccess ? { uid: 'temp-admin', email: 'admin@golf.com' } : null),
+    userData: userData || (tempAdminAccess ? { 
+      id: 'temp-admin', 
+      email: 'admin@golf.com', 
+      role: 'admin', 
+      status: 'approved',
+      name: '임시 관리자',
+      businessNumber: '',
+      phone: '',
+      address: '',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } : null),
     loading,
-    isAdmin: userData?.role === 'admin' || false,
-    isApproved: userData?.status === 'approved' || false,
+    isAdmin: userData?.role === 'admin' || tempAdminAccess,
+    isApproved: userData?.status === 'approved' || tempAdminAccess,
     signOut,
     updateUserData
   };
