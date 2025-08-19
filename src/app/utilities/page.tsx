@@ -1,7 +1,7 @@
 import ProductList from '@/components/ProductList';
 
 const utilityProducts = [
-  { id: 1, name: '핑G425 5번 유틸리티', price: '190,000원', image: '/u1.jpg' },
+  { id: 1, name: 'G430 하이브리드 U3 19 Speeder NX 45', price: '가격문의', image: null },
   { id: 2, name: 'SIM MAX 22도 벤타스 TR 7 S', price: '가격문의', image: null },
   { id: 3, name: 'RMX218 24도 NS 950 S', price: '가격문의', image: null },
   { id: 4, name: 'TW747 24도 디아마나 8S', price: '가격문의', image: null },
