@@ -37,11 +37,20 @@ export default function Login() {
       const isFirebaseEnabled = !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
       
       if (!isFirebaseEnabled) {
-        // Firebase가 비활성화된 경우 임시 로그인 처리
-        console.log('🔧 Firebase가 비활성화됨 - 임시 로그인 처리');
-        alert('개발 모드: 관리자로 로그인되었습니다!');
-        router.push('/admin');
-        return;
+        // Firebase가 비활성화된 경우 특정 이메일만 관리자 로그인 허용
+        const adminEmails = ['dudals7334@naver.com'];
+        
+        if (adminEmails.includes(formData.email)) {
+          console.log('🔧 Firebase가 비활성화됨 - 관리자 임시 로그인 처리');
+          // localStorage에 임시 관리자 이메일 저장
+          localStorage.setItem('tempAdminEmail', formData.email);
+          alert('개발 모드: 관리자로 로그인되었습니다!');
+          router.push('/admin');
+          return;
+        } else {
+          setError('관리자 권한이 없는 이메일입니다.');
+          return;
+        }
       }
 
       // Firebase 로그인

@@ -97,6 +97,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // 로그아웃
   const signOut = async () => {
+    // 임시 관리자 정보 삭제
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('tempAdminEmail');
+    }
+    
     if (!firebaseSignOut || !auth) {
       setUser(null);
       setUserData(null);
@@ -137,17 +142,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // Firebase가 비활성화된 경우 임시 관리자 권한 부여
-  const tempAdminAccess = !isFirebaseEnabled; // Firebase가 없으면 관리자 권한 부여
+  // Firebase가 비활성화된 경우 특정 이메일만 관리자 권한 부여
+  const adminEmails = ['dudals7334@naver.com']; // 관리자 이메일 목록
+  const tempAdminAccess = !isFirebaseEnabled; // Firebase가 없으면 임시 시스템 사용
+  
+  // 현재 임시 로그인된 이메일 (localStorage에서 가져오기)
+  const currentTempEmail = typeof window !== 'undefined' ? localStorage.getItem('tempAdminEmail') : null;
+  const isTempAdmin = tempAdminAccess && currentTempEmail && adminEmails.includes(currentTempEmail);
 
   const value = {
-    user: user || (tempAdminAccess ? { uid: 'temp-admin', email: 'admin@golf.com' } : null),
-    userData: userData || (tempAdminAccess ? { 
+    user: user || (isTempAdmin ? { uid: 'temp-admin', email: currentTempEmail } : null),
+    userData: userData || (isTempAdmin ? { 
       id: 'temp-admin', 
-      email: 'admin@golf.com', 
+      email: currentTempEmail!, 
       role: 'admin', 
       status: 'approved',
-      name: '임시 관리자',
+      name: '관리자',
       businessNumber: '',
       phone: '',
       address: '',
@@ -155,8 +165,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       updatedAt: new Date()
     } : null),
     loading,
-    isAdmin: userData?.role === 'admin' || tempAdminAccess,
-    isApproved: userData?.status === 'approved' || tempAdminAccess,
+    isAdmin: userData?.role === 'admin' || isTempAdmin,
+    isApproved: userData?.status === 'approved' || isTempAdmin,
     signOut,
     updateUserData
   };
