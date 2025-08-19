@@ -10,23 +10,23 @@ const ImageSlider = () => {
   const golfImages = [
     {
       url: '/callaway-logo.jpg',
-      title: 'Callaway - 혁신적인 골프 기술의 선두주자'
+      title: 'Callaway Golf - 혁신과 성능의 만남'
     },
     {
       url: '/taylormade-logo.jpg',
-      title: 'TaylorMade - 프로 골퍼들이 신뢰하는 브랜드'
+      title: 'TaylorMade - Speed. Distance. Performance.'
     },
     {
       url: '/bridgestone-logo.jpg',
-      title: 'Bridgestone Golf - 정밀함과 성능의 완벽한 조화'
+      title: 'Bridgestone Golf - 정밀한 볼의 기술력'
     },
     {
       url: '/xxio-logo.jpg',
-      title: 'XXIO - 프리미엄 골프의 새로운 경험'
+      title: 'XXIO - Experience the Difference'
     },
     {
       url: '/titleist-logo.jpg',
-      title: 'Titleist - 골프 역사의 전설적인 브랜드'
+      title: 'Titleist - The #1 Ball in Golf'
     }
   ];
 
