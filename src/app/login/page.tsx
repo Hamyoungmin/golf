@@ -33,6 +33,17 @@ export default function Login() {
     setError('');
 
     try {
+      // Firebase가 활성화되어 있는지 확인
+      const isFirebaseEnabled = !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+      
+      if (!isFirebaseEnabled) {
+        // Firebase가 비활성화된 경우 임시 로그인 처리
+        console.log('🔧 Firebase가 비활성화됨 - 임시 로그인 처리');
+        alert('개발 모드: 관리자로 로그인되었습니다!');
+        router.push('/admin');
+        return;
+      }
+
       // Firebase 로그인
       const userCredential = await signInWithEmailAndPassword(
         auth, 
