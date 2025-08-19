@@ -328,12 +328,10 @@ export default function DriverProductPage() {
               gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
               gap: '16px'
             }}>
-              {/* 바로 구매 버튼 */}
               <button
                 onClick={() => {
                   if (!user) {
                     alert('로그인이 필요합니다.');
-                    router.push('/login');
                     return;
                   }
                   
@@ -347,39 +345,41 @@ export default function DriverProductPage() {
                     return;
                   }
                   
-                  // 상품을 장바구니에 담고 바로 체크아웃으로 이동
-                  handleAddToCart();
-                  router.push('/checkout');
+                  // 바로구매 로직 - 실제 구현 시 결제 페이지로 이동
+                  alert('바로구매 기능은 준비 중입니다.');
                 }}
                 disabled={product.stock === 0 || product.price === '가격문의'}
                 style={{
                   width: '100%',
                   padding: '16px 24px',
-                  backgroundColor: product.stock === 0 || product.price === '가격문의' ? '#9ca3af' : '#60a5fa',
+                  backgroundColor: product.stock === 0 || product.price === '가격문의' ? '#9ca3af' : '#3b82f6',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
                   fontSize: '16px',
                   fontWeight: '600',
                   cursor: product.stock === 0 || product.price === '가격문의' ? 'not-allowed' : 'pointer',
-                  transition: 'background-color 0.2s ease',
+                  transition: 'all 0.2s ease',
                   boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                onMouseEnter={(e) => {
-                  if (product.stock > 0 && product.price !== '가격문의') {
-                    e.currentTarget.style.backgroundColor = '#3b82f6';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (product.stock > 0 && product.price !== '가격문의') {
-                    e.currentTarget.style.backgroundColor = '#60a5fa';
-                  }
+                  justifyContent: 'center',
+                  gap: '8px'
                 }}
               >
-                바로 구매
+                <svg 
+                  style={{ 
+                    width: '20px', 
+                    height: '20px'
+                  }}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span>바로구매</span>
               </button>
               
               {/* 장바구니 버튼 */}

@@ -315,9 +315,63 @@ export default function LeftHandedProductPage() {
             {/* 구매 버튼들 */}
             <div style={{ 
               display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
+              gridTemplateColumns: '1fr 1fr', 
               gap: '16px'
             }}>
+              <button
+                onClick={() => {
+                  if (!user) {
+                    alert('로그인이 필요합니다.');
+                    return;
+                  }
+                  
+                  if (product.stock === 0) {
+                    alert('품절된 상품입니다.');
+                    return;
+                  }
+                  
+                  if (product.price === '가격문의') {
+                    alert('가격 문의 후 구매 가능합니다.');
+                    return;
+                  }
+                  
+                  // 바로구매 로직 - 실제 구현 시 결제 페이지로 이동
+                  alert('바로구매 기능은 준비 중입니다.');
+                }}
+                disabled={product.stock === 0 || product.price === '가격문의'}
+                style={{
+                  width: '100%',
+                  padding: '16px 24px',
+                  backgroundColor: product.stock === 0 || product.price === '가격문의' ? '#9ca3af' : '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: product.stock === 0 || product.price === '가격문의' ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                <svg 
+                  style={{ 
+                    width: '20px', 
+                    height: '20px'
+                  }}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span>바로구매</span>
+              </button>
+              
               <button
                 onClick={() => {
                   if (!user) {
@@ -341,44 +395,34 @@ export default function LeftHandedProductPage() {
                 style={{
                   width: '100%',
                   padding: '16px 24px',
-                  backgroundColor: product.stock === 0 || product.price === '가격문의' ? '#9ca3af' : '#60a5fa',
+                  backgroundColor: product.stock === 0 || product.price === '가격문의' ? '#9ca3af' : '#ef4444',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
                   fontSize: '16px',
                   fontWeight: '600',
                   cursor: product.stock === 0 || product.price === '가격문의' ? 'not-allowed' : 'pointer',
-                  transition: 'background-color 0.2s ease',
+                  transition: 'all 0.2s ease',
                   boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  gap: '8px'
                 }}
               >
-                바로 구매
-              </button>
-              
-              <button
-                onClick={handleAddToCart}
-                disabled={product.stock === 0 || product.price === '가격문의'}
-                style={{
-                  width: '100%',
-                  padding: '16px 24px',
-                  backgroundColor: product.stock === 0 || product.price === '가격문의' ? '#9ca3af' : '#f87171',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: product.stock === 0 || product.price === '가격문의' ? 'not-allowed' : 'pointer',
-                  transition: 'background-color 0.2s ease',
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                장바구니
+                <svg 
+                  style={{ 
+                    width: '20px', 
+                    height: '20px'
+                  }}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.188.188-.293.442-.293.707V19a1 1 0 001 1h1m9-6v6a1 1 0 01-1 1H9a1 1 0 01-1-1v-6m8 0V9a1 1 0 00-1-1H9a1 1 0 00-1 1v4.01"/>
+                </svg>
+                <span>장바구니</span>
               </button>
             </div>
           </div>
@@ -410,3 +454,4 @@ export default function LeftHandedProductPage() {
     </div>
   );
 }
+
