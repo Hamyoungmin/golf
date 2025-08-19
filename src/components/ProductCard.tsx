@@ -34,7 +34,8 @@ const ProductCard = ({ product, category }: ProductCardProps) => {
       '브리지스톤': 'bridgestone',
       'honma': 'honma',
       '혼마': 'honma',
-      'xxio': 'xxio'
+      'xxio': 'xxio',
+      '젝시오': 'xxio'
     };
     
     // 브랜드별 카테고리 확인 (예: "캘러웨이 드라이버" → "drivers/callaway")
