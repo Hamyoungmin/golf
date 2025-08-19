@@ -9,11 +9,11 @@ const ImageSlider = () => {
   // 골프 브랜드 로고 이미지들
   const golfImages = [
     {
-      url: '/callaway-logo.jpg',
+      url: '/taylormade-logo.jpg',
       title: 'Callaway Golf - 혁신과 성능의 만남'
     },
     {
-      url: '/taylormade-logo.jpg',
+      url: '/callaway-logo.jpg',
       title: 'TaylorMade - Speed. Distance. Performance.'
     },
     {
