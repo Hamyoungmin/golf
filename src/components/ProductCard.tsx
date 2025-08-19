@@ -18,13 +18,53 @@ interface ProductCardProps {
 const ProductCard = ({ product, category }: ProductCardProps) => {
   // 카테고리별 URL 매핑
   const getCategoryPath = (category?: string) => {
-    switch (category?.toLowerCase()) {
+    if (!category) return 'products';
+    
+    const categoryLower = category.toLowerCase();
+    
+    // 브랜드별 카테고리 패턴 처리 (브랜드명 카테고리명 → 카테고리명/브랜드명)
+    const brandMapping: { [key: string]: string } = {
+      'callaway': 'callaway',
+      '캘러웨이': 'callaway',
+      'titleist': 'titleist', 
+      '타이틀리스트': 'titleist',
+      'taylormade': 'taylormade',
+      '테일러메이드': 'taylormade',
+      'bridgestone': 'bridgestone',
+      '브리지스톤': 'bridgestone',
+      'honma': 'honma',
+      '혼마': 'honma',
+      'xxio': 'xxio'
+    };
+    
+    // 브랜드별 카테고리 확인 (예: "캘러웨이 드라이버" → "drivers/callaway")
+    for (const [brandKr, brandEn] of Object.entries(brandMapping)) {
+      if (categoryLower.includes(brandKr)) {
+        if (categoryLower.includes('드라이버') || categoryLower.includes('driver')) {
+          return `drivers/${brandEn}`;
+        } else if (categoryLower.includes('우드') || categoryLower.includes('wood')) {
+          return `woods/${brandEn}`;
+        } else if (categoryLower.includes('아이언') || categoryLower.includes('iron')) {
+          return `irons/${brandEn}`;
+        } else if (categoryLower.includes('웨지') || categoryLower.includes('wedge')) {
+          return `wedges/${brandEn}`;
+        } else if (categoryLower.includes('퍼터') || categoryLower.includes('putter')) {
+          return `putters/${brandEn}`;
+        } else if (categoryLower.includes('유틸리티') || categoryLower.includes('utility')) {
+          return `utilities/${brandEn}`;
+        } else if (categoryLower.includes('여성용') || categoryLower.includes('women')) {
+          return `womens/${brandEn}`;
+        } else if (categoryLower.includes('왼손용') || categoryLower.includes('left')) {
+          return `left-handed/${brandEn}`;
+        }
+      }
+    }
+    
+    // 일반 카테고리 처리
+    switch (categoryLower) {
       case '드라이버':
       case 'drivers':
         return 'drivers';
-      case '캘러웨이 드라이버':
-      case 'callaway drivers':
-        return 'drivers/callaway';
       case '우드':
       case 'woods':
         return 'woods';
