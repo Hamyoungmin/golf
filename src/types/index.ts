@@ -215,3 +215,16 @@ export interface StockAdjustment {
   type: 'increase' | 'decrease' | 'set';
   reason: string;
 }
+
+// 공지사항 관련 타입 정의
+export interface Notice {
+  id: string;
+  title: string;
+  content: string;
+  isFixed: boolean; // 상단 고정 여부
+  isVisible: boolean; // 게시 상태 (즉시 게시 여부)
+  views: number;
+  createdAt: Date;
+  updatedAt: Date;
+  author: string; // 작성자 (관리자 ID)
+}
