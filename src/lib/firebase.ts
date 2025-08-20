@@ -69,8 +69,7 @@ let WhereFilterOp: any = {};
 // 환경변수가 모두 있는 경우에만 실제 Firebase 초기화
 if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY && 
     process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN && 
-    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
-    typeof window !== 'undefined') {
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
   try {
     const { initializeApp } = require('firebase/app');
     const { getAuth } = require('firebase/auth');
