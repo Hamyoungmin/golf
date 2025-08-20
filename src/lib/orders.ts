@@ -19,8 +19,7 @@ export async function getUserOrders(userId: string, limit?: number): Promise<Ord
   try {
     let q = query(
       collection(db, 'orders'),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc')
+      where('userId', '==', userId)
     );
 
     if (limit) {
@@ -38,7 +37,8 @@ export async function getUserOrders(userId: string, limit?: number): Promise<Ord
       } as Order;
     });
 
-    return orders;
+    // 클라이언트 사이드에서 생성일 기준으로 정렬 (최신순)
+    return orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   } catch (error) {
     console.error('사용자 주문 목록 가져오기 오류:', error);
     return [];
@@ -48,16 +48,12 @@ export async function getUserOrders(userId: string, limit?: number): Promise<Ord
 // 모든 주문 목록 가져오기 (관리자용)
 export async function getAllOrders(limit?: number, startAfter?: any, status?: OrderStatus): Promise<Order[]> {
   try {
-    let q = query(
-      collection(db, 'orders'),
-      orderBy('createdAt', 'desc')
-    );
+    let q = query(collection(db, 'orders'));
 
     if (status) {
       q = query(
         collection(db, 'orders'),
-        where('status', '==', status),
-        orderBy('createdAt', 'desc')
+        where('status', '==', status)
       );
     }
 
@@ -76,7 +72,8 @@ export async function getAllOrders(limit?: number, startAfter?: any, status?: Or
       } as Order;
     });
 
-    return orders;
+    // 클라이언트 사이드에서 생성일 기준으로 정렬 (최신순)
+    return orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   } catch (error) {
     console.error('주문 목록 가져오기 오류:', error);
     return [];
