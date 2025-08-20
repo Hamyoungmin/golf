@@ -48,11 +48,31 @@ export default function Login() {
         console.log('✅ 로그인 성공:', userCredential.user);
       }
       
-      // AuthContext에서 사용자 데이터를 가져올 때까지 잠시 대기
-      setTimeout(() => {
-        // 로그인 성공 - 페이지 이동은 AuthContext에서 처리될 예정
+      // 관리자 권한 확인 후 적절한 페이지로 이동
+      setTimeout(async () => {
         showToast('✨ 로그인에 성공했습니다!', 'success');
-        setTimeout(() => router.push('/'), 1000); // 메인 페이지로 이동
+        
+        // 관리자 권한 확인
+        if (userCredential.user.email) {
+          try {
+            const { getDoc, doc } = await import('firebase/firestore');
+            const { db } = await import('@/lib/firebase');
+            const adminDoc = await getDoc(doc(db, 'admins', userCredential.user.email));
+            
+            if (adminDoc.exists() && adminDoc.data().role === 'admin') {
+              // 관리자라면 관리자 페이지로
+              setTimeout(() => router.push('/admin'), 1000);
+            } else {
+              // 일반 사용자라면 메인 페이지로
+              setTimeout(() => router.push('/'), 1000);
+            }
+          } catch (error) {
+            console.error('관리자 권한 확인 실패:', error);
+            setTimeout(() => router.push('/'), 1000);
+          }
+        } else {
+          setTimeout(() => router.push('/'), 1000);
+        }
       }, 1000);
       
     } catch (error: unknown) {
