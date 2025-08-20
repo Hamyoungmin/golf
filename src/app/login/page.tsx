@@ -4,8 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { getDoc, doc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 
@@ -49,30 +48,11 @@ export default function Login() {
         console.log('✅ 로그인 성공:', userCredential.user);
       }
       
-      // 관리자 권한 확인 후 적절한 페이지로 이동
-      setTimeout(async () => {
+      // 로그인 성공 - AuthContext에서 관리자 권한 처리
+      setTimeout(() => {
         showToast('✨ 로그인에 성공했습니다!', 'success');
-        
-        // 관리자 권한 확인
-        if (userCredential.user.email && db) {
-          try {
-            const adminDoc = await getDoc(doc(db, 'admins', userCredential.user.email));
-            
-            if (adminDoc.exists() && adminDoc.data()?.role === 'admin') {
-              // 관리자라면 관리자 페이지로
-              setTimeout(() => router.push('/admin'), 1000);
-            } else {
-              // 일반 사용자라면 메인 페이지로
-              setTimeout(() => router.push('/'), 1000);
-            }
-          } catch (error) {
-            console.error('관리자 권한 확인 실패:', error);
-            setTimeout(() => router.push('/'), 1000);
-          }
-        } else {
-          console.warn('이메일이 없거나 Firestore가 초기화되지 않음');
-          setTimeout(() => router.push('/'), 1000);
-        }
+        // 일단 메인 페이지로 이동 - AuthContext가 자동으로 관리자라면 리다이렉트 처리
+        setTimeout(() => router.push('/'), 1000);
       }, 1000);
       
     } catch (error: unknown) {
