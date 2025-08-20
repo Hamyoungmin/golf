@@ -18,7 +18,11 @@ const NoticeButton = () => {
   const loadNotices = async () => {
     setLoading(true);
     try {
+      console.log('NoticeButton: 공지사항 로드 시작');
       const publishedNotices = await getPublishedNotices();
+      console.log('NoticeButton: 로드된 공지사항:', publishedNotices);
+      console.log('NoticeButton: 공지사항 개수:', publishedNotices.length);
+      
       // 최근 5개만 표시
       setNotices(publishedNotices.slice(0, 5));
     } catch (error) {
@@ -30,6 +34,8 @@ const NoticeButton = () => {
 
   const handleButtonClick = () => {
     setIsPopupOpen(true);
+    // 팝업 열 때마다 최신 공지사항 로드
+    loadNotices();
   };
 
   const handleClosePopup = () => {
@@ -89,12 +95,33 @@ const NoticeButton = () => {
                 </svg>
                 공지사항
               </h3>
-              <button className="close-button" onClick={handleClosePopup}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  className="refresh-button" 
+                  onClick={loadNotices}
+                  title="새로고침"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#666',
+                    padding: '4px'
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 2v6h6"/>
+                    <path d="M21 12A9 9 0 0 0 6 5.3L3 8"/>
+                    <path d="M21 22v-6h-6"/>
+                    <path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"/>
+                  </svg>
+                </button>
+                <button className="close-button" onClick={handleClosePopup}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
             </div>
             
             <div className="notice-popup-content">

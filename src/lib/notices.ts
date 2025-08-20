@@ -52,6 +52,8 @@ export async function getNotices(): Promise<Notice[]> {
 // 게시된 공지사항만 가져오기 (고객용)
 export async function getPublishedNotices(): Promise<Notice[]> {
   try {
+    console.log('getPublishedNotices: 공지사항 조회 시작');
+    
     // 단순 쿼리로 변경 - 클라이언트에서 필터링 및 정렬
     const noticesQuery = query(
       collection(db, 'notices'),
@@ -59,6 +61,8 @@ export async function getPublishedNotices(): Promise<Notice[]> {
     );
     
     const querySnapshot = await getDocs(noticesQuery);
+    console.log('getPublishedNotices: 전체 문서 개수:', querySnapshot.size);
+    
     const notices = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
@@ -69,8 +73,14 @@ export async function getPublishedNotices(): Promise<Notice[]> {
       } as Notice;
     });
 
+    console.log('getPublishedNotices: 전체 공지사항:', notices);
+    console.log('getPublishedNotices: 각 공지사항의 isVisible 값:');
+    notices.forEach((notice, index) => {
+      console.log(`${index + 1}. ${notice.title} - isVisible: ${notice.isVisible}`);
+    });
+
     // 클라이언트에서 필터링 및 정렬
-    return notices
+    const filteredNotices = notices
       .filter(notice => notice.isVisible) // 게시된 것만 필터링
       .sort((a, b) => {
         // 먼저 고정 여부로 정렬
@@ -79,6 +89,11 @@ export async function getPublishedNotices(): Promise<Notice[]> {
         // 같은 고정 상태라면 최신순으로 정렬
         return b.createdAt.getTime() - a.createdAt.getTime();
       });
+
+    console.log('getPublishedNotices: 필터링된 공지사항:', filteredNotices);
+    console.log('getPublishedNotices: 필터링된 공지사항 개수:', filteredNotices.length);
+
+    return filteredNotices;
   } catch (error) {
     console.error('게시된 공지사항 목록 가져오기 오류:', error);
     return [];
