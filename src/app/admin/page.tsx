@@ -1,7 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-// Firebase 제거됨: 더미 통계 함수들 사용
+import { Product } from '@/types';
+import Link from 'next/link';
+import { getInventoryStats } from '@/lib/inventory';
+import { getProducts } from '@/lib/products';
+
+// 더미 주문 통계 함수 (주문 시스템이 없으므로)
 const getOrderStats = async () => ({
   totalOrders: 0,
   pendingOrders: 0,
@@ -9,16 +14,48 @@ const getOrderStats = async () => ({
   totalRevenue: 0,
 });
 
-const getProductStats = async () => ({
-  totalProducts: 0,
-  lowStockProducts: 0,
-  outOfStockProducts: 0,
-  categories: {},
-});
+// 실제 상품 통계를 가져오는 함수
+const getProductStats = async () => {
+  try {
+    const stats = await getInventoryStats();
+    const products = await getProducts();
+    
+    // 카테고리별 상품 수 계산
+    const categories: { [key: string]: number } = {};
+    products.forEach(product => {
+      categories[product.category] = (categories[product.category] || 0) + 1;
+    });
+    
+    return {
+      totalProducts: stats.totalProducts,
+      lowStockProducts: stats.lowStockProducts,
+      outOfStockProducts: stats.outOfStockProducts,
+      categories
+    };
+  } catch (error) {
+    console.error('상품 통계 가져오기 오류:', error);
+    return {
+      totalProducts: 0,
+      lowStockProducts: 0,
+      outOfStockProducts: 0,
+      categories: {},
+    };
+  }
+};
 
-const getPopularProducts = async (limit: number) => [];
-import { Product } from '@/types';
-import Link from 'next/link';
+// 인기 상품 가져오기 (재고 순으로 정렬)
+const getPopularProducts = async (limit: number) => {
+  try {
+    const products = await getProducts();
+    return products
+      .filter(product => product.stock > 0)
+      .sort((a, b) => b.stock - a.stock)
+      .slice(0, limit);
+  } catch (error) {
+    console.error('인기 상품 가져오기 오류:', error);
+    return [];
+  }
+};
 
 export default function AdminDashboard() {
   const [orderStats, setOrderStats] = useState({

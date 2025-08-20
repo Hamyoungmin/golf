@@ -187,3 +187,31 @@ export interface Pagination {
 export interface PaginatedResponse<T> extends ApiResponse<T[]> {
   pagination: Pagination;
 }
+
+// 재고 관리 관련 타입 정의
+export interface InventoryStats {
+  totalProducts: number;
+  lowStockProducts: number;
+  outOfStockProducts: number;
+  totalValue: number;
+}
+
+export interface StockHistory {
+  id: string;
+  productId: string;
+  productName: string;
+  type: 'adjustment' | 'restock' | 'sale' | 'return';
+  previousStock: number;
+  newStock: number;
+  quantity: number;
+  reason: string;
+  createdAt: Date;
+  createdBy: string;
+}
+
+export interface StockAdjustment {
+  productId: string;
+  quantity: number;
+  type: 'increase' | 'decrease' | 'set';
+  reason: string;
+}
