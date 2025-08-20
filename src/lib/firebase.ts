@@ -87,6 +87,16 @@ let addDoc: any = (collectionRef: any, data: any) => {
   console.log('Mock addDoc called with:', collectionRef, data);
   return Promise.resolve({ id: 'mock_' + Date.now() });
 };
+let Timestamp: any = {
+  now: () => ({ seconds: Math.floor(Date.now() / 1000), nanoseconds: 0 }),
+  fromDate: (date: Date) => ({ seconds: Math.floor(date.getTime() / 1000), nanoseconds: 0 })
+};
+let writeBatch: any = (db: any) => ({
+  set: () => {},
+  update: () => {},
+  delete: () => {},
+  commit: () => Promise.resolve()
+});
 
 // Types
 let DocumentSnapshot: any = {};
@@ -120,6 +130,8 @@ if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
     limit = firestoreFunctions.limit;
     startAfter = firestoreFunctions.startAfter;
     addDoc = firestoreFunctions.addDoc;
+    Timestamp = firestoreFunctions.Timestamp;
+    writeBatch = firestoreFunctions.writeBatch;
     
     // Types
     DocumentSnapshot = firestoreFunctions.DocumentSnapshot;
@@ -162,6 +174,8 @@ export {
   limit,
   startAfter,
   addDoc,
+  Timestamp,
+  writeBatch,
   DocumentSnapshot,
   WhereFilterOp
 };

@@ -12,9 +12,9 @@ import {
   limit,
   serverTimestamp,
   Timestamp,
-  writeBatch
-} from 'firebase/firestore';
-import { db } from './firebase';
+  writeBatch,
+  db
+} from './firebase';
 import { Review, ReviewStats } from '@/types';
 
 // 모든 리뷰 가져오기 (관리자용)
