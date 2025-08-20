@@ -465,14 +465,25 @@ export async function initializeReviews(): Promise<void> {
     const batch = writeBatch(db);
     dummyReviews.forEach((review) => {
       const docRef = doc(collection(db, 'reviews'));
-      batch.set(docRef, {
+      // undefined 필드를 제외한 데이터 객체 생성
+      const reviewData: any = {
         ...review,
         createdAt: Timestamp.fromDate(review.createdAt),
         updatedAt: Timestamp.fromDate(review.updatedAt),
-        approvedAt: review.approvedAt ? Timestamp.fromDate(review.approvedAt) : undefined,
-        adminReplyAt: review.adminReplyAt ? Timestamp.fromDate(review.adminReplyAt) : undefined,
-        reportedAt: review.reportedAt ? Timestamp.fromDate(review.reportedAt) : undefined,
-      });
+      };
+      
+      // 조건부로 필드 추가 (undefined 방지)
+      if (review.approvedAt) {
+        reviewData.approvedAt = Timestamp.fromDate(review.approvedAt);
+      }
+      if (review.adminReplyAt) {
+        reviewData.adminReplyAt = Timestamp.fromDate(review.adminReplyAt);
+      }
+      if (review.reportedAt) {
+        reviewData.reportedAt = Timestamp.fromDate(review.reportedAt);
+      }
+      
+      batch.set(docRef, reviewData);
     });
     
     await batch.commit();
