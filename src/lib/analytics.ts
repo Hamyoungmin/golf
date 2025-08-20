@@ -99,21 +99,31 @@ export async function incrementPageView(sessionId: string): Promise<void> {
 // 일별 방문자 통계 업데이트
 async function updateDailyVisitorStats(date: string): Promise<void> {
   try {
-    // 해당 날짜의 모든 방문자 조회
+    // 해당 날짜의 모든 방문자 조회 - 단순화
     const visitorsQuery = query(
       collection(db, 'visitors'),
-      where('date', '>=', new Date(date + 'T00:00:00')),
-      where('date', '<', new Date(date + 'T23:59:59'))
+      orderBy('date', 'desc')
     );
     
     const visitorsSnapshot = await getDocs(visitorsQuery);
-    const totalVisitors = visitorsSnapshot.size;
+    
+    // 클라이언트에서 날짜 필터링
+    const startOfDay = new Date(date + 'T00:00:00');
+    const endOfDay = new Date(date + 'T23:59:59');
+    
+    const filteredVisitors = visitorsSnapshot.docs.filter(doc => {
+      const docDate = doc.data().date?.toDate();
+      if (!docDate) return false;
+      return docDate >= startOfDay && docDate <= endOfDay;
+    });
+    
+    const totalVisitors = filteredVisitors.length;
     
     // 고유 방문자 수 계산 (sessionId 기준)
     const uniqueSessions = new Set();
     let totalPageViews = 0;
     
-    visitorsSnapshot.docs.forEach(doc => {
+    filteredVisitors.forEach(doc => {
       const data = doc.data();
       uniqueSessions.add(data.sessionId);
       totalPageViews += data.pageViews || 1;
@@ -269,15 +279,22 @@ async function calculateConversionRate(
       endDate = new Date();
     }
     
-    // 기간 내 일별 통계 조회
+    // 기간 내 일별 통계 조회 - 단순화
     const statsQuery = query(
       collection(db, 'dailyStats'),
-      where('date', '>=', startDate),
-      where('date', '<=', endDate)
+      orderBy('date', 'desc')
     );
     
     const statsSnapshot = await getDocs(statsQuery);
-    const totalVisitors = statsSnapshot.docs.reduce((sum, doc) => {
+    
+    // 클라이언트에서 날짜 필터링
+    const filteredStats = statsSnapshot.docs.filter(doc => {
+      const docDate = doc.data().date?.toDate();
+      if (!docDate) return false;
+      return docDate >= startDate && docDate <= endDate;
+    });
+    
+    const totalVisitors = filteredStats.reduce((sum, doc) => {
       return sum + (doc.data().uniqueVisitors || 0);
     }, 0);
     
@@ -324,22 +341,27 @@ async function calculateDailyStats(days: number): Promise<Array<{
         }
       });
     
-    // 방문자 데이터 조회
+    // 방문자 데이터 조회 - 단순화
     const statsQuery = query(
       collection(db, 'dailyStats'),
-      where('date', '>=', startDate),
-      where('date', '<=', endDate),
       orderBy('date', 'desc')
     );
     
     const statsSnapshot = await getDocs(statsQuery);
     const visitorMap = new Map<string, number>();
     
-    statsSnapshot.docs.forEach(doc => {
-      const data = doc.data();
-      const dateKey = data.date.toDate().toISOString().split('T')[0];
-      visitorMap.set(dateKey, data.uniqueVisitors || 0);
-    });
+    // 클라이언트에서 날짜 필터링
+    statsSnapshot.docs
+      .filter(doc => {
+        const docDate = doc.data().date?.toDate();
+        if (!docDate) return false;
+        return docDate >= startDate && docDate <= endDate;
+      })
+      .forEach(doc => {
+        const data = doc.data();
+        const dateKey = data.date.toDate().toISOString().split('T')[0];
+        visitorMap.set(dateKey, data.uniqueVisitors || 0);
+      });
     
     // 결과 배열 생성
     const result: Array<{ date: string; revenue: number; orders: number; visitors: number }> = [];

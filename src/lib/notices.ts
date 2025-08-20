@@ -18,10 +18,10 @@ import { Notice } from '@/types';
 // 모든 공지사항 가져오기
 export async function getNotices(): Promise<Notice[]> {
   try {
+    // 단순 쿼리로 변경 - 클라이언트에서 정렬
     const noticesQuery = query(
       collection(db, 'notices'),
-      orderBy('isFixed', 'desc'), // 고정 공지사항을 먼저
-      orderBy('createdAt', 'desc') // 최신순
+      orderBy('createdAt', 'desc') // 최신순만
     );
     
     const querySnapshot = await getDocs(noticesQuery);
@@ -35,7 +35,14 @@ export async function getNotices(): Promise<Notice[]> {
       } as Notice;
     });
 
-    return notices;
+    // 클라이언트에서 정렬: 고정 공지사항을 먼저, 그 다음 최신순
+    return notices.sort((a, b) => {
+      // 먼저 고정 여부로 정렬
+      if (a.isFixed && !b.isFixed) return -1;
+      if (!a.isFixed && b.isFixed) return 1;
+      // 같은 고정 상태라면 최신순으로 정렬
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
   } catch (error) {
     console.error('공지사항 목록 가져오기 오류:', error);
     return [];
@@ -45,11 +52,10 @@ export async function getNotices(): Promise<Notice[]> {
 // 게시된 공지사항만 가져오기 (고객용)
 export async function getPublishedNotices(): Promise<Notice[]> {
   try {
+    // 단순 쿼리로 변경 - 클라이언트에서 필터링 및 정렬
     const noticesQuery = query(
       collection(db, 'notices'),
-      where('isVisible', '==', true),
-      orderBy('isFixed', 'desc'), // 고정 공지사항을 먼저
-      orderBy('createdAt', 'desc') // 최신순
+      orderBy('createdAt', 'desc') // 최신순만
     );
     
     const querySnapshot = await getDocs(noticesQuery);
@@ -63,7 +69,16 @@ export async function getPublishedNotices(): Promise<Notice[]> {
       } as Notice;
     });
 
-    return notices;
+    // 클라이언트에서 필터링 및 정렬
+    return notices
+      .filter(notice => notice.isVisible) // 게시된 것만 필터링
+      .sort((a, b) => {
+        // 먼저 고정 여부로 정렬
+        if (a.isFixed && !b.isFixed) return -1;
+        if (!a.isFixed && b.isFixed) return 1;
+        // 같은 고정 상태라면 최신순으로 정렬
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
   } catch (error) {
     console.error('게시된 공지사항 목록 가져오기 오류:', error);
     return [];
