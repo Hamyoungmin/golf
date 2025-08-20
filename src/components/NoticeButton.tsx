@@ -1,10 +1,32 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { Notice } from '@/types';
+import { getPublishedNotices } from '@/lib/notices';
 
 const NoticeButton = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [loading, setLoading] = useState(true);
   const popupRef = useRef<HTMLDivElement>(null);
+
+  // 데이터 로드
+  useEffect(() => {
+    loadNotices();
+  }, []);
+
+  const loadNotices = async () => {
+    setLoading(true);
+    try {
+      const publishedNotices = await getPublishedNotices();
+      // 최근 5개만 표시
+      setNotices(publishedNotices.slice(0, 5));
+    } catch (error) {
+      console.error('공지사항 로드 오류:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleButtonClick = () => {
     setIsPopupOpen(true);
@@ -30,6 +52,15 @@ const NoticeButton = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isPopupOpen]);
+
+  // 날짜 포맷팅
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  };
 
   return (
     <>
@@ -67,50 +98,52 @@ const NoticeButton = () => {
             </div>
             
             <div className="notice-popup-content">
-              <div className="notice-item">
-                <div className="notice-date">2024.08.11</div>
-                <div className="notice-title">🎉 골프상회 도매몰 24시간 운영 시작!</div>
-                <div className="notice-content">
-                  이제 골프상회에서 24시간 연중무휴로 서비스를 제공합니다. 
-                  언제든지 필요한 골프용품을 주문하실 수 있습니다.
+              {loading ? (
+                <div className="notice-item" style={{ textAlign: 'center', padding: '40px' }}>
+                  <div style={{ fontSize: '14px', color: '#666' }}>
+                    📋 공지사항을 불러오는 중...
+                  </div>
                 </div>
-              </div>
-
-              <div className="notice-item">
-                <div className="notice-date">2024.08.10</div>
-                <div className="notice-title">📋 사업자 인증 안내</div>
-                <div className="notice-content">
-                  상품 주문은 사업자 인증이 완료된 회원만 가능합니다. 
-                  회원가입 시 사업자등록증과 매장 사진을 첨부해주세요.
+              ) : notices.length > 0 ? (
+                notices.map((notice) => (
+                  <div key={notice.id} className="notice-item">
+                    <div className="notice-date">{formatDate(notice.createdAt)}</div>
+                    <div className="notice-title">
+                      {notice.isFixed && '📌 '}
+                      {notice.title}
+                    </div>
+                    <div className="notice-content">
+                      {notice.content.length > 100 
+                        ? notice.content.substring(0, 100) + '...' 
+                        : notice.content}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="notice-item" style={{ textAlign: 'center', padding: '40px' }}>
+                  <div style={{ fontSize: '14px', color: '#666' }}>
+                    등록된 공지사항이 없습니다.
+                  </div>
                 </div>
-              </div>
-
-              <div className="notice-item">
-                <div className="notice-date">2024.08.09</div>
-                <div className="notice-title">⚡ 실시간 재고 업데이트</div>
-                <div className="notice-content">
-                  모든 상품 재고가 실시간으로 업데이트됩니다. 
-                  품절 상품은 자동으로 주문이 제한됩니다.
+              )}
+              
+              {/* 더보기 링크 */}
+              {notices.length > 0 && (
+                <div style={{ textAlign: 'center', padding: '15px', borderTop: '1px solid #e0e0e0' }}>
+                  <a 
+                    href="/notice" 
+                    style={{ 
+                      color: '#007bff', 
+                      textDecoration: 'none',
+                      fontSize: '14px',
+                      fontWeight: '500'
+                    }}
+                    onClick={handleClosePopup}
+                  >
+                    전체 공지사항 보기 →
+                  </a>
                 </div>
-              </div>
-
-              <div className="notice-item">
-                <div className="notice-date">2024.08.08</div>
-                <div className="notice-title">🚚 배송 정책 안내</div>
-                <div className="notice-content">
-                  전국 무료배송 서비스를 제공하며, 주문 후 1-2일 내 발송됩니다. 
-                  도서산간 지역은 추가 배송일이 소요될 수 있습니다.
-                </div>
-              </div>
-
-              <div className="notice-item">
-                <div className="notice-date">2024.08.07</div>
-                <div className="notice-title">💰 도매가격 혜택</div>
-                <div className="notice-content">
-                  사업자 회원 대상으로 최대 30% 할인된 도매가격을 제공합니다. 
-                  대량 주문 시 추가 할인 혜택이 있습니다.
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
