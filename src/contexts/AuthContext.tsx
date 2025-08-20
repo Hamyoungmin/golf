@@ -57,6 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<any | null>(null);
   const [userData, setUserData] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // 사용자 데이터 가져오기
   const fetchUserData = async (uid: string) => {
@@ -73,6 +74,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('사용자 데이터 가져오기 실패:', error);
     }
     return null;
+  };
+
+  // Firebase 관리자 컬렉션에서 관리자 권한 확인
+  const checkAdminRole = async (email: string) => {
+    if (!getDoc || !doc || !db) return false;
+    
+    try {
+      const adminDoc = await getDoc(doc(db, 'admins', email));
+      if (adminDoc.exists()) {
+        const adminData = adminDoc.data();
+        return adminData.role === 'admin';
+      }
+    } catch (error) {
+      console.error('관리자 권한 확인 실패:', error);
+    }
+    return false;
   };
 
   // 사용자 데이터 업데이트
@@ -98,6 +115,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!firebaseSignOut || !auth) {
       setUser(null);
       setUserData(null);
+      setIsAdmin(false);
       return;
     }
     
@@ -105,6 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await firebaseSignOut(auth);
       setUser(null);
       setUserData(null);
+      setIsAdmin(false);
       console.log('로그아웃 완료');
     } catch (error) {
       console.error('로그아웃 실패:', error);
@@ -124,9 +143,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (firebaseUser) {
         // 사용자가 로그인한 경우 사용자 데이터 가져오기
         await fetchUserData(firebaseUser.uid);
+        
+        // 관리자 권한 확인
+        if (firebaseUser.email) {
+          const adminRole = await checkAdminRole(firebaseUser.email);
+          setIsAdmin(adminRole);
+        }
       } else {
         // 사용자가 로그아웃한 경우
         setUserData(null);
+        setIsAdmin(false);
       }
       
       setLoading(false);
@@ -139,7 +165,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     userData,
     loading,
-    isAdmin: userData?.role === 'admin',
+    isAdmin,
     isApproved: userData?.status === 'approved',
     signOut,
     updateUserData
