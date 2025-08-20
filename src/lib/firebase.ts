@@ -61,6 +61,7 @@ let arrayRemove: any = (...values: any[]) => values;
 let orderBy: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
 let limit: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
 let startAfter: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
+let addDoc: any = () => Promise.resolve({ id: 'mock' });
 
 // Types
 let DocumentSnapshot: any = {};
@@ -93,6 +94,7 @@ if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
     orderBy = firestoreFunctions.orderBy;
     limit = firestoreFunctions.limit;
     startAfter = firestoreFunctions.startAfter;
+    addDoc = firestoreFunctions.addDoc;
     
     // Types
     DocumentSnapshot = firestoreFunctions.DocumentSnapshot;
@@ -134,6 +136,7 @@ export {
   orderBy,
   limit,
   startAfter,
+  addDoc,
   DocumentSnapshot,
   WhereFilterOp
 };

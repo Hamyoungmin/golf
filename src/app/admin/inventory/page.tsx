@@ -10,10 +10,10 @@ import {
   getStockStatusColor
 } from '@/lib/inventory';
 import { Product, InventoryStats, StockHistory, StockAdjustment } from '@/types';
-import { useAuthContext } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function InventoryPage() {
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showLowStock, setShowLowStock] = useState(false);
   const [inventoryStats, setInventoryStats] = useState<InventoryStats>({
@@ -117,7 +117,7 @@ export default function InventoryPage() {
   };
 
   if (loading) {
-    return (
+  return (
       <div style={{ 
         display: 'flex', 
         justifyContent: 'center', 
@@ -154,7 +154,7 @@ export default function InventoryPage() {
           상품 재고 현황을 실시간으로 관리하고 모니터링합니다.
         </p>
 
-        {/* 통계 카드 */}
+      {/* 통계 카드 */}
         <div style={{ marginBottom: '25px' }}>
           <h3 style={{ 
             fontWeight: 'bold', 
@@ -218,9 +218,9 @@ export default function InventoryPage() {
               <div style={{ fontSize: '14px', color: '#666' }}>총 재고 가치</div>
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* 필터 및 컨트롤 */}
+      {/* 필터 및 컨트롤 */}
         <div style={{ marginBottom: '25px' }}>
           <h3 style={{ 
             fontWeight: 'bold', 
@@ -294,11 +294,11 @@ export default function InventoryPage() {
               >
                 🔄 새로고침
               </button>
-            </div>
           </div>
         </div>
+      </div>
 
-        {/* 재고 목록 테이블 */}
+      {/* 재고 목록 테이블 */}
         <div style={{ marginBottom: '25px' }}>
           <h3 style={{ 
             fontWeight: 'bold', 
@@ -319,25 +319,25 @@ export default function InventoryPage() {
               <thead style={{ backgroundColor: '#f5f5f5' }}>
                 <tr>
                   <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
-                    상품명
-                  </th>
+                  상품명
+                </th>
                   <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
-                    카테고리
-                  </th>
+                  카테고리
+                </th>
                   <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
-                    현재 재고
-                  </th>
+                  현재 재고
+                </th>
                   <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
-                    상태
-                  </th>
+                  상태
+                </th>
                   <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
-                    단가
-                  </th>
+                  단가
+                </th>
                   <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
-                    작업
-                  </th>
-                </tr>
-              </thead>
+                  작업
+                </th>
+              </tr>
+            </thead>
               <tbody>
                 {filteredProducts.map((product, index) => (
                   <tr key={product.id} style={{ 
@@ -345,7 +345,7 @@ export default function InventoryPage() {
                   }}>
                     <td style={{ padding: '12px', fontSize: '14px', fontWeight: '500' }}>
                       {product.name}
-                    </td>
+                  </td>
                     <td style={{ padding: '12px' }}>
                       <span style={{
                         display: 'inline-block',
@@ -357,11 +357,11 @@ export default function InventoryPage() {
                         color: '#666'
                       }}>
                         {categoryLabels[product.category] || product.category}
-                      </span>
-                    </td>
+                    </span>
+                  </td>
                     <td style={{ padding: '12px', fontSize: '14px' }}>
                       {product.stock}개
-                    </td>
+                  </td>
                     <td style={{ padding: '12px' }}>
                       <span style={{ 
                         fontSize: '14px', 
@@ -369,11 +369,11 @@ export default function InventoryPage() {
                         color: getStockStatusColor(product.stock)
                       }}>
                         {getStockStatusText(product.stock)}
-                      </span>
-                    </td>
+                    </span>
+                  </td>
                     <td style={{ padding: '12px', fontSize: '14px' }}>
                       ₩{parseInt(product.price).toLocaleString()}
-                    </td>
+                  </td>
                     <td style={{ padding: '12px' }}>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <button 
@@ -388,8 +388,8 @@ export default function InventoryPage() {
                             cursor: 'pointer'
                           }}
                         >
-                          조정
-                        </button>
+                      조정
+                    </button>
                         <button 
                           onClick={() => handleShowHistory(product)}
                           style={{
@@ -402,14 +402,14 @@ export default function InventoryPage() {
                             cursor: 'pointer'
                           }}
                         >
-                          이력
-                        </button>
+                      이력
+                    </button>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
             {filteredProducts.length === 0 && (
               <div style={{ 
@@ -570,7 +570,7 @@ export default function InventoryPage() {
                 >
                   조정 완료
                 </button>
-              </div>
+        </div>
             </div>
           </div>
         )}
