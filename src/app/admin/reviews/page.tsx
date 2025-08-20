@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   StarIcon,
   EyeIcon,
@@ -10,72 +10,243 @@ import {
   FlagIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { Review, ReviewStats } from '@/types';
+import { 
+  getAllReviews, 
+  approveReview, 
+  rejectReview, 
+  addAdminReply,
+  resolveReport,
+  deleteReview,
+  getReviewStats,
+  initializeReviews
+} from '@/lib/reviews';
+import { useAuth } from '@/contexts/AuthContext';
+import CustomAlert from '@/components/CustomAlert';
 
 export default function ReviewsPage() {
+  const { user } = useAuth();
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewStats, setReviewStats] = useState<ReviewStats>({
+    totalReviews: 0,
+    pendingReviews: 0,
+    approvedReviews: 0,
+    rejectedReviews: 0,
+    reportedReviews: 0,
+    averageRating: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [showReplyModal, setShowReplyModal] = useState(false);
+  const [selectedReviewId, setSelectedReviewId] = useState<string>('');
+  const [replyText, setReplyText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  // 더미 리뷰 데이터
-  const reviews = [
-    {
-      id: 1,
-      productName: '캘러웨이 로그 드라이버',
-      customerName: '김**',
-      rating: 5,
-      title: '정말 만족스러운 구매입니다!',
-      content: '상태가 생각보다 훨씬 좋았고, 배송도 빨랐습니다. 골프장에서 써보니 비거리도 늘어난 것 같아요.',
-      status: 'approved',
-      createdAt: '2024-01-15',
-      hasImages: true,
-      isReported: false,
-      adminReply: null
-    },
-    {
-      id: 2,
-      productName: '타이틀리스트 917 우드',
-      customerName: '박**',
-      rating: 4,
-      title: '괜찮은 상품이에요',
-      content: '중고치고는 상태가 좋습니다. 다만 배송이 조금 늦었어요.',
-      status: 'pending',
-      createdAt: '2024-01-14',
-      hasImages: false,
-      isReported: false,
-      adminReply: null
-    },
-    {
-      id: 3,
-      productName: '핑 ANSER2 퍼터',
-      customerName: '이**',
-      rating: 3,
-      title: '보통입니다',
-      content: '상품은 괜찮은데 생각보다 스크래치가 많네요.',
-      status: 'approved',
-      createdAt: '2024-01-13',
-      hasImages: true,
-      isReported: true,
-      adminReply: '소중한 후기 감사합니다. 상품 상태에 대해 미리 안내드리지 못해 죄송합니다.'
-    },
-    {
-      id: 4,
-      productName: '젝시오 MP1200 드라이버',
-      customerName: '최**',
-      rating: 5,
-      title: '최고의 클럽!',
-      content: '가성비 최고! 새 제품과 다를 바 없네요. 강력 추천합니다.',
-      status: 'rejected',
-      createdAt: '2024-01-12',
-      hasImages: false,
-      isReported: false,
-      adminReply: null
+  // 알림창 상태
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    type: 'info' as 'success' | 'error' | 'warning' | 'info' | 'confirm',
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    onCancel: () => {},
+    confirmText: '확인',
+    cancelText: '취소'
+  });
+
+  // 알림창 헬퍼 함수들
+  const showAlert = (
+    type: 'success' | 'error' | 'warning' | 'info' | 'confirm',
+    message: string,
+    title?: string,
+    onConfirm?: () => void,
+    onCancel?: () => void
+  ) => {
+    setAlert({
+      isOpen: true,
+      type,
+      title: title || '',
+      message,
+      onConfirm: onConfirm || closeAlert,
+      onCancel: onCancel || closeAlert,
+      confirmText: type === 'confirm' ? '확인' : '확인',
+      cancelText: '취소'
+    });
+  };
+
+  const closeAlert = () => {
+    setAlert(prev => ({ ...prev, isOpen: false }));
+  };
+
+  // 데이터 로드
+  useEffect(() => {
+    loadReviews();
+  }, []);
+
+  const loadReviews = async () => {
+    setLoading(true);
+    try {
+      // 초기 데이터 생성 (필요시)
+      await initializeReviews();
+      
+      // 리뷰 목록 로드
+      const allReviews = await getAllReviews();
+      setReviews(allReviews);
+      
+      // 리뷰 통계 로드
+      const stats = await getReviewStats();
+      setReviewStats(stats);
+      
+      console.log('리뷰 관리 페이지: 로드 완료', allReviews.length, '개');
+    } catch (error) {
+      console.error('리뷰 데이터 로드 오류:', error);
+      showAlert('error', '리뷰 데이터를 불러오는 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  // 리뷰 승인
+  const handleApproveReview = async (reviewId: string) => {
+    if (!user?.uid) {
+      showAlert('error', '관리자 권한이 필요합니다.');
+      return;
+    }
+
+    try {
+      const success = await approveReview(reviewId, user.uid);
+      if (success) {
+        showAlert('success', '리뷰가 승인되었습니다.', '', () => {
+          loadReviews();
+          closeAlert();
+        });
+      } else {
+        showAlert('error', '리뷰 승인에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('리뷰 승인 오류:', error);
+      showAlert('error', '리뷰 승인 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 리뷰 거부
+  const handleRejectReview = async (reviewId: string) => {
+    if (!user?.uid) {
+      showAlert('error', '관리자 권한이 필요합니다.');
+      return;
+    }
+
+    showAlert('confirm', '이 리뷰를 거부하시겠습니까?', '리뷰 거부', async () => {
+      try {
+        const success = await rejectReview(reviewId, user.uid, '관리자에 의해 거부됨');
+        if (success) {
+          showAlert('success', '리뷰가 거부되었습니다.', '', () => {
+            loadReviews();
+            closeAlert();
+          });
+        } else {
+          showAlert('error', '리뷰 거부에 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('리뷰 거부 오류:', error);
+        showAlert('error', '리뷰 거부 중 오류가 발생했습니다.');
+      }
+      closeAlert();
+    }, closeAlert);
+  };
+
+  // 답글 작성
+  const handleReplyReview = (reviewId: string) => {
+    setSelectedReviewId(reviewId);
+    setReplyText('');
+    setShowReplyModal(true);
+  };
+
+  const handleSubmitReply = async () => {
+    if (!user?.uid) {
+      showAlert('error', '관리자 권한이 필요합니다.');
+      return;
+    }
+
+    if (!replyText.trim()) {
+      showAlert('warning', '답글 내용을 입력해주세요.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const success = await addAdminReply(selectedReviewId, replyText.trim(), user.uid);
+      if (success) {
+        showAlert('success', '답글이 등록되었습니다.', '', () => {
+          setShowReplyModal(false);
+          setReplyText('');
+          loadReviews();
+          closeAlert();
+        });
+      } else {
+        showAlert('error', '답글 등록에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('답글 등록 오류:', error);
+      showAlert('error', '답글 등록 중 오류가 발생했습니다.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // 신고 처리
+  const handleResolveReport = async (reviewId: string) => {
+    if (!user?.uid) {
+      showAlert('error', '관리자 권한이 필요합니다.');
+      return;
+    }
+
+    showAlert('confirm', '이 신고를 해제하시겠습니까?', '신고 처리', async () => {
+      try {
+        const success = await resolveReport(reviewId, user.uid);
+        if (success) {
+          showAlert('success', '신고가 해제되었습니다.', '', () => {
+            loadReviews();
+            closeAlert();
+          });
+        } else {
+          showAlert('error', '신고 해제에 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('신고 해제 오류:', error);
+        showAlert('error', '신고 해제 중 오류가 발생했습니다.');
+      }
+      closeAlert();
+    }, closeAlert);
+  };
+
+  // 리뷰 삭제
+  const handleDeleteReview = async (reviewId: string, title: string) => {
+    showAlert('confirm', `"${title}" 리뷰를 삭제하시겠습니까?\n삭제된 리뷰는 복구할 수 없습니다.`, '리뷰 삭제', async () => {
+      try {
+        const success = await deleteReview(reviewId);
+        if (success) {
+          showAlert('success', '리뷰가 삭제되었습니다.', '', () => {
+            loadReviews();
+            closeAlert();
+          });
+        } else {
+          showAlert('error', '리뷰 삭제에 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('리뷰 삭제 오류:', error);
+        showAlert('error', '리뷰 삭제 중 오류가 발생했습니다.');
+      }
+      closeAlert();
+    }, closeAlert);
+  };
 
   const statuses = [
-    { value: 'all', label: '전체', count: reviews.length },
-    { value: 'pending', label: '승인 대기', count: reviews.filter(r => r.status === 'pending').length },
-    { value: 'approved', label: '승인됨', count: reviews.filter(r => r.status === 'approved').length },
-    { value: 'rejected', label: '거부됨', count: reviews.filter(r => r.status === 'rejected').length },
-    { value: 'reported', label: '신고됨', count: reviews.filter(r => r.isReported).length }
+    { value: 'all', label: '전체', count: reviewStats.totalReviews },
+    { value: 'pending', label: '승인 대기', count: reviewStats.pendingReviews },
+    { value: 'approved', label: '승인됨', count: reviewStats.approvedReviews },
+    { value: 'rejected', label: '거부됨', count: reviewStats.rejectedReviews },
+    { value: 'reported', label: '신고됨', count: reviewStats.reportedReviews }
   ];
 
   const filteredReviews = reviews.filter(review => {
@@ -136,6 +307,54 @@ export default function ReviewsPage() {
           고객 리뷰를 관리하고 승인/거부 처리를 할 수 있습니다.
         </p>
 
+        {/* 리뷰 통계 */}
+        {!loading && reviewStats.totalReviews > 0 && (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-around',
+            marginBottom: '30px',
+            padding: '20px',
+            backgroundColor: '#f9f9f9',
+            borderRadius: '8px'
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#007bff' }}>
+                {reviewStats.averageRating.toFixed(1)}
+              </div>
+              <div style={{ fontSize: '14px', color: '#666' }}>평균 평점</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#28a745' }}>
+                {reviewStats.totalReviews}
+              </div>
+              <div style={{ fontSize: '14px', color: '#666' }}>총 리뷰</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ffc107' }}>
+                {reviewStats.pendingReviews}
+              </div>
+              <div style={{ fontSize: '14px', color: '#666' }}>승인 대기</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#dc3545' }}>
+                {reviewStats.reportedReviews}
+              </div>
+              <div style={{ fontSize: '14px', color: '#666' }}>신고됨</div>
+            </div>
+          </div>
+        )}
+
+        {loading && (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '40px',
+            fontSize: '16px',
+            color: '#666'
+          }}>
+            ⭐ 리뷰 데이터를 불러오는 중...
+      </div>
+        )}
+
       {/* 상태별 탭 */}
       <div style={{ marginBottom: '25px' }}>
         <h3 style={{ 
@@ -152,10 +371,10 @@ export default function ReviewsPage() {
           flexWrap: 'wrap', 
           gap: '10px'
         }}>
-          {statuses.map(status => (
-            <button
-              key={status.value}
-              onClick={() => setSelectedStatus(status.value)}
+            {statuses.map(status => (
+              <button
+                key={status.value}
+                onClick={() => setSelectedStatus(status.value)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -169,34 +388,35 @@ export default function ReviewsPage() {
                 backgroundColor: selectedStatus === status.value ? '#007bff' : '#f9f9f9',
                 cursor: 'pointer'
               }}
-            >
-              {status.label}
+              >
+                {status.label}
               <span style={{
                 padding: '2px 6px',
                 borderRadius: '10px',
                 backgroundColor: selectedStatus === status.value ? 'rgba(255,255,255,0.3)' : '#e0e0e0',
                 fontSize: '12px'
               }}>
-                {status.count}
-              </span>
-            </button>
-          ))}
+                  {status.count}
+                </span>
+              </button>
+            ))}
         </div>
       </div>
 
       {/* 리뷰 목록 */}
-      <div style={{ marginBottom: '25px' }}>
-        <h3 style={{ 
-          fontWeight: 'bold', 
-          marginBottom: '15px',
-          fontSize: '18px',
-          borderBottom: '1px solid #e0e0e0',
-          paddingBottom: '8px'
-        }}>
-          리뷰 목록 ({filteredReviews.length}개)
-        </h3>
+      {!loading && (
+        <div style={{ marginBottom: '25px' }}>
+          <h3 style={{ 
+            fontWeight: 'bold', 
+            marginBottom: '15px',
+            fontSize: '18px',
+            borderBottom: '1px solid #e0e0e0',
+            paddingBottom: '8px'
+          }}>
+            리뷰 목록 ({filteredReviews.length}개)
+          </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          {filteredReviews.map((review) => (
+        {filteredReviews.map((review) => (
             <div key={review.id} style={{ 
               border: '1px solid #ddd', 
               borderRadius: '4px',
@@ -238,7 +458,9 @@ export default function ReviewsPage() {
                         🚩 신고됨
                       </span>
                     )}
-                    <span style={{ fontSize: '12px', color: '#666' }}>{review.createdAt}</span>
+                    <span style={{ fontSize: '12px', color: '#666' }}>
+                      {review.createdAt.toLocaleDateString('ko-KR')}
+                    </span>
                   </div>
                   
                   <div style={{ marginBottom: '10px' }}>
@@ -264,7 +486,7 @@ export default function ReviewsPage() {
                     </p>
                   </div>
 
-                  {review.hasImages && (
+                  {review.images && review.images.length > 0 && (
                     <div style={{ marginBottom: '12px' }}>
                       <span style={{ 
                         display: 'inline-flex', 
@@ -272,7 +494,7 @@ export default function ReviewsPage() {
                         fontSize: '14px', 
                         color: '#007bff'
                       }}>
-                        🖼️ 이미지 첨부됨
+                        🖼️ 이미지 {review.images.length}개 첨부됨
                       </span>
                     </div>
                   )}
@@ -308,80 +530,94 @@ export default function ReviewsPage() {
                 }}>
                   {review.status === 'pending' && (
                     <>
-                      <button style={{
-                        padding: '6px 12px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        color: '#fff',
-                        backgroundColor: '#28a745',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}>
+                      <button 
+                        onClick={() => handleApproveReview(review.id)}
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          color: '#fff',
+                          backgroundColor: '#28a745',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
                         ✓ 승인
                       </button>
-                      <button style={{
-                        padding: '6px 12px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        color: '#fff',
-                        backgroundColor: '#dc3545',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}>
+                      <button 
+                        onClick={() => handleRejectReview(review.id)}
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          color: '#fff',
+                          backgroundColor: '#dc3545',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
                         ✗ 거부
                       </button>
                     </>
                   )}
                   
                   {review.status === 'approved' && !review.adminReply && (
-                    <button style={{
-                      padding: '6px 12px',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      color: '#fff',
-                      backgroundColor: '#007bff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}>
+                    <button 
+                      onClick={() => handleReplyReview(review.id)}
+                      style={{
+                        padding: '6px 12px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        color: '#fff',
+                        backgroundColor: '#007bff',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
                       💬 답글
                     </button>
                   )}
 
                   {review.isReported && (
-                    <button style={{
-                      padding: '6px 12px',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      color: '#fff',
-                      backgroundColor: '#fd7e14',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}>
+                    <button 
+                      onClick={() => handleResolveReport(review.id)}
+                      style={{
+                        padding: '6px 12px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        color: '#fff',
+                        backgroundColor: '#fd7e14',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
                       신고 처리
                     </button>
                   )}
 
-                  <button style={{
-                    padding: '6px 12px',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    color: '#fff',
-                    backgroundColor: '#6c757d',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}>
-                    상세보기
+                  <button 
+                    onClick={() => handleDeleteReview(review.id, review.title)}
+                    style={{
+                      padding: '6px 12px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: '#fff',
+                      backgroundColor: '#6c757d',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    🗑 삭제
                   </button>
-                </div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
       {filteredReviews.length === 0 && (
@@ -401,6 +637,106 @@ export default function ReviewsPage() {
           </p>
         </div>
       )}
+        </div>
+      )}
+
+      {/* 답글 작성 모달 */}
+      {showReplyModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '8px',
+            padding: '30px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
+          }}>
+            <h3 style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold', 
+              marginBottom: '20px',
+              margin: '0 0 20px 0'
+            }}>
+              관리자 답글 작성
+            </h3>
+            
+            <textarea
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder="고객 리뷰에 대한 답글을 작성해주세요"
+              rows={4}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px',
+                resize: 'vertical',
+                marginBottom: '20px'
+              }}
+            />
+            
+            <div style={{ 
+              display: 'flex', 
+              gap: '10px', 
+              justifyContent: 'flex-end' 
+            }}>
+              <button
+                onClick={() => setShowReplyModal(false)}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#6c757d',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleSubmitReply}
+                disabled={submitting}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: submitting ? '#6c757d' : '#007bff',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  cursor: submitting ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {submitting ? '등록 중...' : '답글 등록'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 커스텀 알림창 */}
+      <CustomAlert
+        isOpen={alert.isOpen}
+        type={alert.type}
+        title={alert.title}
+        message={alert.message}
+        onConfirm={alert.onConfirm}
+        onCancel={alert.type === 'confirm' ? alert.onCancel : undefined}
+        confirmText={alert.confirmText}
+        cancelText={alert.cancelText}
+      />
       </div>
     </div>
   );

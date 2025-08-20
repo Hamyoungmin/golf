@@ -121,12 +121,37 @@ export interface Cart {
 export interface Review {
   id: string;
   productId: string;
+  productName: string;
   userId: string;
   userName: string;
   rating: number;
+  title: string;
   content: string;
   images: string[];
+  status: 'pending' | 'approved' | 'rejected';
+  isReported: boolean;
+  reportReason?: string;
+  reportedAt?: Date;
+  reportedBy?: string;
+  adminReply?: string;
+  adminReplyAt?: Date;
+  repliedBy?: string; // 관리자 ID
+  approvedAt?: Date;
+  approvedBy?: string; // 관리자 ID
+  rejectedAt?: Date;
+  rejectedBy?: string; // 관리자 ID
+  rejectionReason?: string;
   createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ReviewStats {
+  totalReviews: number;
+  pendingReviews: number;
+  approvedReviews: number;
+  rejectedReviews: number;
+  reportedReviews: number;
+  averageRating: number;
 }
 
 // 위시리스트 관련 타입 정의
