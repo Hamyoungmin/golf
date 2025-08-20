@@ -151,11 +151,24 @@ export default function AdminPaymentsPage() {
       header: '주문번호',
       render: (payment: any) => (
         <div>
-          <p className="font-medium text-blue-600 cursor-pointer hover:underline"
-             onClick={() => router.push(`/admin/orders/${payment.orderId}`)}>
+          <p style={{ 
+            fontWeight: '500',
+            color: '#007bff',
+            cursor: 'pointer',
+            textDecoration: 'none',
+            margin: 0,
+            marginBottom: '4px'
+          }}
+             onClick={() => router.push(`/admin/orders/${payment.orderId}`)}
+             onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+             onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}>
             {payment.orderId}
           </p>
-          <p className="text-xs text-gray-500">{formatDate(payment.createdAt)}</p>
+          <p style={{ 
+            fontSize: '12px', 
+            color: '#666',
+            margin: 0
+          }}>{formatDate(payment.createdAt)}</p>
         </div>
       ),
     },
@@ -166,8 +179,16 @@ export default function AdminPaymentsPage() {
         const user = userCache[payment.userId];
         return (
           <div>
-            <p className="font-medium">{user?.name || '알 수 없음'}</p>
-            <p className="text-xs text-gray-500">{user?.email || payment.userId}</p>
+            <p style={{ 
+              fontWeight: '500',
+              margin: 0,
+              marginBottom: '4px'
+            }}>{user?.name || '알 수 없음'}</p>
+            <p style={{ 
+              fontSize: '12px', 
+              color: '#666',
+              margin: 0
+            }}>{user?.email || payment.userId}</p>
           </div>
         );
       },
@@ -177,15 +198,19 @@ export default function AdminPaymentsPage() {
       header: '입금정보',
       render: (payment: PaymentInfo) => {
         const info = payment.bankTransferInfo;
-        if (!info) return <span className="text-gray-400">정보 없음</span>;
+        if (!info) return <span style={{ color: '#999' }}>정보 없음</span>;
         
         return (
-          <div className="text-sm">
-            <p><strong>입금자:</strong> {info.depositorName}</p>
-            <p><strong>금액:</strong> {formatCurrency(info.transferAmount)}</p>
-            <p><strong>은행:</strong> {info.bankName}</p>
+          <div style={{ fontSize: '14px' }}>
+            <p style={{ margin: 0, marginBottom: '4px' }}><strong>입금자:</strong> {info.depositorName}</p>
+            <p style={{ margin: 0, marginBottom: '4px' }}><strong>금액:</strong> {formatCurrency(info.transferAmount)}</p>
+            <p style={{ margin: 0, marginBottom: '4px' }}><strong>은행:</strong> {info.bankName}</p>
             {info.transferDate && (
-              <p className="text-xs text-gray-500">
+              <p style={{ 
+                fontSize: '12px', 
+                color: '#666',
+                margin: 0
+              }}>
                 입금일: {formatDate(info.transferDate)}
               </p>
             )}
@@ -198,9 +223,14 @@ export default function AdminPaymentsPage() {
       header: '주문금액',
       render: (payment: any) => (
         <div>
-          <span className="font-medium">{formatCurrency(payment.amount)}</span>
+          <span style={{ fontWeight: '500' }}>{formatCurrency(payment.amount)}</span>
           {payment.bankTransferInfo && payment.bankTransferInfo.transferAmount !== payment.amount && (
-            <p className="text-xs text-red-500">
+            <p style={{ 
+              fontSize: '12px', 
+              color: '#dc3545',
+              margin: 0,
+              marginTop: '4px'
+            }}>
               차액: {formatCurrency(payment.bankTransferInfo.transferAmount - payment.amount)}
             </p>
           )}
@@ -210,11 +240,30 @@ export default function AdminPaymentsPage() {
     {
       key: 'status',
       header: '상태',
-      render: (payment: any) => (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentStatusColor(payment.status)}`}>
-          {getPaymentStatusText(payment.status)}
-        </span>
-      ),
+      render: (payment: any) => {
+        const statusColors = {
+          pending: { bg: '#fff3cd', color: '#856404', border: '#ffeaa7' },
+          confirmed: { bg: '#d1edff', color: '#155724', border: '#b3d7ff' }, 
+          rejected: { bg: '#f8d7da', color: '#721c24', border: '#f5c6cb' }
+        };
+        const statusColor = statusColors[payment.status as keyof typeof statusColors] || statusColors.pending;
+        
+        return (
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '4px 12px',
+            borderRadius: '12px',
+            fontSize: '12px',
+            fontWeight: '500',
+            backgroundColor: statusColor.bg,
+            color: statusColor.color,
+            border: `1px solid ${statusColor.border}`
+          }}>
+            {getPaymentStatusText(payment.status)}
+          </span>
+        );
+      },
     },
   ];
 
@@ -236,98 +285,230 @@ export default function AdminPaymentsPage() {
   });
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">입금 관리</h1>
-        <p className="text-gray-600 mt-2">고객의 입금 내역을 확인하고 승인/거절할 수 있습니다.</p>
-      </div>
+    <div className="container" style={{ maxWidth: '1200px', margin: '50px auto', padding: '20px' }}>
+      <div style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '8px', 
+        padding: '30px',
+        backgroundColor: '#fff'
+      }}>
+        <h1 style={{ 
+          textAlign: 'center', 
+          marginBottom: '10px',
+          fontSize: '24px',
+          fontWeight: 'bold'
+        }}>
+          입금 관리
+        </h1>
+        <p style={{
+          textAlign: 'center',
+          marginBottom: '30px',
+          fontSize: '14px',
+          color: '#666'
+        }}>
+          고객의 입금 내역을 확인하고 승인/거절할 수 있습니다.
+        </p>
 
-      {/* 상태별 탭 */}
-      <div className="mb-6 border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          {paymentStatuses.map(status => (
-            <button
-              key={status.key}
-              onClick={() => setSelectedStatus(status.key as 'pending' | 'confirmed' | 'rejected')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                selectedStatus === status.key
-                  ? 'border-green-500 text-green-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              {status.label}
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* 검색 */}
-      <div className="mb-6 bg-white p-4 rounded-lg shadow">
-        <div className="relative max-w-md">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="주문번호, 고객명, 이메일, 입금자명 검색..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-3 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
+        {/* 상태별 탭 */}
+        <div style={{ marginBottom: '25px' }}>
+          <h3 style={{ 
+            fontWeight: 'bold', 
+            marginBottom: '15px',
+            fontSize: '18px',
+            borderBottom: '1px solid #e0e0e0',
+            paddingBottom: '8px'
+          }}>
+            입금 상태별 조회
+          </h3>
+          <div style={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: '10px',
+            marginBottom: '15px'
+          }}>
+            {paymentStatuses.map(status => (
+              <button
+                key={status.key}
+                onClick={() => setSelectedStatus(status.key as 'pending' | 'confirmed' | 'rejected')}
+                style={{
+                  padding: '8px 16px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: selectedStatus === status.key ? '#fff' : '#666',
+                  backgroundColor: selectedStatus === status.key ? '#28a745' : '#f9f9f9',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (selectedStatus !== status.key) {
+                    e.currentTarget.style.backgroundColor = '#e9ecef';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (selectedStatus !== status.key) {
+                    e.currentTarget.style.backgroundColor = '#f9f9f9';
+                  }
+                }}
+              >
+                {status.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* 결제 테이블 */}
-      <div className="bg-white shadow rounded-lg">
-        <DataTable
-          data={filteredPayments.map(payment => ({ ...payment, id: payment.orderId || 'unknown' }))}
-          columns={columns}
-          loading={loading}
-          emptyMessage="입금 내역이 없습니다."
-          actions={(payment) => (
-            <div className="flex space-x-2">
-              {payment.status === 'pending' && (
-                <>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (payment.orderId) handlePaymentConfirm(payment.orderId, true);
-                    }}
-                    disabled={processing === payment.orderId}
-                    className="text-green-600 hover:text-green-900 flex items-center gap-1 disabled:opacity-50"
-                  >
-                    <CheckCircleIcon className="h-4 w-4" />
-                    승인
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (payment.orderId) handlePaymentConfirm(payment.orderId, false);
-                    }}
-                    disabled={processing === payment.orderId}
-                    className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50"
-                  >
-                    <XCircleIcon className="h-4 w-4" />
-                    거절
-                  </button>
-                </>
+        {/* 검색 */}
+        <div style={{ marginBottom: '25px' }}>
+          <h3 style={{ 
+            fontWeight: 'bold', 
+            marginBottom: '15px',
+            fontSize: '18px',
+            borderBottom: '1px solid #e0e0e0',
+            paddingBottom: '8px'
+          }}>
+            입금 내역 검색
+          </h3>
+          <div style={{ position: 'relative', maxWidth: '400px' }}>
+            <MagnifyingGlassIcon style={{
+              position: 'absolute',
+              left: '12px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: '20px',
+              height: '20px',
+              color: '#999'
+            }} />
+            <input
+              type="text"
+              placeholder="주문번호, 고객명, 이메일, 입금자명 검색..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 10px 10px 40px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px',
+                outline: 'none'
+              }}
+            />
+          </div>
+        </div>
+
+        {/* 결제 테이블 */}
+        <div style={{ marginBottom: '25px' }}>
+          <h3 style={{ 
+            fontWeight: 'bold', 
+            marginBottom: '15px',
+            fontSize: '18px',
+            borderBottom: '1px solid #e0e0e0',
+            paddingBottom: '8px'
+          }}>
+            입금 내역 ({filteredPayments.length}건)
+          </h3>
+          <div style={{ 
+            border: '1px solid #ddd', 
+            borderRadius: '4px',
+            backgroundColor: '#fff'
+          }}>
+            <DataTable
+              data={filteredPayments.map(payment => ({ ...payment, id: payment.orderId || 'unknown' }))}
+              columns={columns}
+              loading={loading}
+              emptyMessage="입금 내역이 없습니다."
+              actions={(payment) => (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {payment.status === 'pending' && (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (payment.orderId) handlePaymentConfirm(payment.orderId, true);
+                        }}
+                        disabled={processing === payment.orderId}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '6px 12px',
+                          border: 'none',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          color: '#fff',
+                          backgroundColor: processing === payment.orderId ? '#ccc' : '#28a745',
+                          cursor: processing === payment.orderId ? 'not-allowed' : 'pointer',
+                          opacity: processing === payment.orderId ? 0.5 : 1
+                        }}
+                      >
+                        <CheckCircleIcon style={{ width: '16px', height: '16px' }} />
+                        승인
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (payment.orderId) handlePaymentConfirm(payment.orderId, false);
+                        }}
+                        disabled={processing === payment.orderId}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '6px 12px',
+                          border: 'none',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          color: '#fff',
+                          backgroundColor: processing === payment.orderId ? '#ccc' : '#dc3545',
+                          cursor: processing === payment.orderId ? 'not-allowed' : 'pointer',
+                          opacity: processing === payment.orderId ? 0.5 : 1
+                        }}
+                      >
+                        <XCircleIcon style={{ width: '16px', height: '16px' }} />
+                        거절
+                      </button>
+                    </>
+                  )}
+                  {payment.status !== 'pending' && (
+                    <span style={{ fontSize: '12px', color: '#666' }}>
+                      {payment.verifiedAt && `${formatDate(payment.verifiedAt)} 처리됨`}
+                    </span>
+                  )}
+                </div>
               )}
-              {payment.status !== 'pending' && (
-                <span className="text-gray-400 text-sm">
-                  {payment.verifiedAt && `${formatDate(payment.verifiedAt)} 처리됨`}
-                </span>
-              )}
+            />
+          </div>
+        </div>
+
+        {/* 안내 메시지 */}
+        <div style={{ 
+          padding: '15px',
+          border: '1px solid #b3d7ff',
+          borderRadius: '4px',
+          backgroundColor: '#f0f8ff',
+          marginTop: '20px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+            <BanknotesIcon style={{ 
+              width: '20px', 
+              height: '20px', 
+              color: '#0066cc',
+              marginRight: '12px',
+              marginTop: '2px',
+              flexShrink: 0
+            }} />
+            <div>
+              <p style={{ 
+                fontSize: '14px', 
+                color: '#0066cc',
+                margin: 0,
+                lineHeight: '1.5'
+              }}>
+                💡 입금 내역을 확인한 후 승인/거절 처리해주세요. 승인 시 자동으로 주문 상태가 "결제 완료"로 변경됩니다.
+              </p>
             </div>
-          )}
-        />
-      </div>
-
-      {/* 안내 메시지 */}
-      <div className="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4">
-        <div className="flex">
-          <BanknotesIcon className="h-5 w-5 text-blue-400" />
-          <div className="ml-3">
-            <p className="text-sm text-blue-700">
-              입금 내역을 확인한 후 승인/거절 처리해주세요. 승인 시 자동으로 주문 상태가 &quot;결제 완료&quot;로 변경됩니다.
-            </p>
           </div>
         </div>
       </div>
