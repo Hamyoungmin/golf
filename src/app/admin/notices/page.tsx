@@ -19,6 +19,7 @@ import {
   initializeNotices
 } from '@/lib/notices';
 import { useAuth } from '@/contexts/AuthContext';
+import CustomAlert from '@/components/CustomAlert';
 
 export default function NoticesPage() {
   const { user } = useAuth();
@@ -32,6 +33,42 @@ export default function NoticesPage() {
     isVisible: true
   });
   const [submitting, setSubmitting] = useState(false);
+  
+  // 알림창 상태
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    type: 'info' as 'success' | 'error' | 'warning' | 'info' | 'confirm',
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    onCancel: () => {},
+    confirmText: '확인',
+    cancelText: '취소'
+  });
+
+  // 알림창 헬퍼 함수들
+  const showAlert = (
+    type: 'success' | 'error' | 'warning' | 'info' | 'confirm',
+    message: string,
+    title?: string,
+    onConfirm?: () => void,
+    onCancel?: () => void
+  ) => {
+    setAlert({
+      isOpen: true,
+      type,
+      title: title || '',
+      message,
+      onConfirm: onConfirm || closeAlert,
+      onCancel: onCancel || closeAlert,
+      confirmText: type === 'confirm' ? '확인' : '확인',
+      cancelText: '취소'
+    });
+  };
+
+  const closeAlert = () => {
+    setAlert(prev => ({ ...prev, isOpen: false }));
+  };
 
   // 데이터 로드
   useEffect(() => {
@@ -75,12 +112,12 @@ export default function NoticesPage() {
   // 새 공지사항 작성 처리
   const handleSubmit = async () => {
     if (!formData.title.trim() || !formData.content.trim()) {
-      alert('제목과 내용을 모두 입력해주세요.');
+      showAlert('warning', '제목과 내용을 모두 입력해주세요.');
       return;
     }
 
     if (!user?.uid) {
-      alert('로그인이 필요합니다.');
+      showAlert('error', '로그인이 필요합니다.');
       return;
     }
 
@@ -97,21 +134,23 @@ export default function NoticesPage() {
       const noticeId = await createNotice(noticeData);
       
       if (noticeId) {
-        alert('공지사항이 성공적으로 등록되었습니다.');
-        setFormData({
-          title: '',
-          content: '',
-          isFixed: false,
-          isVisible: true
+        showAlert('success', '공지사항이 성공적으로 등록되었습니다.', '', () => {
+          setFormData({
+            title: '',
+            content: '',
+            isFixed: false,
+            isVisible: true
+          });
+          setShowForm(false);
+          loadNotices(); // 목록 새로고침
+          closeAlert();
         });
-        setShowForm(false);
-        await loadNotices(); // 목록 새로고침
       } else {
-        alert('공지사항 등록에 실패했습니다.');
+        showAlert('error', '공지사항 등록에 실패했습니다.');
       }
     } catch (error) {
       console.error('공지사항 등록 오류:', error);
-      alert('공지사항 등록 중 오류가 발생했습니다.');
+      showAlert('error', '공지사항 등록 중 오류가 발생했습니다.');
     } finally {
       setSubmitting(false);
     }
@@ -119,22 +158,29 @@ export default function NoticesPage() {
 
   // 공지사항 삭제
   const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`"${title}" 공지사항을 삭제하시겠습니까?`)) {
-      return;
-    }
-
-    try {
-      const success = await deleteNotice(id);
-      if (success) {
-        alert('공지사항이 삭제되었습니다.');
-        await loadNotices();
-      } else {
-        alert('공지사항 삭제에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('공지사항 삭제 오류:', error);
-      alert('공지사항 삭제 중 오류가 발생했습니다.');
-    }
+    showAlert(
+      'confirm',
+      `"${title}" 공지사항을 삭제하시겠습니까?`,
+      '공지사항 삭제',
+      async () => {
+        try {
+          const success = await deleteNotice(id);
+          if (success) {
+            showAlert('success', '공지사항이 삭제되었습니다.', '', async () => {
+              await loadNotices();
+              closeAlert();
+            });
+          } else {
+            showAlert('error', '공지사항 삭제에 실패했습니다.');
+          }
+        } catch (error) {
+          console.error('공지사항 삭제 오류:', error);
+          showAlert('error', '공지사항 삭제 중 오류가 발생했습니다.');
+        }
+        closeAlert();
+      },
+      closeAlert
+    );
   };
 
   // 상단 고정 토글
@@ -144,11 +190,11 @@ export default function NoticesPage() {
       if (success) {
         await loadNotices();
       } else {
-        alert('설정 변경에 실패했습니다.');
+        showAlert('error', '설정 변경에 실패했습니다.');
       }
     } catch (error) {
       console.error('고정 설정 변경 오류:', error);
-      alert('설정 변경 중 오류가 발생했습니다.');
+      showAlert('error', '설정 변경 중 오류가 발생했습니다.');
     }
   };
 
@@ -159,11 +205,11 @@ export default function NoticesPage() {
       if (success) {
         await loadNotices();
       } else {
-        alert('게시 상태 변경에 실패했습니다.');
+        showAlert('error', '게시 상태 변경에 실패했습니다.');
       }
     } catch (error) {
       console.error('게시 상태 변경 오류:', error);
-      alert('게시 상태 변경 중 오류가 발생했습니다.');
+      showAlert('error', '게시 상태 변경 중 오류가 발생했습니다.');
     }
   };
 
@@ -531,6 +577,18 @@ export default function NoticesPage() {
         </div>
       )}
       </div>
+
+      {/* 커스텀 알림창 */}
+      <CustomAlert
+        isOpen={alert.isOpen}
+        type={alert.type}
+        title={alert.title}
+        message={alert.message}
+        onConfirm={alert.onConfirm}
+        onCancel={alert.type === 'confirm' ? alert.onCancel : undefined}
+        confirmText={alert.confirmText}
+        cancelText={alert.cancelText}
+      />
     </div>
   );
 }

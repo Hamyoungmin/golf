@@ -381,7 +381,6 @@ export default function NoticeDetailPage() {
           </div>
         </div>
       </div>
-      </div>
     </div>
   );
 }
