@@ -8,24 +8,40 @@ const mockAuth = {
 // Mock functions that match Firestore API
 const mockCollection = (db: any, path: string) => ({
   doc: (id?: string) => mockDoc(db, `${path}/${id || 'mock'}`),
-  add: () => Promise.resolve({ id: 'mock' }),
-  where: () => ({ get: () => Promise.resolve({ docs: [] }) }),
+  add: (data: any) => Promise.resolve({ id: 'mock_' + Date.now() }),
+  where: () => ({ 
+    get: () => Promise.resolve({ docs: [] }),
+    limit: () => ({ get: () => Promise.resolve({ docs: [] }) }),
+    orderBy: () => ({ get: () => Promise.resolve({ docs: [] }) })
+  }),
   get: () => Promise.resolve({ docs: [] }),
+  orderBy: () => ({ get: () => Promise.resolve({ docs: [] }) }),
+  limit: () => ({ get: () => Promise.resolve({ docs: [] }) }),
+  path: path,
+  parent: db,
+  id: path.split('/').pop() || 'mock'
 });
 
 const mockDoc = (db: any, path: string) => ({
   get: () => Promise.resolve({ 
-    exists: false, 
+    exists: () => false, 
     data: () => null,
-    id: 'mock'
+    id: path.split('/').pop() || 'mock',
+    ref: { path: path }
   }),
-  set: () => Promise.resolve(),
-  update: () => Promise.resolve(),
+  set: (data: any, options?: any) => Promise.resolve(),
+  update: (data: any) => Promise.resolve(),
   delete: () => Promise.resolve(),
+  path: path,
+  parent: db,
+  id: path.split('/').pop() || 'mock'
 });
 
 const mockDb = {
-  // This will be replaced by the actual functions when Firebase is initialized
+  collection: (path: string) => mockCollection(mockDb, path),
+  doc: (path: string) => mockDoc(mockDb, path),
+  app: { name: 'mock' },
+  type: 'firestore'
 };
 
 const mockStorage = {
@@ -42,7 +58,13 @@ let db: any = mockDb;
 let storage: any = mockStorage;
 
 // Mock Firestore functions
-let collection: any = mockCollection;
+let collection: any = (db: any, path: string) => {
+  if (!db || !path) {
+    console.warn('Collection called with invalid arguments:', db, path);
+    return mockCollection(mockDb, path || 'fallback');
+  }
+  return mockCollection(db, path);
+};
 let doc: any = mockDoc;
 let getDoc: any = (docRef: any) => Promise.resolve({ 
   exists: false, 
@@ -61,7 +83,10 @@ let arrayRemove: any = (...values: any[]) => values;
 let orderBy: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
 let limit: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
 let startAfter: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
-let addDoc: any = () => Promise.resolve({ id: 'mock' });
+let addDoc: any = (collectionRef: any, data: any) => {
+  console.log('Mock addDoc called with:', collectionRef, data);
+  return Promise.resolve({ id: 'mock_' + Date.now() });
+};
 
 // Types
 let DocumentSnapshot: any = {};
