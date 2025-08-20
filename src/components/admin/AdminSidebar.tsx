@@ -137,14 +137,7 @@ const AdminSidebar: React.FC = () => {
         })}
       </nav>
 
-      <div className="absolute bottom-0 w-64 p-6 border-t border-gray-200 bg-white">
-        <Link
-          href="/"
-          className="flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
-        >
-          ← 쇼핑몰로 돌아가기
-        </Link>
-      </div>
+
     </div>
   );
 };
