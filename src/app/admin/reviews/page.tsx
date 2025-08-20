@@ -13,8 +13,6 @@ import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { Review, ReviewStats } from '@/types';
 import { 
   getAllReviews, 
-  approveReview, 
-  rejectReview, 
   addAdminReply,
   resolveReport,
   deleteReview,
@@ -26,7 +24,7 @@ import CustomAlert from '@/components/CustomAlert';
 
 export default function ReviewsPage() {
   const { user } = useAuth();
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedFilter, setSelectedFilter] = useState('all');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewStats, setReviewStats] = useState<ReviewStats>({
     totalReviews: 0,
@@ -106,54 +104,7 @@ export default function ReviewsPage() {
     }
   };
 
-  // 리뷰 승인
-  const handleApproveReview = async (reviewId: string) => {
-    if (!user?.uid) {
-      showAlert('error', '관리자 권한이 필요합니다.');
-      return;
-    }
 
-    try {
-      const success = await approveReview(reviewId, user.uid);
-      if (success) {
-        showAlert('success', '리뷰가 승인되었습니다.', '', () => {
-          loadReviews();
-          closeAlert();
-        });
-      } else {
-        showAlert('error', '리뷰 승인에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('리뷰 승인 오류:', error);
-      showAlert('error', '리뷰 승인 중 오류가 발생했습니다.');
-    }
-  };
-
-  // 리뷰 거부
-  const handleRejectReview = async (reviewId: string) => {
-    if (!user?.uid) {
-      showAlert('error', '관리자 권한이 필요합니다.');
-      return;
-    }
-
-    showAlert('confirm', '이 리뷰를 거부하시겠습니까?', '리뷰 거부', async () => {
-      try {
-        const success = await rejectReview(reviewId, user.uid, '관리자에 의해 거부됨');
-        if (success) {
-          showAlert('success', '리뷰가 거부되었습니다.', '', () => {
-            loadReviews();
-            closeAlert();
-          });
-        } else {
-          showAlert('error', '리뷰 거부에 실패했습니다.');
-        }
-      } catch (error) {
-        console.error('리뷰 거부 오류:', error);
-        showAlert('error', '리뷰 거부 중 오류가 발생했습니다.');
-      }
-      closeAlert();
-    }, closeAlert);
-  };
 
   // 답글 작성
   const handleReplyReview = (reviewId: string) => {
@@ -241,37 +192,22 @@ export default function ReviewsPage() {
     }, closeAlert);
   };
 
-  const statuses = [
+  const filterOptions = [
     { value: 'all', label: '전체', count: reviewStats.totalReviews },
-    { value: 'pending', label: '승인 대기', count: reviewStats.pendingReviews },
-    { value: 'approved', label: '승인됨', count: reviewStats.approvedReviews },
-    { value: 'rejected', label: '거부됨', count: reviewStats.rejectedReviews },
+    { value: 'with-reply', label: '답글 있음', count: reviews.filter(r => r.adminReply).length },
+    { value: 'no-reply', label: '답글 없음', count: reviews.filter(r => !r.adminReply).length },
     { value: 'reported', label: '신고됨', count: reviewStats.reportedReviews }
   ];
 
   const filteredReviews = reviews.filter(review => {
-    if (selectedStatus === 'all') return true;
-    if (selectedStatus === 'reported') return review.isReported;
-    return review.status === selectedStatus;
+    if (selectedFilter === 'all') return true;
+    if (selectedFilter === 'reported') return review.isReported;
+    if (selectedFilter === 'with-reply') return !!review.adminReply;
+    if (selectedFilter === 'no-reply') return !review.adminReply;
+    return true;
   });
 
-  const getStatusColor = (status: string) => {
-    switch(status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
 
-  const getStatusText = (status: string) => {
-    switch(status) {
-      case 'pending': return '승인 대기';
-      case 'approved': return '승인됨';
-      case 'rejected': return '거부됨';
-      default: return status;
-    }
-  };
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -304,7 +240,7 @@ export default function ReviewsPage() {
           fontSize: '14px',
           color: '#666'
         }}>
-          고객 리뷰를 관리하고 승인/거부 처리를 할 수 있습니다.
+          고객 리뷰에 답글을 작성하고 신고된 리뷰를 관리할 수 있습니다.
         </p>
 
         {/* 리뷰 통계 */}
@@ -331,9 +267,9 @@ export default function ReviewsPage() {
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ffc107' }}>
-                {reviewStats.pendingReviews}
+                {reviews.filter(r => !r.adminReply).length}
               </div>
-              <div style={{ fontSize: '14px', color: '#666' }}>승인 대기</div>
+              <div style={{ fontSize: '14px', color: '#666' }}>답글 없음</div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#dc3545' }}>
@@ -371,10 +307,10 @@ export default function ReviewsPage() {
           flexWrap: 'wrap', 
           gap: '10px'
         }}>
-            {statuses.map(status => (
+            {filterOptions.map(status => (
               <button
                 key={status.value}
-                onClick={() => setSelectedStatus(status.value)}
+                onClick={() => setSelectedFilter(status.value)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -384,8 +320,8 @@ export default function ReviewsPage() {
                 borderRadius: '4px',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: selectedStatus === status.value ? '#fff' : '#666',
-                backgroundColor: selectedStatus === status.value ? '#007bff' : '#f9f9f9',
+                color: selectedFilter === status.value ? '#fff' : '#666',
+                backgroundColor: selectedFilter === status.value ? '#007bff' : '#f9f9f9',
                 cursor: 'pointer'
               }}
               >
@@ -393,7 +329,7 @@ export default function ReviewsPage() {
               <span style={{
                 padding: '2px 6px',
                 borderRadius: '10px',
-                backgroundColor: selectedStatus === status.value ? 'rgba(255,255,255,0.3)' : '#e0e0e0',
+                backgroundColor: selectedFilter === status.value ? 'rgba(255,255,255,0.3)' : '#e0e0e0',
                 fontSize: '12px'
               }}>
                   {status.count}
@@ -432,16 +368,10 @@ export default function ReviewsPage() {
                       fontSize: '12px',
                       fontWeight: '500',
                       borderRadius: '12px',
-                      backgroundColor: 
-                        review.status === 'pending' ? '#fff3cd' : 
-                        review.status === 'approved' ? '#e8f5e8' : 
-                        review.status === 'rejected' ? '#fee' : '#f0f0f0',
-                      color: 
-                        review.status === 'pending' ? '#856404' : 
-                        review.status === 'approved' ? '#2d7a2d' : 
-                        review.status === 'rejected' ? '#c33' : '#666'
+                      backgroundColor: review.adminReply ? '#e8f5e8' : '#fff3cd',
+                      color: review.adminReply ? '#2d7a2d' : '#856404'
                     }}>
-                      {getStatusText(review.status)}
+                      {review.adminReply ? '답글 완료' : '답글 없음'}
                     </span>
                     {review.isReported && (
                       <span style={{
@@ -528,42 +458,7 @@ export default function ReviewsPage() {
                   gap: '8px', 
                   marginLeft: '15px' 
                 }}>
-                  {review.status === 'pending' && (
-                    <>
-                      <button 
-                        onClick={() => handleApproveReview(review.id)}
-                        style={{
-                          padding: '6px 12px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          color: '#fff',
-                          backgroundColor: '#28a745',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        ✓ 승인
-                      </button>
-                      <button 
-                        onClick={() => handleRejectReview(review.id)}
-                        style={{
-                          padding: '6px 12px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          color: '#fff',
-                          backgroundColor: '#dc3545',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        ✗ 거부
-                      </button>
-                    </>
-                  )}
-                  
-                  {review.status === 'approved' && !review.adminReply && (
+                  {!review.adminReply ? (
                     <button 
                       onClick={() => handleReplyReview(review.id)}
                       style={{
@@ -579,6 +474,15 @@ export default function ReviewsPage() {
                     >
                       💬 답글
                     </button>
+                  ) : (
+                    <span style={{
+                      padding: '6px 12px',
+                      fontSize: '12px',
+                      color: '#28a745',
+                      fontWeight: '500'
+                    }}>
+                      답글 작성 완료
+                    </span>
                   )}
 
                   {review.isReported && (

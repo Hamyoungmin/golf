@@ -52,7 +52,50 @@ export async function getAllReviews(): Promise<Review[]> {
   }
 }
 
-// 승인된 리뷰만 가져오기 (고객용)
+// 상품별 모든 리뷰 가져오기 (신고된 리뷰 제외, 고객용)
+export async function getProductReviews(productId?: string): Promise<Review[]> {
+  try {
+    console.log('getProductReviews: 상품 리뷰 조회 시작, productId:', productId);
+    
+    let reviewsQuery;
+    if (productId) {
+      reviewsQuery = query(
+        collection(db, 'reviews'),
+        where('productId', '==', productId),
+        where('isReported', '==', false), // 신고되지 않은 리뷰만
+        orderBy('createdAt', 'desc')
+      );
+    } else {
+      reviewsQuery = query(
+        collection(db, 'reviews'),
+        where('isReported', '==', false), // 신고되지 않은 리뷰만
+        orderBy('createdAt', 'desc')
+      );
+    }
+    
+    const querySnapshot = await getDocs(reviewsQuery);
+    console.log('getProductReviews: 리뷰 개수:', querySnapshot.size);
+    
+    const reviews = querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        ...data,
+        id: doc.id,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        approvedAt: data.approvedAt?.toDate(),
+        adminReplyAt: data.adminReplyAt?.toDate(),
+      } as Review;
+    });
+
+    return reviews;
+  } catch (error) {
+    console.error('상품 리뷰 목록 가져오기 오류:', error);
+    return [];
+  }
+}
+
+// 승인된 리뷰만 가져오기 (기존 호환성을 위해 유지)
 export async function getApprovedReviews(productId?: string): Promise<Review[]> {
   try {
     console.log('getApprovedReviews: 승인된 리뷰 조회 시작, productId:', productId);
@@ -139,7 +182,7 @@ export async function createReview(reviewData: {
     const newReview = {
       ...reviewData,
       images: reviewData.images || [],
-      status: 'pending', // 기본적으로 승인 대기 상태
+      status: 'approved', // 즉시 공개 상태
       isReported: false,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -321,7 +364,7 @@ export async function getProductReviewStats(productId: string): Promise<{
   try {
     console.log('getProductReviewStats: 상품별 리뷰 통계 계산 시작, productId:', productId);
     
-    const reviews = await getApprovedReviews(productId);
+    const reviews = await getProductReviews(productId);
     
     const ratingDistribution: { [key: number]: number } = {
       1: 0, 2: 0, 3: 0, 4: 0, 5: 0

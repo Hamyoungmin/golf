@@ -10,7 +10,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useRecentlyViewed } from '@/contexts/RecentlyViewedContext';
 import { 
-  getApprovedReviews, 
+  getProductReviews, 
   createReview, 
   getProductReviewStats,
   initializeReviews,
@@ -240,7 +240,7 @@ export default function ProductDetail() {
       await initializeReviews();
       
       // 해당 상품의 승인된 리뷰들 가져오기
-      const productReviews = await getApprovedReviews(productId);
+      const productReviews = await getProductReviews(productId);
       setReviews(productReviews);
       
       // 리뷰 통계 가져오기
