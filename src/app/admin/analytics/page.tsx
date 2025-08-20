@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ChartBarIcon,
   CurrencyDollarIcon,
@@ -9,39 +9,67 @@ import {
   ArrowTrendingDownIcon
 } from '@heroicons/react/24/outline';
 import StatsCard from '@/components/admin/StatsCard';
+import { calculateSalesAnalytics, SalesAnalytics } from '@/lib/analytics';
 
 export default function AnalyticsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('week');
   const [selectedChart, setSelectedChart] = useState('sales');
+  const [analyticsData, setAnalyticsData] = useState<SalesAnalytics>({
+    totalRevenue: 0,
+    totalOrders: 0,
+    averageOrderValue: 0,
+    conversionRate: 0,
+    topProducts: [],
+    categoryStats: [],
+    dailyStats: [],
+    monthlyStats: []
+  });
+  const [loading, setLoading] = useState(true);
 
-  // 더미 분석 데이터
-  const analyticsData = {
-    totalRevenue: 125670000,
-    totalOrders: 1247,
-    averageOrderValue: 98500,
-    conversionRate: 3.2,
-    topProducts: [
-      { name: '캘러웨이 로그 드라이버', sales: 45, revenue: 6300000 },
-      { name: '젝시오 MP1200', sales: 23, revenue: 12650000 },
-      { name: '타이틀리스트 917 우드', sales: 38, revenue: 4560000 },
-      { name: '핑 ANSER2 퍼터', sales: 42, revenue: 5460000 },
-      { name: '클리브랜드 RTX6 웨지', sales: 35, revenue: 4200000 }
-    ],
-    categoryStats: [
-      { category: '드라이버', sales: 156, revenue: 35400000, percentage: 28.2 },
-      { category: '아이언', sales: 234, revenue: 42300000, percentage: 33.7 },
-      { category: '퍼터', sales: 189, revenue: 24570000, percentage: 19.5 },
-      { category: '웨지', sales: 145, revenue: 17400000, percentage: 13.8 },
-      { category: '우드', sales: 98, revenue: 5970000, percentage: 4.8 }
-    ],
-    monthlySales: [
-      { month: '1월', revenue: 8500000, orders: 95 },
-      { month: '2월', revenue: 9200000, orders: 108 },
-      { month: '3월', revenue: 11800000, orders: 134 },
-      { month: '4월', revenue: 10600000, orders: 121 },
-      { month: '5월', revenue: 13400000, orders: 156 },
-      { month: '6월', revenue: 15200000, orders: 178 },
-    ]
+  // 데이터 로드
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [selectedPeriod]);
+
+  const loadAnalyticsData = async () => {
+    setLoading(true);
+    try {
+      let startDate: Date | undefined;
+      let endDate: Date | undefined;
+
+      // 기간별 날짜 설정
+      const now = new Date();
+      switch (selectedPeriod) {
+        case 'day':
+          startDate = new Date(now);
+          startDate.setDate(now.getDate() - 1);
+          break;
+        case 'week':
+          startDate = new Date(now);
+          startDate.setDate(now.getDate() - 7);
+          break;
+        case 'month':
+          startDate = new Date(now);
+          startDate.setMonth(now.getMonth() - 1);
+          break;
+        case 'year':
+          startDate = new Date(now);
+          startDate.setFullYear(now.getFullYear() - 1);
+          break;
+        default:
+          startDate = new Date(now);
+          startDate.setDate(now.getDate() - 30);
+      }
+      
+      endDate = new Date();
+
+      const data = await calculateSalesAnalytics(startDate, endDate);
+      setAnalyticsData(data);
+    } catch (error) {
+      console.error('매출 통계 로드 오류:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const periods = [
@@ -80,8 +108,19 @@ export default function AnalyticsPage() {
           fontSize: '14px',
           color: '#666'
         }}>
-          매출 데이터를 분석하고 인사이트를 확인합니다.
+          실시간 매출 데이터를 분석하고 인사이트를 확인합니다.
         </p>
+
+        {loading && (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '40px',
+            fontSize: '16px',
+            color: '#666'
+          }}>
+            📊 매출 통계를 계산하는 중...
+          </div>
+        )}
 
       {/* 기간 선택 */}
       <div style={{ marginBottom: '25px' }}>
@@ -143,7 +182,9 @@ export default function AnalyticsPage() {
               ₩{(analyticsData.totalRevenue / 10000).toFixed(0)}만
             </div>
             <div style={{ fontSize: '14px', color: '#666' }}>총 매출</div>
-            <div style={{ fontSize: '12px', color: '#28a745', marginTop: '4px' }}>↗ 15.3%</div>
+            {analyticsData.totalRevenue > 0 && (
+              <div style={{ fontSize: '12px', color: '#28a745', marginTop: '4px' }}>실시간 집계</div>
+            )}
           </div>
           
           <div style={{ 
@@ -157,7 +198,9 @@ export default function AnalyticsPage() {
               {analyticsData.totalOrders.toLocaleString()}건
             </div>
             <div style={{ fontSize: '14px', color: '#666' }}>총 주문 건수</div>
-            <div style={{ fontSize: '12px', color: '#28a745', marginTop: '4px' }}>↗ 8.7%</div>
+            {analyticsData.totalOrders > 0 && (
+              <div style={{ fontSize: '12px', color: '#28a745', marginTop: '4px' }}>실시간 집계</div>
+            )}
           </div>
           
           <div style={{ 
@@ -168,10 +211,12 @@ export default function AnalyticsPage() {
             backgroundColor: '#f9f9f9'
           }}>
             <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
-              ₩{(analyticsData.averageOrderValue / 1000).toFixed(0)}천
+              ₩{analyticsData.averageOrderValue > 0 ? (analyticsData.averageOrderValue / 1000).toFixed(0) : '0'}천
             </div>
             <div style={{ fontSize: '14px', color: '#666' }}>평균 주문 금액</div>
-            <div style={{ fontSize: '12px', color: '#dc3545', marginTop: '4px' }}>↘ 2.1%</div>
+            {analyticsData.averageOrderValue > 0 && (
+              <div style={{ fontSize: '12px', color: '#007bff', marginTop: '4px' }}>자동 계산</div>
+            )}
           </div>
           
           <div style={{ 
@@ -182,10 +227,12 @@ export default function AnalyticsPage() {
             backgroundColor: '#f9f9f9'
           }}>
             <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
-              {analyticsData.conversionRate}%
+              {analyticsData.conversionRate.toFixed(1)}%
             </div>
             <div style={{ fontSize: '14px', color: '#666' }}>전환율</div>
-            <div style={{ fontSize: '12px', color: '#28a745', marginTop: '4px' }}>↗ 0.5%</div>
+            {analyticsData.conversionRate > 0 && (
+              <div style={{ fontSize: '12px', color: '#007bff', marginTop: '4px' }}>방문자 대비</div>
+            )}
           </div>
         </div>
       </div>
@@ -267,35 +314,48 @@ export default function AnalyticsPage() {
             padding: '20px'
           }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              {analyticsData.categoryStats.map((category, index) => (
-                <div key={index}>
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    marginBottom: '5px'
-                  }}>
-                    <span style={{ fontSize: '14px', fontWeight: '500' }}>{category.category}</span>
-                    <span style={{ fontSize: '14px', color: '#666' }}>
-                      ₩{(category.revenue / 10000).toFixed(0)}만 ({category.percentage}%)
-                    </span>
+              {analyticsData.categoryStats.length > 0 ? (
+                analyticsData.categoryStats.map((category, index) => (
+                  <div key={index}>
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      marginBottom: '5px'
+                    }}>
+                      <span style={{ fontSize: '14px', fontWeight: '500' }}>{category.category}</span>
+                      <span style={{ fontSize: '14px', color: '#666' }}>
+                        ₩{(category.revenue / 10000).toFixed(0)}만 ({category.percentage.toFixed(1)}%)
+                      </span>
+                    </div>
+                    <div style={{ 
+                      width: '100%', 
+                      backgroundColor: '#e0e0e0', 
+                      borderRadius: '10px', 
+                      height: '8px' 
+                    }}>
+                      <div style={{
+                        backgroundColor: '#007bff',
+                        height: '8px',
+                        borderRadius: '10px',
+                        width: `${category.percentage}%`,
+                        transition: 'width 0.3s ease'
+                      }}></div>
+                    </div>
                   </div>
-                  <div style={{ 
-                    width: '100%', 
-                    backgroundColor: '#e0e0e0', 
-                    borderRadius: '10px', 
-                    height: '8px' 
-                  }}>
-                    <div style={{
-                      backgroundColor: '#007bff',
-                      height: '8px',
-                      borderRadius: '10px',
-                      width: `${category.percentage}%`,
-                      transition: 'width 0.3s ease'
-                    }}></div>
-                  </div>
+                ))
+              ) : (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '40px',
+                  color: '#666'
+                }}>
+                  <div style={{ fontSize: '48px', marginBottom: '15px' }}>📊</div>
+                  <p style={{ fontSize: '14px', margin: 0 }}>
+                    아직 카테고리별 매출 데이터가 없습니다.
+                  </p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -339,50 +399,61 @@ export default function AnalyticsPage() {
               </tr>
             </thead>
             <tbody>
-              {analyticsData.topProducts.map((product, index) => (
-                <tr key={index} style={{ 
-                  borderBottom: index < analyticsData.topProducts.length - 1 ? '1px solid #e0e0e0' : 'none'
-                }}>
-                  <td style={{ padding: '12px' }}>
-                    <span style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
-                      color: '#fff',
-                      backgroundColor: index === 0 ? '#ffc107' : 
-                                     index === 1 ? '#6c757d' : 
-                                     index === 2 ? '#fd7e14' : '#adb5bd'
-                    }}>
-                      {index + 1}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px', fontSize: '14px', fontWeight: '500' }}>
-                    {product.name}
-                  </td>
-                  <td style={{ padding: '12px', fontSize: '14px' }}>
-                    {product.sales}개
-                  </td>
-                  <td style={{ padding: '12px', fontSize: '14px' }}>
-                    ₩{(product.revenue / 10000).toFixed(0)}만
-                  </td>
-                  <td style={{ padding: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ 
-                        fontSize: '14px', 
-                        fontWeight: '500',
-                        color: Math.random() > 0.5 ? '#28a745' : '#dc3545'
+              {analyticsData.topProducts.length > 0 ? (
+                analyticsData.topProducts.map((product, index) => (
+                  <tr key={product.id} style={{ 
+                    borderBottom: index < analyticsData.topProducts.length - 1 ? '1px solid #e0e0e0' : 'none'
+                  }}>
+                    <td style={{ padding: '12px' }}>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        color: '#fff',
+                        backgroundColor: index === 0 ? '#ffc107' : 
+                                       index === 1 ? '#6c757d' : 
+                                       index === 2 ? '#fd7e14' : '#adb5bd'
                       }}>
-                        {Math.random() > 0.5 ? '↗' : '↘'} {(Math.random() * 20 + 5).toFixed(1)}%
+                        {index + 1}
                       </span>
-                    </div>
+                    </td>
+                    <td style={{ padding: '12px', fontSize: '14px', fontWeight: '500' }}>
+                      {product.name}
+                    </td>
+                    <td style={{ padding: '12px', fontSize: '14px' }}>
+                      {product.sales}개
+                    </td>
+                    <td style={{ padding: '12px', fontSize: '14px' }}>
+                      ₩{(product.revenue / 10000).toFixed(0)}만
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ 
+                          fontSize: '14px', 
+                          fontWeight: '500',
+                          color: product.growthRate >= 0 ? '#28a745' : '#dc3545'
+                        }}>
+                          {product.growthRate >= 0 ? '↗' : '↘'} {Math.abs(product.growthRate).toFixed(1)}%
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '15px' }}>🏆</div>
+                    <p style={{ fontSize: '14px', margin: 0 }}>
+                      아직 베스트셀러 상품 데이터가 없습니다.
+                    </p>
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

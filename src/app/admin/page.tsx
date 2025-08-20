@@ -5,14 +5,33 @@ import { Product } from '@/types';
 import Link from 'next/link';
 import { getInventoryStats } from '@/lib/inventory';
 import { getProducts } from '@/lib/products';
+import { calculateSalesAnalytics } from '@/lib/analytics';
 
-// 더미 주문 통계 함수 (주문 시스템이 없으므로)
-const getOrderStats = async () => ({
-  totalOrders: 0,
-  pendingOrders: 0,
-  completedOrders: 0,
-  totalRevenue: 0,
-});
+// 실제 주문 통계 함수
+const getOrderStats = async () => {
+  try {
+    // 오늘 날짜 기준으로 매출 통계 계산
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    const analytics = await calculateSalesAnalytics(startOfToday, today);
+    
+    return {
+      totalOrders: analytics.totalOrders,
+      pendingOrders: 0, // 임시로 0 (상태별 조회 기능 추가 필요)
+      completedOrders: analytics.totalOrders,
+      totalRevenue: analytics.totalRevenue,
+    };
+  } catch (error) {
+    console.error('주문 통계 계산 오류:', error);
+    return {
+      totalOrders: 0,
+      pendingOrders: 0,
+      completedOrders: 0,
+      totalRevenue: 0,
+    };
+  }
+};
 
 // 실제 상품 통계를 가져오는 함수
 const getProductStats = async () => {
@@ -43,14 +62,21 @@ const getProductStats = async () => {
   }
 };
 
-// 인기 상품 가져오기 (재고 순으로 정렬)
+// 인기 상품 가져오기 (매출 기준)
 const getPopularProducts = async (limit: number) => {
   try {
+    // 최근 30일 매출 통계에서 베스트셀러 상품 가져오기
+    const analytics = await calculateSalesAnalytics();
+    const topProducts = analytics.topProducts.slice(0, limit);
+    
+    // 상품 상세 정보와 결합
     const products = await getProducts();
-    return products
-      .filter(product => product.stock > 0)
-      .sort((a, b) => b.stock - a.stock)
-      .slice(0, limit);
+    const popularProducts = topProducts.map(topProduct => {
+      const product = products.find(p => p.id === topProduct.id);
+      return product || null;
+    }).filter(Boolean) as Product[];
+    
+    return popularProducts;
   } catch (error) {
     console.error('인기 상품 가져오기 오류:', error);
     return [];

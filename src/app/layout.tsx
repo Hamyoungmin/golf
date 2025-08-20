@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { RecentlyViewedProvider } from "@/contexts/RecentlyViewedContext";
+import VisitorTracker from "@/components/VisitorTracker";
 
 export const metadata: Metadata = {
   title: "골프상회 - 골프용품 전문 도매몰",
@@ -28,6 +29,7 @@ export default function RootLayout({
             <WishlistProvider>
               <RecentlyViewedProvider>
                 <AuthGuard>
+                  <VisitorTracker />
                   <Header />
                   <main>
                     {children}

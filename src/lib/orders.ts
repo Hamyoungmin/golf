@@ -13,6 +13,7 @@ import {
   DocumentSnapshot
 } from './firebase';
 import { Order, OrderStatus } from '@/types';
+import { onOrderCreated } from './analytics';
 
 // 특정 사용자의 주문 목록 가져오기
 export async function getUserOrders(userId: string, limit?: number): Promise<Order[]> {
@@ -157,6 +158,10 @@ export async function createOrder(orderData: Omit<Order, 'orderId' | 'createdAt'
     };
 
     await setDoc(docRef, order);
+    
+    // 주문 생성 후 자동으로 통계 업데이트
+    await onOrderCreated(docRef.id);
+    
     return docRef.id;
   } catch (error) {
     console.error('주문 생성 오류:', error);
