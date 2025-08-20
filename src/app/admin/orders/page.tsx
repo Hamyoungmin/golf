@@ -181,21 +181,50 @@ export default function AdminOrdersPage() {
   });
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">주문 관리</h1>
-      </div>
+    <div className="container" style={{ maxWidth: '1200px', margin: '50px auto', padding: '20px' }}>
+      <div style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '8px', 
+        padding: '30px',
+        backgroundColor: '#fff'
+      }}>
+        <h1 style={{ 
+          textAlign: 'center', 
+          marginBottom: '30px',
+          fontSize: '24px',
+          fontWeight: 'bold'
+        }}>
+          주문 관리
+        </h1>
 
       {/* 상태별 탭 */}
-      <div className="mb-6 border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          주문 상태별 필터
+        </h3>
+        <div style={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: '10px'
+        }}>
           <button
             onClick={() => setSelectedStatus('')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              selectedStatus === ''
-                ? 'border-green-500 text-green-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+            style={{
+              padding: '8px 16px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: selectedStatus === '' ? '#fff' : '#666',
+              backgroundColor: selectedStatus === '' ? '#007bff' : '#f9f9f9',
+              cursor: 'pointer'
+            }}
           >
             전체
           </button>
@@ -203,89 +232,166 @@ export default function AdminOrdersPage() {
             <button
               key={status}
               onClick={() => setSelectedStatus(status)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                selectedStatus === status
-                  ? 'border-green-500 text-green-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              style={{
+                padding: '8px 16px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: selectedStatus === status ? '#fff' : '#666',
+                backgroundColor: selectedStatus === status ? '#007bff' : '#f9f9f9',
+                cursor: 'pointer'
+              }}
             >
               {getOrderStatusText(status)}
             </button>
           ))}
-        </nav>
+        </div>
       </div>
 
       {/* 검색 및 필터 */}
-      <div className="mb-6 bg-white p-4 rounded-lg shadow">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          주문 검색
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+          <div>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '5px',
+              fontWeight: '500',
+              fontSize: '14px'
+            }}>
+              검색어
+            </label>
             <input
               type="text"
-              placeholder="주문번호, 고객명, 이메일, 상품명 검색..."
+              placeholder="주문번호, 고객명, 이메일, 상품명..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-3 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-green-500"
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px'
+              }}
             />
           </div>
           
-          <div className="relative">
-            <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <div>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '5px',
+              fontWeight: '500',
+              fontSize: '14px'
+            }}>
+              시작일
+            </label>
             <input
               type="date"
               value={dateRange.start}
               onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-              className="pl-10 pr-3 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="시작일"
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px'
+              }}
             />
           </div>
           
-          <div className="relative">
-            <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <div>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '5px',
+              fontWeight: '500',
+              fontSize: '14px'
+            }}>
+              종료일
+            </label>
             <input
               type="date"
               value={dateRange.end}
               onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-              className="pl-10 pr-3 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="종료일"
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px'
+              }}
             />
           </div>
         </div>
       </div>
 
       {/* 주문 테이블 */}
-      <div className="bg-white shadow rounded-lg">
-        <DataTable
-          data={filteredOrders.map(order => ({ ...order, id: order.orderId }))}
-          columns={columns}
-          loading={loading}
-          emptyMessage="주문이 없습니다."
-          onRowClick={(order) => router.push(`/admin/orders/${order.orderId}`)}
-          actions={(order) => (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/admin/orders/${order.orderId}`);
-              }}
-              className="text-green-600 hover:text-green-900 flex items-center gap-1"
-            >
-              <DocumentTextIcon className="h-4 w-4" />
-              상세보기
-            </button>
-          )}
-        />
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          주문 목록 ({filteredOrders.length}개)
+        </h3>
+        <div style={{ 
+          border: '1px solid #ddd', 
+          borderRadius: '4px',
+          backgroundColor: '#fff'
+        }}>
+          <DataTable
+            data={filteredOrders.map(order => ({ ...order, id: order.orderId }))}
+            columns={columns}
+            loading={loading}
+            emptyMessage="주문이 없습니다."
+            onRowClick={(order) => router.push(`/admin/orders/${order.orderId}`)}
+            actions={(order) => (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/admin/orders/${order.orderId}`);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 8px',
+                  fontSize: '12px',
+                  color: '#007bff',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #007bff',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                상세보기
+              </button>
+            )}
+          />
+        </div>
       </div>
 
       {/* 안내 메시지 */}
-      <div className="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4">
-        <div className="flex">
-          <ExclamationCircleIcon className="h-5 w-5 text-blue-400" />
-          <div className="ml-3">
-            <p className="text-sm text-blue-700">
-              주문을 클릭하면 상세 정보를 확인하고 상태를 변경할 수 있습니다.
-            </p>
-          </div>
-        </div>
+      <div style={{
+        padding: '15px',
+        backgroundColor: '#e8f4fd',
+        border: '1px solid #bee5eb',
+        borderRadius: '4px',
+        fontSize: '14px',
+        color: '#0c5460'
+      }}>
+        💡 주문을 클릭하면 상세 정보를 확인하고 상태를 변경할 수 있습니다.
+      </div>
       </div>
     </div>
   );

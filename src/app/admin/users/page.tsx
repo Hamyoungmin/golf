@@ -151,19 +151,46 @@ export default function UsersManagement() {
   }
 
   return (
-    <div>
-      <div className="sm:flex sm:items-center sm:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">사용자 관리</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            회원가입 신청을 검토하고 승인/거부할 수 있습니다.
-          </p>
-        </div>
-      </div>
+    <div className="container" style={{ maxWidth: '1200px', margin: '50px auto', padding: '20px' }}>
+      <div style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '8px', 
+        padding: '30px',
+        backgroundColor: '#fff'
+      }}>
+        <h1 style={{ 
+          textAlign: 'center', 
+          marginBottom: '10px',
+          fontSize: '24px',
+          fontWeight: 'bold'
+        }}>
+          사용자 관리
+        </h1>
+        <p style={{
+          textAlign: 'center',
+          marginBottom: '30px',
+          fontSize: '14px',
+          color: '#666'
+        }}>
+          회원가입 신청을 검토하고 승인/거부할 수 있습니다.
+        </p>
 
       {/* 필터 탭 */}
-      <div className="mb-6">
-        <nav className="-mb-px flex space-x-8">
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          사용자 상태별 필터
+        </h3>
+        <div style={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: '10px'
+        }}>
           {[
             { key: 'pending', label: '승인 대기', count: users.filter(u => u.status === 'pending').length },
             { key: 'approved', label: '승인됨', count: users.filter(u => u.status === 'approved').length },
@@ -173,88 +200,135 @@ export default function UsersManagement() {
             <button
               key={tab.key}
               onClick={() => setFilter(tab.key as 'all' | 'pending' | 'approved' | 'rejected')}
-              className={`${
-                filter === tab.key
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: filter === tab.key ? '#fff' : '#666',
+                backgroundColor: filter === tab.key ? '#007bff' : '#f9f9f9',
+                cursor: 'pointer'
+              }}
             >
               {tab.label}
-              <span className="ml-2 py-0.5 px-2 rounded-full bg-gray-100 text-xs">
+              <span style={{
+                padding: '2px 6px',
+                borderRadius: '10px',
+                backgroundColor: filter === tab.key ? 'rgba(255,255,255,0.3)' : '#e0e0e0',
+                fontSize: '12px'
+              }}>
                 {tab.count}
               </span>
             </button>
           ))}
-        </nav>
+        </div>
       </div>
 
       {/* 사용자 목록 */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul className="divide-y divide-gray-200">
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          사용자 목록 ({users.length}개)
+        </h3>
+        <div style={{ 
+          border: '1px solid #ddd', 
+          borderRadius: '4px',
+          backgroundColor: '#fff'
+        }}>
           {users.length === 0 ? (
-            <li className="px-6 py-12 text-center">
-              <UsersIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">사용자가 없습니다</h3>
-              <p className="mt-1 text-sm text-gray-500">
+            <div style={{ 
+              padding: '40px 20px',
+              textAlign: 'center',
+              color: '#666'
+            }}>
+              <div style={{ fontSize: '48px', marginBottom: '15px' }}>👤</div>
+              <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>사용자가 없습니다</h3>
+              <p style={{ fontSize: '14px' }}>
                 {filter === 'pending' && '승인 대기 중인 사용자가 없습니다.'}
                 {filter === 'approved' && '승인된 사용자가 없습니다.'}
                 {filter === 'rejected' && '거부된 사용자가 없습니다.'}
                 {filter === 'all' && '등록된 사용자가 없습니다.'}
               </p>
-            </li>
+            </div>
           ) : (
-            users.map((user) => (
-              <li key={user.uid}>
-                <div className="px-6 py-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
+            users.map((user, index) => (
+              <div key={user.uid}>
+                <div style={{ 
+                  padding: '20px',
+                  borderBottom: index < users.length - 1 ? '1px solid #e0e0e0' : 'none'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                         <div>
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '4px' }}>
                             {user.name}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p style={{ fontSize: '14px', color: '#666' }}>
                             {user.email}
                           </p>
                         </div>
                         {getStatusBadge(user.status)}
                       </div>
                       
-                      <div className="mt-2 grid grid-cols-2 gap-4 text-sm text-gray-500">
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px', fontSize: '14px', color: '#666', marginBottom: '15px' }}>
                         <div>
-                          <span className="font-medium">상호명:</span> {user.companyName}
+                          <span style={{ fontWeight: '500' }}>상호명:</span> {user.companyName}
                         </div>
                         <div>
-                          <span className="font-medium">사업자번호:</span> {user.businessNumber}
+                          <span style={{ fontWeight: '500' }}>사업자번호:</span> {user.businessNumber}
                         </div>
                         <div>
-                          <span className="font-medium">연락처:</span> {user.phone}
+                          <span style={{ fontWeight: '500' }}>연락처:</span> {user.phone}
                         </div>
                         <div>
-                          <span className="font-medium">신청일:</span> {formatDate(user.createdAt)}
+                          <span style={{ fontWeight: '500' }}>신청일:</span> {formatDate(user.createdAt)}
                         </div>
                       </div>
 
                       {/* 사진 미리보기 */}
-                      <div className="mt-3 flex space-x-4">
+                      <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
                         {user.shopInteriorPhotoUrl && (
                           <div>
-                            <p className="text-xs text-gray-500 mb-1">샵 내부</p>
+                            <p style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>샵 내부</p>
                             <img 
                               src={user.shopInteriorPhotoUrl} 
                               alt="샵 내부" 
-                              className="h-16 w-16 object-cover rounded cursor-pointer"
+                              style={{
+                                width: '64px',
+                                height: '64px',
+                                objectFit: 'cover',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                border: '1px solid #ddd'
+                              }}
                               onClick={() => window.open(user.shopInteriorPhotoUrl, '_blank')}
                             />
                           </div>
                         )}
                         {user.shopSignPhotoUrl && (
                           <div>
-                            <p className="text-xs text-gray-500 mb-1">샵 간판</p>
+                            <p style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>샵 간판</p>
                             <img 
                               src={user.shopSignPhotoUrl} 
                               alt="샵 간판" 
-                              className="h-16 w-16 object-cover rounded cursor-pointer"
+                              style={{
+                                width: '64px',
+                                height: '64px',
+                                objectFit: 'cover',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                border: '1px solid #ddd'
+                              }}
                               onClick={() => window.open(user.shopSignPhotoUrl, '_blank')}
                             />
                           </div>
@@ -263,18 +337,30 @@ export default function UsersManagement() {
 
                       {/* 거부 사유 표시 */}
                       {user.status === 'rejected' && user.rejectionReason && (
-                        <div className="mt-3 p-3 bg-red-50 rounded-md">
-                          <p className="text-sm text-red-800">
-                            <span className="font-medium">거부 사유:</span> {user.rejectionReason}
+                        <div style={{
+                          padding: '12px',
+                          backgroundColor: '#fee',
+                          border: '1px solid #fcc',
+                          borderRadius: '4px',
+                          marginBottom: '10px'
+                        }}>
+                          <p style={{ fontSize: '14px', color: '#c33' }}>
+                            <span style={{ fontWeight: '500' }}>거부 사유:</span> {user.rejectionReason}
                           </p>
                         </div>
                       )}
 
                       {/* 승인 정보 표시 */}
                       {user.status === 'approved' && user.approvedAt && (
-                        <div className="mt-3 p-3 bg-blue-50 rounded-md">
-                          <p className="text-sm text-blue-800">
-                            <span className="font-medium">승인일:</span> {formatDate(user.approvedAt)}
+                        <div style={{
+                          padding: '12px',
+                          backgroundColor: '#e8f4fd',
+                          border: '1px solid #bee5eb',
+                          borderRadius: '4px',
+                          marginBottom: '10px'
+                        }}>
+                          <p style={{ fontSize: '14px', color: '#0c5460' }}>
+                            <span style={{ fontWeight: '500' }}>승인일:</span> {formatDate(user.approvedAt)}
                           </p>
                         </div>
                       )}
@@ -282,29 +368,52 @@ export default function UsersManagement() {
 
                     {/* 액션 버튼 */}
                     {user.status === 'pending' && (
-                      <div className="ml-4 flex space-x-2">
+                      <div style={{ marginLeft: '15px', display: 'flex', gap: '8px' }}>
                         <button
                           onClick={() => approveUser(user.uid)}
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '8px 12px',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            color: '#fff',
+                            backgroundColor: '#007bff',
+                            cursor: 'pointer'
+                          }}
                         >
-                          <CheckIcon className="h-4 w-4 mr-1" />
-                          승인
+                          ✓ 승인
                         </button>
                         <button
                           onClick={() => rejectUser(user.uid)}
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '8px 12px',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            color: '#fff',
+                            backgroundColor: '#dc3545',
+                            cursor: 'pointer'
+                          }}
                         >
-                          <XMarkIcon className="h-4 w-4 mr-1" />
-                          거부
+                          ✗ 거부
                         </button>
                       </div>
                     )}
                   </div>
                 </div>
-              </li>
+              </div>
             ))
           )}
-        </ul>
+        </div>
+      </div>
       </div>
     </div>
   );

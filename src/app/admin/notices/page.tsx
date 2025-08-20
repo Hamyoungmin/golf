@@ -53,69 +53,154 @@ export default function NoticesPage() {
   ];
 
   return (
-    <div>
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
+    <div className="container" style={{ maxWidth: '1200px', margin: '50px auto', padding: '20px' }}>
+      <div style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '8px', 
+        padding: '30px',
+        backgroundColor: '#fff'
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '30px'
+        }}>
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">공지사항 관리</h1>
-            <p className="text-gray-600">고객에게 전달할 공지사항을 작성하고 관리합니다.</p>
+            <h1 style={{ 
+              fontSize: '24px',
+              fontWeight: 'bold',
+              margin: 0,
+              marginBottom: '8px'
+            }}>
+              공지사항 관리
+            </h1>
+            <p style={{
+              fontSize: '14px',
+              color: '#666',
+              margin: 0
+            }}>
+              고객에게 전달할 공지사항을 작성하고 관리합니다.
+            </p>
           </div>
           <button
             onClick={() => setShowForm(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '8px 16px',
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: '#fff',
+              backgroundColor: '#007bff',
+              cursor: 'pointer'
+            }}
           >
-            <PlusIcon className="w-4 h-4 inline mr-2" />
-            새 공지사항
+            + 새 공지사항
           </button>
         </div>
-      </div>
 
       {/* 공지사항 작성 폼 */}
       {showForm && (
-        <div className="bg-white shadow rounded-lg mb-6">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">새 공지사항 작성</h3>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
+        <div style={{ marginBottom: '25px' }}>
+          <h3 style={{ 
+            fontWeight: 'bold', 
+            marginBottom: '15px',
+            fontSize: '18px',
+            borderBottom: '1px solid #e0e0e0',
+            paddingBottom: '8px'
+          }}>
+            새 공지사항 작성
+          </h3>
+          <div style={{ 
+            border: '1px solid #ddd', 
+            borderRadius: '4px',
+            backgroundColor: '#fff',
+            padding: '20px'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '5px',
+                  fontWeight: '500',
+                  fontSize: '14px'
+                }}>
                   제목
                 </label>
                 <input
                   type="text"
                   placeholder="공지사항 제목을 입력하세요"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '14px'
+                  }}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '5px',
+                  fontWeight: '500',
+                  fontSize: '14px'
+                }}>
                   내용
                 </label>
                 <textarea
                   rows={6}
                   placeholder="공지사항 내용을 입력하세요"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    resize: 'vertical'
+                  }}
                 />
               </div>
-              <div className="flex items-center space-x-6">
-                <label className="flex items-center">
-                  <input type="checkbox" className="mr-2" />
-                  <span className="text-sm text-gray-700">상단 고정</span>
+              <div style={{ display: 'flex', gap: '20px' }}>
+                <label style={{ display: 'flex', alignItems: 'center' }}>
+                  <input type="checkbox" style={{ marginRight: '8px' }} />
+                  <span style={{ fontSize: '14px' }}>상단 고정</span>
                 </label>
-                <label className="flex items-center">
-                  <input type="checkbox" defaultChecked className="mr-2" />
-                  <span className="text-sm text-gray-700">즉시 게시</span>
+                <label style={{ display: 'flex', alignItems: 'center' }}>
+                  <input type="checkbox" defaultChecked style={{ marginRight: '8px' }} />
+                  <span style={{ fontSize: '14px' }}>즉시 게시</span>
                 </label>
               </div>
-              <div className="flex justify-end space-x-3">
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                 <button
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  style={{
+                    padding: '8px 16px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#666',
+                    backgroundColor: '#f9f9f9',
+                    cursor: 'pointer'
+                  }}
                 >
                   취소
                 </button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+                <button style={{
+                  padding: '8px 16px',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#fff',
+                  backgroundColor: '#007bff',
+                  cursor: 'pointer'
+                }}>
                   게시
                 </button>
               </div>
@@ -125,80 +210,123 @@ export default function NoticesPage() {
       )}
 
       {/* 공지사항 목록 */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">공지사항 목록</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          공지사항 목록 ({notices.length}개)
+        </h3>
+        <div style={{ 
+          border: '1px solid #ddd', 
+          borderRadius: '4px',
+          backgroundColor: '#fff',
+          overflowX: 'auto'
+        }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead style={{ backgroundColor: '#f5f5f5' }}>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   제목
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   상태
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   조회수
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   작성일
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   작업
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {notices.map((notice) => (
-                <tr key={notice.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
+            <tbody>
+              {notices.map((notice, index) => (
+                <tr key={notice.id} style={{ 
+                  borderBottom: index < notices.length - 1 ? '1px solid #e0e0e0' : 'none'
+                }}>
+                  <td style={{ padding: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {notice.isFixed && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 mr-2">
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '2px 8px',
+                          borderRadius: '12px',
+                          fontSize: '11px',
+                          fontWeight: '500',
+                          backgroundColor: '#fee',
+                          color: '#c33'
+                        }}>
                           고정
                         </span>
                       )}
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{notice.title}</div>
-                        <div className="text-sm text-gray-500 truncate max-w-xs">
+                        <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '2px' }}>
+                          {notice.title}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#666', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {notice.content}
                         </div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      notice.isVisible 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
+                  <td style={{ padding: '12px' }}>
+                    <span style={{
+                      display: 'inline-block',
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      borderRadius: '12px',
+                      backgroundColor: notice.isVisible ? '#e8f5e8' : '#f0f0f0',
+                      color: notice.isVisible ? '#2d7a2d' : '#666'
+                    }}>
                       {notice.isVisible ? '게시중' : '비공개'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center text-sm text-gray-900">
-                      <EyeIcon className="w-4 h-4 mr-1 text-gray-400" />
-                      {notice.views.toLocaleString()}
+                  <td style={{ padding: '12px', fontSize: '14px' }}>
+                    👁 {notice.views.toLocaleString()}
+                  </td>
+                  <td style={{ padding: '12px', fontSize: '14px' }}>
+                    {notice.createdAt}
+                  </td>
+                  <td style={{ padding: '12px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button style={{
+                        padding: '4px 8px',
+                        fontSize: '12px',
+                        color: '#007bff',
+                        backgroundColor: 'transparent',
+                        border: '1px solid #007bff',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}>
+                        수정
+                      </button>
+                      <button style={{
+                        padding: '4px 8px',
+                        fontSize: '12px',
+                        color: '#dc3545',
+                        backgroundColor: 'transparent',
+                        border: '1px solid #dc3545',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}>
+                        삭제
+                      </button>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{notice.createdAt}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-4">
-                      <PencilIcon className="w-4 h-4" />
-                    </button>
-                    <button className="text-red-600 hover:text-red-900">
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      </div>
       </div>
     </div>
   );

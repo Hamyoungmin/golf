@@ -70,87 +70,194 @@ export default function FAQPage() {
   );
 
   return (
-    <div>
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
+    <div className="container" style={{ maxWidth: '1200px', margin: '50px auto', padding: '20px' }}>
+      <div style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '8px', 
+        padding: '30px',
+        backgroundColor: '#fff'
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '30px'
+        }}>
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">FAQ 관리</h1>
-            <p className="text-gray-600">자주 묻는 질문과 답변을 관리합니다.</p>
+            <h1 style={{ 
+              fontSize: '24px',
+              fontWeight: 'bold',
+              margin: 0,
+              marginBottom: '8px'
+            }}>
+              FAQ 관리
+            </h1>
+            <p style={{
+              fontSize: '14px',
+              color: '#666',
+              margin: 0
+            }}>
+              자주 묻는 질문과 답변을 관리합니다.
+            </p>
           </div>
           <button
             onClick={() => setShowForm(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '8px 16px',
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: '#fff',
+              backgroundColor: '#007bff',
+              cursor: 'pointer'
+            }}
           >
-            <PlusIcon className="w-4 h-4 inline mr-2" />
-            새 FAQ 추가
+            + 새 FAQ 추가
           </button>
         </div>
-      </div>
 
       {/* FAQ 작성 폼 */}
       {showForm && (
-        <div className="bg-white shadow rounded-lg mb-6">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">새 FAQ 추가</h3>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
+        <div style={{ marginBottom: '25px' }}>
+          <h3 style={{ 
+            fontWeight: 'bold', 
+            marginBottom: '15px',
+            fontSize: '18px',
+            borderBottom: '1px solid #e0e0e0',
+            paddingBottom: '8px'
+          }}>
+            새 FAQ 추가
+          </h3>
+          <div style={{ 
+            border: '1px solid #ddd', 
+            borderRadius: '4px',
+            backgroundColor: '#fff',
+            padding: '20px'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '5px',
+                  fontWeight: '500',
+                  fontSize: '14px'
+                }}>
                   카테고리
                 </label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}>
                   {categories.filter(cat => cat !== 'all').map(category => (
                     <option key={category} value={category}>{category}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '5px',
+                  fontWeight: '500',
+                  fontSize: '14px'
+                }}>
                   질문
                 </label>
                 <input
                   type="text"
                   placeholder="자주 묻는 질문을 입력하세요"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '14px'
+                  }}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '5px',
+                  fontWeight: '500',
+                  fontSize: '14px'
+                }}>
                   답변
                 </label>
                 <textarea
                   rows={4}
                   placeholder="질문에 대한 답변을 입력하세요"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    resize: 'vertical'
+                  }}
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '5px',
+                    fontWeight: '500',
+                    fontSize: '14px'
+                  }}>
                     순서
                   </label>
                   <input
                     type="number"
                     defaultValue="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px'
+                    }}
                   />
                 </div>
-                <div className="flex items-center">
-                  <label className="flex items-center">
-                    <input type="checkbox" defaultChecked className="mr-2" />
-                    <span className="text-sm text-gray-700">즉시 게시</span>
+                <div style={{ display: 'flex', alignItems: 'center', paddingTop: '25px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center' }}>
+                    <input type="checkbox" defaultChecked style={{ marginRight: '8px' }} />
+                    <span style={{ fontSize: '14px' }}>즉시 게시</span>
                   </label>
                 </div>
               </div>
-              <div className="flex justify-end space-x-3">
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                 <button
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  style={{
+                    padding: '8px 16px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#666',
+                    backgroundColor: '#f9f9f9',
+                    cursor: 'pointer'
+                  }}
                 >
                   취소
                 </button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+                <button style={{
+                  padding: '8px 16px',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#fff',
+                  backgroundColor: '#007bff',
+                  cursor: 'pointer'
+                }}>
                   추가
                 </button>
               </div>
@@ -160,75 +267,168 @@ export default function FAQPage() {
       )}
 
       {/* 카테고리 필터 */}
-      <div className="bg-white shadow rounded-lg mb-6">
-        <div className="px-6 py-4">
-          <div className="flex flex-wrap gap-2">
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {category === 'all' ? '전체' : category}
-              </button>
-            ))}
-          </div>
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          카테고리 필터
+        </h3>
+        <div style={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: '10px'
+        }}>
+          {categories.map(category => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              style={{
+                padding: '8px 16px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: selectedCategory === category ? '#fff' : '#666',
+                backgroundColor: selectedCategory === category ? '#007bff' : '#f9f9f9',
+                cursor: 'pointer'
+              }}
+            >
+              {category === 'all' ? '전체' : category}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* FAQ 목록 */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">FAQ 목록</h3>
-        </div>
-        <div className="divide-y divide-gray-200">
-          {filteredFAQs.map((faq) => (
-            <div key={faq.id} className="p-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          FAQ 목록 ({filteredFAQs.length}개)
+        </h3>
+        <div style={{ 
+          border: '1px solid #ddd', 
+          borderRadius: '4px',
+          backgroundColor: '#fff'
+        }}>
+          {filteredFAQs.map((faq, index) => (
+            <div key={faq.id} style={{ 
+              padding: '20px',
+              borderBottom: index < filteredFAQs.length - 1 ? '1px solid #e0e0e0' : 'none'
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                marginBottom: '15px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{
+                    display: 'inline-block',
+                    padding: '4px 8px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    borderRadius: '12px',
+                    backgroundColor: '#e8f4fd',
+                    color: '#0c5460'
+                  }}>
                     {faq.category}
                   </span>
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    faq.isVisible 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
+                  <span style={{
+                    display: 'inline-block',
+                    padding: '4px 8px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    borderRadius: '12px',
+                    backgroundColor: faq.isVisible ? '#e8f5e8' : '#f0f0f0',
+                    color: faq.isVisible ? '#2d7a2d' : '#666'
+                  }}>
                     {faq.isVisible ? '게시중' : '비공개'}
                   </span>
-                  <span className="text-xs text-gray-500">조회수: {faq.views}</span>
+                  <span style={{ fontSize: '12px', color: '#666' }}>
+                    👁 {faq.views}
+                  </span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <ChevronUpIcon className="w-4 h-4" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button style={{
+                    padding: '4px 8px',
+                    fontSize: '12px',
+                    color: '#666',
+                    backgroundColor: 'transparent',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}>
+                    ↑
                   </button>
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <ChevronDownIcon className="w-4 h-4" />
+                  <button style={{
+                    padding: '4px 8px',
+                    fontSize: '12px',
+                    color: '#666',
+                    backgroundColor: 'transparent',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}>
+                    ↓
                   </button>
-                  <button className="text-blue-600 hover:text-blue-900">
-                    <PencilIcon className="w-4 h-4" />
+                  <button style={{
+                    padding: '4px 8px',
+                    fontSize: '12px',
+                    color: '#007bff',
+                    backgroundColor: 'transparent',
+                    border: '1px solid #007bff',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}>
+                    수정
                   </button>
-                  <button className="text-red-600 hover:text-red-900">
-                    <TrashIcon className="w-4 h-4" />
+                  <button style={{
+                    padding: '4px 8px',
+                    fontSize: '12px',
+                    color: '#dc3545',
+                    backgroundColor: 'transparent',
+                    border: '1px solid #dc3545',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}>
+                    삭제
                   </button>
                 </div>
               </div>
-              <div className="mb-2">
-                <h4 className="text-sm font-medium text-gray-900 flex items-center">
-                  <QuestionMarkCircleIcon className="w-4 h-4 mr-2 text-blue-500" />
-                  Q. {faq.question}
+              <div style={{ marginBottom: '8px' }}>
+                <h4 style={{ 
+                  fontSize: '14px', 
+                  fontWeight: '500', 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  margin: 0
+                }}>
+                  ❓ Q. {faq.question}
                 </h4>
               </div>
-              <div className="ml-6">
-                <p className="text-sm text-gray-600">A. {faq.answer}</p>
+              <div style={{ marginLeft: '20px' }}>
+                <p style={{ 
+                  fontSize: '14px', 
+                  color: '#666',
+                  margin: 0,
+                  lineHeight: '1.4'
+                }}>
+                  A. {faq.answer}
+                </p>
               </div>
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );

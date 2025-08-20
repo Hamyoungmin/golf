@@ -79,15 +79,17 @@ const AdminSidebar: React.FC = () => {
   ];
 
   return (
-    <div className="bg-gray-800 text-white w-64 min-h-screen">
-      <div className="p-6">
-        <Link href="/admin" className="text-2xl font-bold">
-          골프 어드민
+    <div className="bg-white w-64 min-h-screen border-r border-gray-200">
+      {/* 골프 관리자 제목 - 독립적으로 위치 조정 */}
+      <div style={{ paddingTop: '8px', paddingBottom: '15px', paddingLeft: '24px', paddingRight: '24px', borderBottom: '1px solid #e5e7eb', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Link href="/admin" className="text-2xl font-bold text-gray-800 block text-center">
+          골프 관리자
         </Link>
       </div>
       
-      <nav className="mt-6">
-        {menuItems.map((item) => {
+      {/* 좌측 메뉴 - 고정된 위치에서 시작 */}
+      <nav style={{ marginTop: '30px' }}>
+        {menuItems.map((item, index) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || 
             (item.href !== '/admin' && pathname.startsWith(item.href));
@@ -96,23 +98,49 @@ const AdminSidebar: React.FC = () => {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center px-6 py-3 text-sm font-medium transition-colors duration-200 ${
-                isActive 
-                  ? 'bg-gray-900 text-white border-l-4 border-green-500' 
-                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-              }`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '12px 24px',
+                textDecoration: 'none',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: isActive ? '#333' : '#666',
+                backgroundColor: isActive ? '#fff' : 'transparent',
+                borderRadius: isActive ? '0' : '0',
+                transition: 'all 0.2s ease',
+                borderBottom: '1px solid #e5e5e5',
+                borderTop: index === 0 ? '1px solid #e5e5e5' : 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = '#f8f9fa';
+                  e.currentTarget.style.color = '#333';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#666';
+                }
+              }}
             >
-              <Icon className="w-5 h-5 mr-3" />
+              <Icon style={{ 
+                width: '18px', 
+                height: '18px', 
+                marginRight: '12px',
+                color: isActive ? '#666' : '#999'
+              }} />
               {item.name}
             </Link>
           );
         })}
       </nav>
 
-      <div className="absolute bottom-0 w-64 p-6">
+      <div className="absolute bottom-0 w-64 p-6 border-t border-gray-200 bg-white">
         <Link
           href="/"
-          className="flex items-center text-sm text-gray-300 hover:text-white transition-colors duration-200"
+          className="flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
         >
           ← 쇼핑몰로 돌아가기
         </Link>

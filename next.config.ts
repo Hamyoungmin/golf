@@ -43,6 +43,7 @@ const nextConfig: NextConfig = {
   env: {
     SITE_NAME: '골프상회',
     SITE_DESCRIPTION: '골프용품 전문 도매몰',
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'https://your-domain.com',
   },
 };
 

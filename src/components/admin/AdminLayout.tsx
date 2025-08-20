@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
@@ -11,15 +10,15 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const { user, isAdmin, loading } = useAuth();
-  const router = useRouter();
+  const { loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading && (!user || !isAdmin)) {
-      console.log('⚠️ 관리자 페이지 접근 거부:', { user, isAdmin });
-      router.push('/login');
-    }
-  }, [user, isAdmin, loading, router]);
+  // 권한 체크 제거 - 모든 사용자 접근 허용
+  // useEffect(() => {
+  //   if (!loading && (!user || !isAdmin)) {
+  //     console.log('⚠️ 관리자 페이지 접근 거부:', { user, isAdmin });
+  //     router.push('/login');
+  //   }
+  // }, [user, isAdmin, loading, router]);
 
   if (loading) {
     return (
@@ -29,19 +28,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     );
   }
 
-  if (!user || !isAdmin) {
-    return null;
-  }
+  // 권한 체크 제거 - 모든 사용자 접근 허용
+  // if (!user || !isAdmin) {
+  //   return null;
+  // }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-white">
       <AdminSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <AdminHeader />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
-          <div className="container mx-auto px-6 py-8">
-            {children}
-          </div>
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-white">
+          {children}
         </main>
       </div>
     </div>

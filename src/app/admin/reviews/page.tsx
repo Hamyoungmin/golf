@@ -112,137 +112,296 @@ export default function ReviewsPage() {
   };
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">리뷰 관리</h1>
-        <p className="text-gray-600">고객 리뷰를 관리하고 승인/거부 처리를 할 수 있습니다.</p>
-      </div>
+    <div className="container" style={{ maxWidth: '1200px', margin: '50px auto', padding: '20px' }}>
+      <div style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '8px', 
+        padding: '30px',
+        backgroundColor: '#fff'
+      }}>
+        <h1 style={{ 
+          textAlign: 'center', 
+          marginBottom: '10px',
+          fontSize: '24px',
+          fontWeight: 'bold'
+        }}>
+          리뷰 관리
+        </h1>
+        <p style={{
+          textAlign: 'center',
+          marginBottom: '30px',
+          fontSize: '14px',
+          color: '#666'
+        }}>
+          고객 리뷰를 관리하고 승인/거부 처리를 할 수 있습니다.
+        </p>
 
       {/* 상태별 탭 */}
-      <div className="bg-white shadow rounded-lg mb-6">
-        <div className="px-6 py-4">
-          <div className="flex flex-wrap gap-2">
-            {statuses.map(status => (
-              <button
-                key={status.value}
-                onClick={() => setSelectedStatus(status.value)}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
-                  selectedStatus === status.value
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {status.label}
-                <span className="ml-2 bg-white bg-opacity-20 px-2 py-1 rounded-full text-xs">
-                  {status.count}
-                </span>
-              </button>
-            ))}
-          </div>
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          리뷰 상태별 필터
+        </h3>
+        <div style={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: '10px'
+        }}>
+          {statuses.map(status => (
+            <button
+              key={status.value}
+              onClick={() => setSelectedStatus(status.value)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: selectedStatus === status.value ? '#fff' : '#666',
+                backgroundColor: selectedStatus === status.value ? '#007bff' : '#f9f9f9',
+                cursor: 'pointer'
+              }}
+            >
+              {status.label}
+              <span style={{
+                padding: '2px 6px',
+                borderRadius: '10px',
+                backgroundColor: selectedStatus === status.value ? 'rgba(255,255,255,0.3)' : '#e0e0e0',
+                fontSize: '12px'
+              }}>
+                {status.count}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
       {/* 리뷰 목록 */}
-      <div className="space-y-4">
-        {filteredReviews.map((review) => (
-          <div key={review.id} className="bg-white shadow rounded-lg">
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(review.status)}`}>
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          리뷰 목록 ({filteredReviews.length}개)
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {filteredReviews.map((review) => (
+            <div key={review.id} style={{ 
+              border: '1px solid #ddd', 
+              borderRadius: '4px',
+              backgroundColor: '#fff',
+              padding: '20px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                    <span style={{
+                      display: 'inline-block',
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      borderRadius: '12px',
+                      backgroundColor: 
+                        review.status === 'pending' ? '#fff3cd' : 
+                        review.status === 'approved' ? '#e8f5e8' : 
+                        review.status === 'rejected' ? '#fee' : '#f0f0f0',
+                      color: 
+                        review.status === 'pending' ? '#856404' : 
+                        review.status === 'approved' ? '#2d7a2d' : 
+                        review.status === 'rejected' ? '#c33' : '#666'
+                    }}>
                       {getStatusText(review.status)}
                     </span>
                     {review.isReported && (
-                      <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
-                        <FlagIcon className="w-3 h-3 mr-1" />
-                        신고됨
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '4px 8px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        backgroundColor: '#fee',
+                        color: '#c33',
+                        borderRadius: '12px'
+                      }}>
+                        🚩 신고됨
                       </span>
                     )}
-                    <span className="text-sm text-gray-500">{review.createdAt}</span>
+                    <span style={{ fontSize: '12px', color: '#666' }}>{review.createdAt}</span>
                   </div>
                   
-                  <div className="mb-2">
-                    <h3 className="text-lg font-medium text-gray-900">{review.productName}</h3>
-                    <p className="text-sm text-gray-600">작성자: {review.customerName}</p>
+                  <div style={{ marginBottom: '10px' }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '4px' }}>
+                      {review.productName}
+                    </h3>
+                    <p style={{ fontSize: '14px', color: '#666' }}>작성자: {review.customerName}</p>
                   </div>
 
-                  <div className="flex items-center mb-3">
-                    <div className="flex mr-2">
+                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', marginRight: '8px' }}>
                       {renderStars(review.rating)}
                     </div>
-                    <span className="text-sm text-gray-600">({review.rating}/5)</span>
+                    <span style={{ fontSize: '14px', color: '#666' }}>({review.rating}/5)</span>
                   </div>
 
-                  <div className="mb-3">
-                    <h4 className="font-medium text-gray-900 mb-1">{review.title}</h4>
-                    <p className="text-gray-700">{review.content}</p>
+                  <div style={{ marginBottom: '12px' }}>
+                    <h4 style={{ fontWeight: '500', marginBottom: '4px', fontSize: '14px' }}>
+                      {review.title}
+                    </h4>
+                    <p style={{ color: '#666', fontSize: '14px', lineHeight: '1.4' }}>
+                      {review.content}
+                    </p>
                   </div>
 
                   {review.hasImages && (
-                    <div className="mb-3">
-                      <span className="inline-flex items-center text-sm text-blue-600">
-                        <EyeIcon className="w-4 h-4 mr-1" />
-                        이미지 첨부됨
+                    <div style={{ marginBottom: '12px' }}>
+                      <span style={{ 
+                        display: 'inline-flex', 
+                        alignItems: 'center', 
+                        fontSize: '14px', 
+                        color: '#007bff'
+                      }}>
+                        🖼️ 이미지 첨부됨
                       </span>
                     </div>
                   )}
 
                   {review.adminReply && (
-                    <div className="bg-gray-50 p-3 rounded-lg mt-3">
-                      <div className="flex items-center mb-1">
-                        <ChatBubbleLeftIcon className="w-4 h-4 mr-1 text-gray-500" />
-                        <span className="text-sm font-medium text-gray-700">관리자 답글</span>
+                    <div style={{ 
+                      backgroundColor: '#f5f5f5', 
+                      padding: '12px', 
+                      borderRadius: '4px', 
+                      marginTop: '12px' 
+                    }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        marginBottom: '4px' 
+                      }}>
+                        <span style={{ fontSize: '14px', fontWeight: '500', color: '#666' }}>
+                          💬 관리자 답글
+                        </span>
                       </div>
-                      <p className="text-sm text-gray-600">{review.adminReply}</p>
+                      <p style={{ fontSize: '14px', color: '#666', margin: 0 }}>
+                        {review.adminReply}
+                      </p>
                     </div>
                   )}
                 </div>
 
-                <div className="flex flex-col space-y-2 ml-4">
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '8px', 
+                  marginLeft: '15px' 
+                }}>
                   {review.status === 'pending' && (
                     <>
-                      <button className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors">
-                        <CheckIcon className="w-4 h-4 inline mr-1" />
-                        승인
+                      <button style={{
+                        padding: '6px 12px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        color: '#fff',
+                        backgroundColor: '#28a745',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}>
+                        ✓ 승인
                       </button>
-                      <button className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors">
-                        <XMarkIcon className="w-4 h-4 inline mr-1" />
-                        거부
+                      <button style={{
+                        padding: '6px 12px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        color: '#fff',
+                        backgroundColor: '#dc3545',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}>
+                        ✗ 거부
                       </button>
                     </>
                   )}
                   
                   {review.status === 'approved' && !review.adminReply && (
-                    <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
-                      <ChatBubbleLeftIcon className="w-4 h-4 inline mr-1" />
-                      답글
+                    <button style={{
+                      padding: '6px 12px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: '#fff',
+                      backgroundColor: '#007bff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}>
+                      💬 답글
                     </button>
                   )}
 
                   {review.isReported && (
-                    <button className="bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700 transition-colors">
+                    <button style={{
+                      padding: '6px 12px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: '#fff',
+                      backgroundColor: '#fd7e14',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}>
                       신고 처리
                     </button>
                   )}
 
-                  <button className="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition-colors">
+                  <button style={{
+                    padding: '6px 12px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    color: '#fff',
+                    backgroundColor: '#6c757d',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}>
                     상세보기
                   </button>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {filteredReviews.length === 0 && (
-        <div className="bg-white shadow rounded-lg p-12 text-center">
-          <StarIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">리뷰가 없습니다</h3>
-          <p className="text-gray-600">선택한 상태에 해당하는 리뷰가 없습니다.</p>
+        <div style={{ 
+          padding: '60px 20px',
+          textAlign: 'center',
+          border: '1px solid #ddd',
+          borderRadius: '4px',
+          backgroundColor: '#fff'
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '15px' }}>⭐</div>
+          <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>
+            리뷰가 없습니다
+          </h3>
+          <p style={{ color: '#666', fontSize: '14px' }}>
+            선택한 상태에 해당하는 리뷰가 없습니다.
+          </p>
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -55,151 +55,298 @@ export default function InventoryPage() {
   };
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">재고 관리</h1>
-        <p className="text-gray-600">상품 재고 현황을 관리하고 모니터링합니다.</p>
-      </div>
+    <div className="container" style={{ maxWidth: '1200px', margin: '50px auto', padding: '20px' }}>
+      <div style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '8px', 
+        padding: '30px',
+        backgroundColor: '#fff'
+      }}>
+        <h1 style={{ 
+          textAlign: 'center', 
+          marginBottom: '10px',
+          fontSize: '24px',
+          fontWeight: 'bold'
+        }}>
+          재고 관리
+        </h1>
+        <p style={{
+          textAlign: 'center',
+          marginBottom: '30px',
+          fontSize: '14px',
+          color: '#666'
+        }}>
+          상품 재고 현황을 관리하고 모니터링합니다.
+        </p>
 
       {/* 통계 카드 */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-        <StatsCard
-          title="전체 상품"
-          value={inventoryStats.totalProducts.toLocaleString()}
-          icon={CubeIcon}
-          iconColor="text-blue-600"
-        />
-        <StatsCard
-          title="재고 부족"
-          value={inventoryStats.lowStockItems.toLocaleString()}
-          icon={ExclamationTriangleIcon}
-          iconColor="text-yellow-600"
-        />
-        <StatsCard
-          title="품절 상품"
-          value={inventoryStats.outOfStockItems.toLocaleString()}
-          icon={MinusIcon}
-          iconColor="text-red-600"
-        />
-        <StatsCard
-          title="총 재고 가치"
-          value={`₩${(inventoryStats.totalValue / 10000).toFixed(0)}만`}
-          icon={ClipboardDocumentListIcon}
-          iconColor="text-green-600"
-        />
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          재고 현황 요약
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px' }}>
+          <div style={{ 
+            padding: '20px', 
+            border: '1px solid #ddd', 
+            borderRadius: '4px', 
+            textAlign: 'center',
+            backgroundColor: '#f9f9f9'
+          }}>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
+              {inventoryStats.totalProducts.toLocaleString()}개
+            </div>
+            <div style={{ fontSize: '14px', color: '#666' }}>전체 상품</div>
+          </div>
+          
+          <div style={{ 
+            padding: '20px', 
+            border: '1px solid #ddd', 
+            borderRadius: '4px', 
+            textAlign: 'center',
+            backgroundColor: '#f9f9f9'
+          }}>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
+              {inventoryStats.lowStockItems.toLocaleString()}개
+            </div>
+            <div style={{ fontSize: '14px', color: '#666' }}>재고 부족</div>
+          </div>
+          
+          <div style={{ 
+            padding: '20px', 
+            border: '1px solid #ddd', 
+            borderRadius: '4px', 
+            textAlign: 'center',
+            backgroundColor: '#f9f9f9'
+          }}>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
+              {inventoryStats.outOfStockItems.toLocaleString()}개
+            </div>
+            <div style={{ fontSize: '14px', color: '#666' }}>품절 상품</div>
+          </div>
+          
+          <div style={{ 
+            padding: '20px', 
+            border: '1px solid #ddd', 
+            borderRadius: '4px', 
+            textAlign: 'center',
+            backgroundColor: '#f9f9f9'
+          }}>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
+              ₩{(inventoryStats.totalValue / 10000).toFixed(0)}만
+            </div>
+            <div style={{ fontSize: '14px', color: '#666' }}>총 재고 가치</div>
+          </div>
+        </div>
       </div>
 
       {/* 필터 및 컨트롤 */}
-      <div className="bg-white shadow rounded-lg mb-6">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap gap-2 mb-4 sm:mb-0">
-              {categories.map(category => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    selectedCategory === category
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {category === 'all' ? '전체' : category}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center space-x-4">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={showLowStock}
-                  onChange={(e) => setShowLowStock(e.target.checked)}
-                  className="mr-2"
-                />
-                <span className="text-sm text-gray-700">재고 부족만 표시</span>
-              </label>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                <PlusIcon className="w-4 h-4 inline mr-2" />
-                재고 조정
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          재고 필터 및 관리
+        </h3>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '15px'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: '10px'
+          }}>
+            {categories.map(category => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                style={{
+                  padding: '8px 16px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: selectedCategory === category ? '#fff' : '#666',
+                  backgroundColor: selectedCategory === category ? '#007bff' : '#f9f9f9',
+                  cursor: 'pointer'
+                }}
+              >
+                {category === 'all' ? '전체' : category}
               </button>
-            </div>
+            ))}
+          </div>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '10px'
+          }}>
+            <label style={{ display: 'flex', alignItems: 'center' }}>
+              <input
+                type="checkbox"
+                checked={showLowStock}
+                onChange={(e) => setShowLowStock(e.target.checked)}
+                style={{ marginRight: '8px' }}
+              />
+              <span style={{ fontSize: '14px', color: '#666' }}>재고 부족만 표시</span>
+            </label>
+            <button 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#fff',
+                backgroundColor: '#007bff',
+                cursor: 'pointer'
+              }}
+            >
+              + 재고 조정
+            </button>
           </div>
         </div>
       </div>
 
       {/* 재고 목록 테이블 */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">재고 현황</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          재고 목록 ({filteredItems.length}개)
+        </h3>
+        <div style={{ 
+          border: '1px solid #ddd', 
+          borderRadius: '4px',
+          backgroundColor: '#fff',
+          overflowX: 'auto'
+        }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead style={{ backgroundColor: '#f5f5f5' }}>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   상품명
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   카테고리
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   현재 재고
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   최소 재고
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   상태
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   단가
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   작업
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredItems.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{item.name}</div>
+            <tbody>
+              {filteredItems.map((item, index) => (
+                <tr key={item.id} style={{ 
+                  borderBottom: index < filteredItems.length - 1 ? '1px solid #e0e0e0' : 'none'
+                }}>
+                  <td style={{ padding: '12px', fontSize: '14px', fontWeight: '500' }}>
+                    {item.name}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                  <td style={{ padding: '12px' }}>
+                    <span style={{
+                      display: 'inline-block',
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      borderRadius: '12px',
+                      backgroundColor: '#f0f0f0',
+                      color: '#666'
+                    }}>
                       {item.category}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{item.currentStock}개</div>
+                  <td style={{ padding: '12px', fontSize: '14px' }}>
+                    {item.currentStock}개
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{item.minStock}개</div>
+                  <td style={{ padding: '12px', fontSize: '14px', color: '#666' }}>
+                    {item.minStock}개
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`text-sm font-medium ${getStatusColor(item.status)}`}>
+                  <td style={{ padding: '12px' }}>
+                    <span style={{ 
+                      fontSize: '14px', 
+                      fontWeight: '500',
+                      color: item.status === 'low' ? '#f39c12' : item.status === 'out' ? '#e74c3c' : '#27ae60'
+                    }}>
                       {getStatusText(item.status)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">₩{item.price.toLocaleString()}</div>
+                  <td style={{ padding: '12px', fontSize: '14px' }}>
+                    ₩{item.price.toLocaleString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-4">
-                      입고
-                    </button>
-                    <button className="text-green-600 hover:text-green-900 mr-4">
-                      조정
-                    </button>
-                    <button className="text-gray-600 hover:text-gray-900">
-                      이력
-                    </button>
+                  <td style={{ padding: '12px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button style={{
+                        padding: '4px 8px',
+                        fontSize: '12px',
+                        color: '#007bff',
+                        backgroundColor: 'transparent',
+                        border: '1px solid #007bff',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}>
+                        입고
+                      </button>
+                      <button style={{
+                        padding: '4px 8px',
+                        fontSize: '12px',
+                        color: '#28a745',
+                        backgroundColor: 'transparent',
+                        border: '1px solid #28a745',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}>
+                        조정
+                      </button>
+                      <button style={{
+                        padding: '4px 8px',
+                        fontSize: '12px',
+                        color: '#666',
+                        backgroundColor: 'transparent',
+                        border: '1px solid #666',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}>
+                        이력
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      </div>
       </div>
     </div>
   );

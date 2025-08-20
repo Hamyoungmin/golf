@@ -59,117 +59,240 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">매출 통계</h1>
-        <p className="text-gray-600">매출 데이터를 분석하고 인사이트를 확인합니다.</p>
-      </div>
+    <div className="container" style={{ maxWidth: '1200px', margin: '50px auto', padding: '20px' }}>
+      <div style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '8px', 
+        padding: '30px',
+        backgroundColor: '#fff'
+      }}>
+        <h1 style={{ 
+          textAlign: 'center', 
+          marginBottom: '10px',
+          fontSize: '24px',
+          fontWeight: 'bold'
+        }}>
+          매출 통계
+        </h1>
+        <p style={{
+          textAlign: 'center',
+          marginBottom: '30px',
+          fontSize: '14px',
+          color: '#666'
+        }}>
+          매출 데이터를 분석하고 인사이트를 확인합니다.
+        </p>
 
       {/* 기간 선택 */}
-      <div className="bg-white shadow rounded-lg mb-6">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">분석 기간</h3>
-            <div className="flex space-x-2">
-              {periods.map(period => (
-                <button
-                  key={period.value}
-                  onClick={() => setSelectedPeriod(period.value)}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    selectedPeriod === period.value
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {period.label}
-                </button>
-              ))}
-            </div>
-          </div>
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          분석 기간
+        </h3>
+        <div style={{ 
+          display: 'flex', 
+          gap: '10px',
+          flexWrap: 'wrap'
+        }}>
+          {periods.map(period => (
+            <button
+              key={period.value}
+              onClick={() => setSelectedPeriod(period.value)}
+              style={{
+                padding: '8px 16px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: selectedPeriod === period.value ? '#fff' : '#666',
+                backgroundColor: selectedPeriod === period.value ? '#007bff' : '#f9f9f9',
+                cursor: 'pointer'
+              }}
+            >
+              {period.label}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* 주요 통계 */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-        <StatsCard
-          title="총 매출"
-          value={`₩${(analyticsData.totalRevenue / 10000).toFixed(0)}만`}
-          icon={CurrencyDollarIcon}
-          iconColor="text-green-600"
-          trend={{ value: 15.3, isPositive: true }}
-        />
-        <StatsCard
-          title="총 주문 건수"
-          value={analyticsData.totalOrders.toLocaleString()}
-          icon={ShoppingBagIcon}
-          iconColor="text-blue-600"
-          trend={{ value: 8.7, isPositive: true }}
-        />
-        <StatsCard
-          title="평균 주문 금액"
-          value={`₩${(analyticsData.averageOrderValue / 1000).toFixed(0)}천`}
-          icon={ChartBarIcon}
-          iconColor="text-purple-600"
-          trend={{ value: 2.1, isPositive: false }}
-        />
-        <StatsCard
-          title="전환율"
-          value={`${analyticsData.conversionRate}%`}
-          icon={ArrowTrendingUpIcon}
-          iconColor="text-orange-600"
-          trend={{ value: 0.5, isPositive: true }}
-        />
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          주요 통계
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px' }}>
+          <div style={{ 
+            padding: '20px', 
+            border: '1px solid #ddd', 
+            borderRadius: '4px', 
+            textAlign: 'center',
+            backgroundColor: '#f9f9f9'
+          }}>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
+              ₩{(analyticsData.totalRevenue / 10000).toFixed(0)}만
+            </div>
+            <div style={{ fontSize: '14px', color: '#666' }}>총 매출</div>
+            <div style={{ fontSize: '12px', color: '#28a745', marginTop: '4px' }}>↗ 15.3%</div>
+          </div>
+          
+          <div style={{ 
+            padding: '20px', 
+            border: '1px solid #ddd', 
+            borderRadius: '4px', 
+            textAlign: 'center',
+            backgroundColor: '#f9f9f9'
+          }}>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
+              {analyticsData.totalOrders.toLocaleString()}건
+            </div>
+            <div style={{ fontSize: '14px', color: '#666' }}>총 주문 건수</div>
+            <div style={{ fontSize: '12px', color: '#28a745', marginTop: '4px' }}>↗ 8.7%</div>
+          </div>
+          
+          <div style={{ 
+            padding: '20px', 
+            border: '1px solid #ddd', 
+            borderRadius: '4px', 
+            textAlign: 'center',
+            backgroundColor: '#f9f9f9'
+          }}>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
+              ₩{(analyticsData.averageOrderValue / 1000).toFixed(0)}천
+            </div>
+            <div style={{ fontSize: '14px', color: '#666' }}>평균 주문 금액</div>
+            <div style={{ fontSize: '12px', color: '#dc3545', marginTop: '4px' }}>↘ 2.1%</div>
+          </div>
+          
+          <div style={{ 
+            padding: '20px', 
+            border: '1px solid #ddd', 
+            borderRadius: '4px', 
+            textAlign: 'center',
+            backgroundColor: '#f9f9f9'
+          }}>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
+              {analyticsData.conversionRate}%
+            </div>
+            <div style={{ fontSize: '14px', color: '#666' }}>전환율</div>
+            <div style={{ fontSize: '12px', color: '#28a745', marginTop: '4px' }}>↗ 0.5%</div>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '25px' }}>
         {/* 매출 차트 */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-900">매출 추이</h3>
+        <div>
+          <h3 style={{ 
+            fontWeight: 'bold', 
+            marginBottom: '15px',
+            fontSize: '18px',
+            borderBottom: '1px solid #e0e0e0',
+            paddingBottom: '8px'
+          }}>
+            매출 추이
+          </h3>
+          <div style={{ 
+            border: '1px solid #ddd', 
+            borderRadius: '4px',
+            backgroundColor: '#fff'
+          }}>
+            <div style={{ 
+              padding: '15px', 
+              borderBottom: '1px solid #e0e0e0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span style={{ fontSize: '16px', fontWeight: '500' }}>차트 설정</span>
               <select 
                 value={selectedChart}
                 onChange={(e) => setSelectedChart(e.target.value)}
-                className="text-sm border-gray-300 rounded-md"
+                style={{
+                  padding: '4px 8px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
               >
                 {chartTypes.map(type => (
                   <option key={type.value} value={type.value}>{type.label}</option>
                 ))}
               </select>
             </div>
-          </div>
-          <div className="p-6">
-            <div className="h-64 flex items-center justify-center bg-gray-50 rounded">
-              <div className="text-center">
-                <ChartBarIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-500">차트 영역 (Chart.js 연동 필요)</p>
+            <div style={{ padding: '20px' }}>
+              <div style={{ 
+                height: '256px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: '4px',
+                border: '1px dashed #ddd'
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '48px', marginBottom: '10px' }}>📊</div>
+                  <p style={{ color: '#666', fontSize: '14px' }}>차트 영역 (Chart.js 연동 필요)</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* 카테고리별 매출 */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">카테고리별 매출</h3>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
+        <div>
+          <h3 style={{ 
+            fontWeight: 'bold', 
+            marginBottom: '15px',
+            fontSize: '18px',
+            borderBottom: '1px solid #e0e0e0',
+            paddingBottom: '8px'
+          }}>
+            카테고리별 매출
+          </h3>
+          <div style={{ 
+            border: '1px solid #ddd', 
+            borderRadius: '4px',
+            backgroundColor: '#fff',
+            padding: '20px'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               {analyticsData.categoryStats.map((category, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-gray-900">{category.category}</span>
-                      <span className="text-sm text-gray-500">
-                        ₩{(category.revenue / 10000).toFixed(0)}만 ({category.percentage}%)
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${category.percentage}%` }}
-                      ></div>
-                    </div>
+                <div key={index}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    marginBottom: '5px'
+                  }}>
+                    <span style={{ fontSize: '14px', fontWeight: '500' }}>{category.category}</span>
+                    <span style={{ fontSize: '14px', color: '#666' }}>
+                      ₩{(category.revenue / 10000).toFixed(0)}만 ({category.percentage}%)
+                    </span>
+                  </div>
+                  <div style={{ 
+                    width: '100%', 
+                    backgroundColor: '#e0e0e0', 
+                    borderRadius: '10px', 
+                    height: '8px' 
+                  }}>
+                    <div style={{
+                      backgroundColor: '#007bff',
+                      height: '8px',
+                      borderRadius: '10px',
+                      width: `${category.percentage}%`,
+                      transition: 'width 0.3s ease'
+                    }}></div>
                   </div>
                 </div>
               ))}
@@ -179,63 +302,82 @@ export default function AnalyticsPage() {
       </div>
 
       {/* 베스트셀러 상품 */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">베스트셀러 상품</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          베스트셀러 상품
+        </h3>
+        <div style={{ 
+          border: '1px solid #ddd', 
+          borderRadius: '4px',
+          backgroundColor: '#fff',
+          overflowX: 'auto'
+        }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead style={{ backgroundColor: '#f5f5f5' }}>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   순위
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   상품명
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   판매 수량
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   매출액
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#666', borderBottom: '1px solid #ddd' }}>
                   성장률
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody>
               {analyticsData.topProducts.map((product, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white ${
-                        index === 0 ? 'bg-yellow-500' : 
-                        index === 1 ? 'bg-gray-400' : 
-                        index === 2 ? 'bg-amber-600' : 'bg-gray-300'
-                      }`}>
-                        {index + 1}
-                      </span>
-                    </div>
+                <tr key={index} style={{ 
+                  borderBottom: index < analyticsData.topProducts.length - 1 ? '1px solid #e0e0e0' : 'none'
+                }}>
+                  <td style={{ padding: '12px' }}>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      color: '#fff',
+                      backgroundColor: index === 0 ? '#ffc107' : 
+                                     index === 1 ? '#6c757d' : 
+                                     index === 2 ? '#fd7e14' : '#adb5bd'
+                    }}>
+                      {index + 1}
+                    </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                  <td style={{ padding: '12px', fontSize: '14px', fontWeight: '500' }}>
+                    {product.name}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{product.sales}개</div>
+                  <td style={{ padding: '12px', fontSize: '14px' }}>
+                    {product.sales}개
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">₩{(product.revenue / 10000).toFixed(0)}만</div>
+                  <td style={{ padding: '12px', fontSize: '14px' }}>
+                    ₩{(product.revenue / 10000).toFixed(0)}만
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {Math.random() > 0.5 ? (
-                        <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
-                      ) : (
-                        <ArrowTrendingDownIcon className="w-4 h-4 text-red-500 mr-1" />
-                      )}
-                      <span className={`text-sm font-medium ${Math.random() > 0.5 ? 'text-green-600' : 'text-red-600'}`}>
-                        {(Math.random() * 20 + 5).toFixed(1)}%
+                  <td style={{ padding: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ 
+                        fontSize: '14px', 
+                        fontWeight: '500',
+                        color: Math.random() > 0.5 ? '#28a745' : '#dc3545'
+                      }}>
+                        {Math.random() > 0.5 ? '↗' : '↘'} {(Math.random() * 20 + 5).toFixed(1)}%
                       </span>
                     </div>
                   </td>
@@ -244,6 +386,7 @@ export default function AnalyticsPage() {
             </tbody>
           </table>
         </div>
+      </div>
       </div>
     </div>
   );

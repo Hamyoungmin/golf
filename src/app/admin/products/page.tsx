@@ -132,48 +132,118 @@ export default function AdminProductsPage() {
   );
 
   return (
-    <div>
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">상품 관리</h1>
-        <Link
-          href="/admin/products/new"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700"
-        >
-          <PlusIcon className="h-5 w-5 mr-2" />
-          새 상품 등록
-        </Link>
-      </div>
+    <div className="container" style={{ maxWidth: '1200px', margin: '50px auto', padding: '20px' }}>
+      <div style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '8px', 
+        padding: '30px',
+        backgroundColor: '#fff'
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '30px'
+        }}>
+          <h1 style={{ 
+            fontSize: '24px',
+            fontWeight: 'bold',
+            margin: 0
+          }}>
+            상품 관리
+          </h1>
+          <Link
+            href="/admin/products/new"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '8px 16px',
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: '#fff',
+              backgroundColor: '#007bff',
+              textDecoration: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            + 새 상품 등록
+          </Link>
+        </div>
 
       {/* 검색 및 필터 */}
-      <div className="mb-6 bg-white p-4 rounded-lg shadow">
-        <div className="flex gap-4">
-          <div className="flex-1 relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          상품 검색
+        </h3>
+        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+          <div style={{ flex: 1, position: 'relative' }}>
             <input
               type="text"
               placeholder="상품명, 카테고리, 브랜드로 검색..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-3 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-green-500"
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px'
+              }}
             />
           </div>
           <button
             onClick={() => setShowFilter(!showFilter)}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            style={{
+              padding: '8px 16px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: '#666',
+              backgroundColor: '#f9f9f9',
+              cursor: 'pointer'
+            }}
           >
-            <FunnelIcon className="h-5 w-5 mr-2" />
-            필터
+            필터 {showFilter ? '숨기기' : '보기'}
           </button>
         </div>
 
         {showFilter && (
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
+          <div style={{ 
+            marginTop: '15px', 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(3, 1fr)', 
+            gap: '20px', 
+            paddingTop: '15px', 
+            borderTop: '1px solid #e0e0e0' 
+          }}>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">카테고리</label>
+              <label style={{ 
+                display: 'block', 
+                marginBottom: '5px',
+                fontWeight: '500',
+                fontSize: '14px'
+              }}>
+                카테고리
+              </label>
               <select
                 value={filter.category || ''}
                 onChange={(e) => setFilter({ ...filter, category: e.target.value as Category || undefined })}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
               >
                 <option value="">전체</option>
                 {categories.map(cat => (
@@ -182,11 +252,24 @@ export default function AdminProductsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">브랜드</label>
+              <label style={{ 
+                display: 'block', 
+                marginBottom: '5px',
+                fontWeight: '500',
+                fontSize: '14px'
+              }}>
+                브랜드
+              </label>
               <select
                 value={filter.brand || ''}
                 onChange={(e) => setFilter({ ...filter, brand: e.target.value as Brand || undefined })}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
               >
                 <option value="">전체</option>
                 {brands.map(brand => (
@@ -195,11 +278,24 @@ export default function AdminProductsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">재고 상태</label>
+              <label style={{ 
+                display: 'block', 
+                marginBottom: '5px',
+                fontWeight: '500',
+                fontSize: '14px'
+              }}>
+                재고 상태
+              </label>
               <select
                 value={filter.inStock === undefined ? '' : filter.inStock.toString()}
                 onChange={(e) => setFilter({ ...filter, inStock: e.target.value === '' ? undefined : e.target.value === 'true' })}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
               >
                 <option value="">전체</option>
                 <option value="true">재고 있음</option>
@@ -211,39 +307,78 @@ export default function AdminProductsPage() {
       </div>
 
       {/* 상품 테이블 */}
-      <div className="bg-white shadow rounded-lg">
-        <DataTable
-          data={filteredProducts}
-          columns={columns}
-          loading={loading}
-          emptyMessage="등록된 상품이 없습니다."
-          actions={(product) => (
-            <div className="flex gap-2">
-              <button
-                onClick={() => router.push(`/admin/products/${product.id}/edit`)}
-                className="text-blue-600 hover:text-blue-900"
-              >
-                <PencilIcon className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => handleDelete(product.id)}
-                className="text-red-600 hover:text-red-900"
-              >
-                <TrashIcon className="h-5 w-5" />
-              </button>
-            </div>
-          )}
-        />
+      <div style={{ marginBottom: '25px' }}>
+        <h3 style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '15px',
+          fontSize: '18px',
+          borderBottom: '1px solid #e0e0e0',
+          paddingBottom: '8px'
+        }}>
+          상품 목록 ({filteredProducts.length}개)
+        </h3>
+        <div style={{ 
+          border: '1px solid #ddd', 
+          borderRadius: '4px',
+          backgroundColor: '#fff'
+        }}>
+          <DataTable
+            data={filteredProducts}
+            columns={columns}
+            loading={loading}
+            emptyMessage="등록된 상품이 없습니다."
+            actions={(product) => (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => router.push(`/admin/products/${product.id}/edit`)}
+                  style={{
+                    padding: '4px 8px',
+                    fontSize: '12px',
+                    color: '#007bff',
+                    backgroundColor: 'transparent',
+                    border: '1px solid #007bff',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  수정
+                </button>
+                <button
+                  onClick={() => handleDelete(product.id)}
+                  style={{
+                    padding: '4px 8px',
+                    fontSize: '12px',
+                    color: '#dc3545',
+                    backgroundColor: 'transparent',
+                    border: '1px solid #dc3545',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  삭제
+                </button>
+              </div>
+            )}
+          />
+        </div>
       </div>
 
       {/* 페이지네이션 */}
       {totalPages > 1 && (
-        <div className="mt-6 flex justify-center">
-          <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+          <div style={{ display: 'flex', gap: '5px' }}>
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+              style={{
+                padding: '8px 12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px',
+                backgroundColor: currentPage === 1 ? '#f5f5f5' : '#fff',
+                color: currentPage === 1 ? '#999' : '#333',
+                cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
+              }}
             >
               이전
             </button>
@@ -251,11 +386,15 @@ export default function AdminProductsPage() {
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                  page === currentPage
-                    ? 'z-10 bg-green-50 border-green-500 text-green-600'
-                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                }`}
+                style={{
+                  padding: '8px 12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  backgroundColor: page === currentPage ? '#007bff' : '#fff',
+                  color: page === currentPage ? '#fff' : '#333',
+                  cursor: 'pointer'
+                }}
               >
                 {page}
               </button>
@@ -263,13 +402,22 @@ export default function AdminProductsPage() {
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+              style={{
+                padding: '8px 12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px',
+                backgroundColor: currentPage === totalPages ? '#f5f5f5' : '#fff',
+                color: currentPage === totalPages ? '#999' : '#333',
+                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
+              }}
             >
               다음
             </button>
-          </nav>
+          </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
