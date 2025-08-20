@@ -54,148 +54,303 @@ export default function NoticePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* 헤더 */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">공지사항</h1>
-        <p className="text-gray-600">골프상회의 새로운 소식을 확인하세요.</p>
-      </div>
-
-      {/* 로딩 상태 */}
-      {loading && (
-        <div className="text-center py-16">
-          <div className="mb-4">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mx-auto text-gray-400 animate-spin">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 6v6l4 2"/>
-            </svg>
-          </div>
-          <h3 className="text-lg font-semibold mb-2">공지사항을 불러오는 중...</h3>
+    <div className="container" style={{ maxWidth: '1200px', margin: '50px auto', padding: '20px' }}>
+      <div style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '8px', 
+        padding: '30px',
+        backgroundColor: '#fff'
+      }}>
+        {/* 헤더 */}
+        <div style={{ marginBottom: '30px' }}>
+          <h1 style={{ 
+            textAlign: 'center', 
+            marginBottom: '10px',
+            fontSize: '24px',
+            fontWeight: 'bold'
+          }}>
+            공지사항
+          </h1>
+          <p style={{
+            textAlign: 'center',
+            marginBottom: '30px',
+            fontSize: '14px',
+            color: '#666'
+          }}>
+            골프상회의 새로운 소식을 확인하세요.
+          </p>
         </div>
-      )}
 
-      {/* 공지사항 목록 */}
-      {!loading && (
-        <div className="bg-white border rounded-lg">
-          {/* 테이블 헤더 */}
-          <div className="hidden md:grid md:grid-cols-12 gap-4 p-4 border-b bg-gray-50 font-semibold text-sm text-gray-700">
-            <div className="col-span-1 text-center">번호</div>
-            <div className="col-span-6">제목</div>
-            <div className="col-span-2 text-center">작성일</div>
-            <div className="col-span-1 text-center">조회수</div>
+        {/* 로딩 상태 */}
+        {loading && (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '40px',
+            fontSize: '16px',
+            color: '#666'
+          }}>
+            📋 공지사항을 불러오는 중...
           </div>
+        )}
 
-          {/* 공지사항 리스트 */}
-          <div className="divide-y divide-gray-200">
-            {currentNotices.map((notice, index) => (
-              <div key={notice.id} className="p-4 hover:bg-gray-50 transition-colors">
-                <div className="md:grid md:grid-cols-12 gap-4 items-center">
-                  {/* 모바일: 세로 레이아웃, 데스크톱: 가로 레이아웃 */}
-                  <div className="col-span-1 text-center mb-2 md:mb-0">
-                    {notice.isFixed ? (
-                      <span className="inline-block px-2 py-1 bg-red-100 text-red-600 text-xs font-semibold rounded">
-                        고정
-                      </span>
-                    ) : (
-                      <span className="text-gray-500 text-sm">{startIndex + index + 1}</span>
-                    )}
-                  </div>
-                  
-                  <div className="col-span-6">
-                    <Link 
-                      href={`/notice/${notice.id}`}
-                      onClick={() => handleNoticeClick(notice.id)}
-                      className="hover:text-blue-500 transition-colors"
-                    >
-                      <h3 className={`${notice.isFixed ? 'font-bold text-red-600' : 'font-medium'} text-lg md:text-base mb-1`}>
-                        {notice.title}
-                      </h3>
-                    </Link>
+        {/* 공지사항 목록 */}
+        {!loading && (
+          <div>
+            {/* 공지사항 개수 표시 */}
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ 
+                fontWeight: 'bold', 
+                marginBottom: '15px',
+                fontSize: '18px',
+                borderBottom: '1px solid #e0e0e0',
+                paddingBottom: '8px'
+              }}>
+                전체 공지사항 ({notices.length}개)
+              </h3>
+            </div>
+
+            <div style={{ 
+              border: '1px solid #ddd', 
+              borderRadius: '4px',
+              backgroundColor: '#fff',
+              overflowX: 'auto'
+            }}>
+              {/* 테이블 헤더 */}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '80px 1fr 150px 100px', 
+                gap: '15px', 
+                padding: '15px 20px', 
+                borderBottom: '1px solid #ddd', 
+                backgroundColor: '#f5f5f5', 
+                fontWeight: '500', 
+                fontSize: '14px', 
+                color: '#666' 
+              }}>
+                <div style={{ textAlign: 'center' }}>번호</div>
+                <div>제목</div>
+                <div style={{ textAlign: 'center' }}>작성일</div>
+                <div style={{ textAlign: 'center' }}>조회수</div>
+              </div>
+
+              {/* 공지사항 리스트 */}
+              <div>
+                {currentNotices.map((notice, index) => (
+                  <div key={notice.id} style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '80px 1fr 150px 100px', 
+                    gap: '15px', 
+                    padding: '15px 20px',
+                    borderBottom: index < currentNotices.length - 1 ? '1px solid #e0e0e0' : 'none',
+                    alignItems: 'center',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    {/* 번호/고정 표시 */}
+                    <div style={{ textAlign: 'center' }}>
+                      {notice.isFixed ? (
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '4px 8px',
+                          borderRadius: '12px',
+                          fontSize: '11px',
+                          fontWeight: '500',
+                          backgroundColor: '#fee',
+                          color: '#c33'
+                        }}>
+                          고정
+                        </span>
+                      ) : (
+                        <span style={{ color: '#999', fontSize: '14px' }}>
+                          {startIndex + index + 1}
+                        </span>
+                      )}
+                    </div>
                     
-                    {/* 모바일에서 표시할 메타 정보 */}
-                    <div className="md:hidden text-sm text-gray-500 space-x-4">
-                      <span>{formatDate(notice.createdAt)}</span>
-                      <span>조회 {formatNumber(notice.views)}</span>
+                    {/* 제목 */}
+                    <div>
+                      <Link 
+                        href={`/notice/${notice.id}`}
+                        onClick={() => handleNoticeClick(notice.id)}
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <h3 style={{ 
+                          fontSize: '16px',
+                          fontWeight: notice.isFixed ? 'bold' : '500',
+                          color: notice.isFixed ? '#c33' : '#333',
+                          margin: 0,
+                          cursor: 'pointer',
+                          transition: 'color 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#007bff'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = notice.isFixed ? '#c33' : '#333'}
+                        >
+                          {notice.title}
+                        </h3>
+                      </Link>
+                    </div>
+                    
+                    {/* 작성일 */}
+                    <div style={{ textAlign: 'center', fontSize: '14px', color: '#666' }}>
+                      {formatDate(notice.createdAt)}
+                    </div>
+
+                    {/* 조회수 */}
+                    <div style={{ textAlign: 'center', fontSize: '14px', color: '#666' }}>
+                      👁 {formatNumber(notice.views)}
                     </div>
                   </div>
-                  
-                  {/* 데스크톱에서만 표시 */}
-                  <div className="hidden md:block col-span-2 text-center text-sm text-gray-600">
-                    {formatDate(notice.createdAt)}
-                  </div>
-                  <div className="hidden md:block col-span-1 text-center text-sm text-gray-600">
-                    {formatNumber(notice.views)}
-                  </div>
+                ))}
+              </div>
+
+              {/* 공지사항이 없는 경우 */}
+              {notices.length === 0 && !loading && (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '60px 20px',
+                  color: '#666'
+                }}>
+                  <div style={{ fontSize: '48px', marginBottom: '20px' }}>📋</div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '10px', margin: '0 0 10px 0' }}>
+                    등록된 공지사항이 없습니다
+                  </h3>
+                  <p style={{ fontSize: '14px', margin: 0 }}>
+                    새로운 공지사항이 등록되면 알려드리겠습니다.
+                  </p>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* 공지사항이 없는 경우 */}
-          {notices.length === 0 && !loading && (
-            <div className="text-center py-16">
-              <div className="mb-4">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mx-auto text-gray-400">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                  <path d="M8 12h8"/>
-                  <path d="M8 16h6"/>
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">등록된 공지사항이 없습니다</h3>
-              <p className="text-gray-600">새로운 공지사항이 등록되면 알려드리겠습니다.</p>
+              )}
             </div>
-          )}
-        </div>
-      )}
-
-      {/* 페이지네이션 */}
-      {!loading && totalPages > 1 && (
-        <div className="flex justify-center mt-8">
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              이전
-            </button>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-3 py-2 border rounded ${
-                  currentPage === page
-                    ? 'bg-blue-500 text-white border-blue-500'
-                    : 'border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-            
-            <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              다음
-            </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 하단 링크 */}
-      {!loading && (
-        <div className="mt-8 text-center">
-          <Link 
-            href="/"
-            className="inline-block px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            홈으로 돌아가기
-          </Link>
-        </div>
-      )}
+        {/* 페이지네이션 */}
+        {!loading && totalPages > 1 && (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            marginTop: '30px' 
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px' 
+            }}>
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                style={{
+                  padding: '8px 12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  backgroundColor: currentPage === 1 ? '#f5f5f5' : '#fff',
+                  color: currentPage === 1 ? '#ccc' : '#666',
+                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (currentPage !== 1) {
+                    e.currentTarget.style.backgroundColor = '#f9f9f9';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPage !== 1) {
+                    e.currentTarget.style.backgroundColor = '#fff';
+                  }
+                }}
+              >
+                이전
+              </button>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  style={{
+                    padding: '8px 12px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    backgroundColor: currentPage === page ? '#007bff' : '#fff',
+                    color: currentPage === page ? '#fff' : '#666',
+                    borderColor: currentPage === page ? '#007bff' : '#ddd',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (currentPage !== page) {
+                      e.currentTarget.style.backgroundColor = '#f9f9f9';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (currentPage !== page) {
+                      e.currentTarget.style.backgroundColor = '#fff';
+                    }
+                  }}
+                >
+                  {page}
+                </button>
+              ))}
+              
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                style={{
+                  padding: '8px 12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  backgroundColor: currentPage === totalPages ? '#f5f5f5' : '#fff',
+                  color: currentPage === totalPages ? '#ccc' : '#666',
+                  cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (currentPage !== totalPages) {
+                    e.currentTarget.style.backgroundColor = '#f9f9f9';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPage !== totalPages) {
+                    e.currentTarget.style.backgroundColor = '#fff';
+                  }
+                }}
+              >
+                다음
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 하단 링크 */}
+        {!loading && (
+          <div style={{ 
+            marginTop: '30px', 
+            textAlign: 'center' 
+          }}>
+            <Link 
+              href="/"
+              style={{
+                display: 'inline-block',
+                padding: '12px 24px',
+                backgroundColor: '#6c757d',
+                color: '#fff',
+                borderRadius: '4px',
+                textDecoration: 'none',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'background-color 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5a6268'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6c757d'}
+            >
+              홈으로 돌아가기
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
