@@ -13,6 +13,7 @@ import {
   serverTimestamp,
   Timestamp,
   writeBatch,
+  onSnapshot,
   db
 } from './firebase';
 import { Review, ReviewStats } from '@/types';
@@ -394,101 +395,85 @@ export async function getProductReviewStats(productId: string): Promise<{
   }
 }
 
-// 초기 더미 리뷰 데이터 생성 (개발/테스트용)
+// 리뷰 시스템 초기화 (실제 데이터만 사용)
 export async function initializeReviews(): Promise<void> {
-  try {
-    console.log('initializeReviews: 초기 리뷰 데이터 확인 시작');
-    
-    const reviews = await getAllReviews();
-    if (reviews.length > 0) {
-      console.log('initializeReviews: 이미 리뷰 데이터가 존재함, 스킵');
-      return;
-    }
-    
-    console.log('initializeReviews: 초기 리뷰 데이터 생성 시작');
-    
-    const dummyReviews = [
-      {
-        productId: 'product-1',
-        productName: '캘러웨이 로그 드라이버',
-        userId: 'user-1',
-        userName: '김**',
-        rating: 5,
-        title: '정말 만족스러운 구매입니다!',
-        content: '상태가 생각보다 훨씬 좋았고, 배송도 빨랐습니다. 골프장에서 써보니 비거리도 늘어난 것 같아요.',
-        images: [],
-        status: 'approved' as const,
-        isReported: false,
-        approvedAt: new Date(),
-        approvedBy: 'admin-1',
-        createdAt: new Date('2024-01-15'),
-        updatedAt: new Date('2024-01-15'),
-      },
-      {
-        productId: 'product-2',
-        productName: '타이틀리스트 917 우드',
-        userId: 'user-2',
-        userName: '박**',
-        rating: 4,
-        title: '괜찮은 상품이에요',
-        content: '중고치고는 상태가 좋습니다. 다만 배송이 조금 늦었어요.',
-        images: [],
-        status: 'pending' as const,
-        isReported: false,
-        createdAt: new Date('2024-01-14'),
-        updatedAt: new Date('2024-01-14'),
-      },
-      {
-        productId: 'product-3',
-        productName: '핑 ANSER2 퍼터',
-        userId: 'user-3',
-        userName: '이**',
-        rating: 3,
-        title: '보통입니다',
-        content: '상품은 괜찮은데 생각보다 스크래치가 많네요.',
-        images: [],
-        status: 'approved' as const,
-        isReported: true,
-        reportReason: '부적절한 내용',
-        reportedAt: new Date(),
-        reportedBy: 'user-4',
-        adminReply: '소중한 후기 감사합니다. 상품 상태에 대해 미리 안내드리지 못해 죄송합니다.',
-        adminReplyAt: new Date(),
-        repliedBy: 'admin-1',
-        approvedAt: new Date(),
-        approvedBy: 'admin-1',
-        createdAt: new Date('2024-01-13'),
-        updatedAt: new Date('2024-01-13'),
-      }
-    ];
-    
-    const batch = writeBatch(db);
-    dummyReviews.forEach((review) => {
-      const docRef = doc(collection(db, 'reviews'));
-      // undefined 필드를 제외한 데이터 객체 생성
-      const reviewData: any = {
-        ...review,
-        createdAt: Timestamp.fromDate(review.createdAt),
-        updatedAt: Timestamp.fromDate(review.updatedAt),
-      };
-      
-      // 조건부로 필드 추가 (undefined 방지)
-      if (review.approvedAt) {
-        reviewData.approvedAt = Timestamp.fromDate(review.approvedAt);
-      }
-      if (review.adminReplyAt) {
-        reviewData.adminReplyAt = Timestamp.fromDate(review.adminReplyAt);
-      }
-      if (review.reportedAt) {
-        reviewData.reportedAt = Timestamp.fromDate(review.reportedAt);
-      }
-      
-      batch.set(docRef, reviewData);
+  // 샘플 데이터를 생성하지 않음 - 실제 사용자 리뷰만 사용
+  console.log('리뷰 시스템 초기화 완료 - 실제 데이터만 사용');
+}
+
+// 실시간 리뷰 리스너 (관리자용)
+export function subscribeToAllReviews(callback: (reviews: Review[]) => void): () => void {
+  const reviewsQuery = query(
+    collection(db, 'reviews'),
+    orderBy('createdAt', 'desc')
+  );
+
+  return onSnapshot(reviewsQuery, (querySnapshot) => {
+    const reviews = querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        ...data,
+        id: doc.id,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        approvedAt: data.approvedAt?.toDate(),
+        rejectedAt: data.rejectedAt?.toDate(),
+        adminReplyAt: data.adminReplyAt?.toDate(),
+        reportedAt: data.reportedAt?.toDate(),
+      } as Review;
     });
     
-    await batch.commit();
-    console.log('initializeReviews: 초기 리뷰 데이터 생성 완료');
-  } catch (error) {
-    console.error('초기 리뷰 데이터 생성 오류:', error);
-  }
+    console.log('실시간 리뷰 업데이트:', reviews.length, '개');
+    callback(reviews);
+  }, (error) => {
+    console.error('실시간 리뷰 리스너 오류:', error);
+  });
+}
+
+// 실시간 상품별 리뷰 리스너 (고객용)
+export function subscribeToProductReviews(productId: string, callback: (reviews: Review[]) => void): () => void {
+  const reviewsQuery = query(
+    collection(db, 'reviews'),
+    where('productId', '==', productId),
+    where('isReported', '==', false), // 신고되지 않은 리뷰만
+    orderBy('createdAt', 'desc')
+  );
+
+  return onSnapshot(reviewsQuery, (querySnapshot) => {
+    const reviews = querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        ...data,
+        id: doc.id,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        approvedAt: data.approvedAt?.toDate(),
+        adminReplyAt: data.adminReplyAt?.toDate(),
+      } as Review;
+    });
+    
+    console.log('실시간 상품 리뷰 업데이트:', productId, reviews.length, '개');
+    callback(reviews);
+  }, (error) => {
+    console.error('실시간 상품 리뷰 리스너 오류:', error);
+  });
+}
+
+// 실시간 리뷰 통계 리스너 (관리자용)
+export function subscribeToReviewStats(callback: (stats: ReviewStats) => void): () => void {
+  return subscribeToAllReviews((reviews) => {
+    const stats: ReviewStats = {
+      totalReviews: reviews.length,
+      pendingReviews: reviews.filter(r => r.status === 'pending').length,
+      approvedReviews: reviews.filter(r => r.status === 'approved').length,
+      rejectedReviews: reviews.filter(r => r.status === 'rejected').length,
+      reportedReviews: reviews.filter(r => r.isReported).length,
+      averageRating: reviews.length > 0 
+        ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length) * 10) / 10
+        : 0
+    };
+    
+    console.log('실시간 리뷰 통계 업데이트:', stats);
+    callback(stats);
+  });
 }

@@ -1,25 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const honmaWoods = [
-  { id: 1, name: 'TW757 TYPE-S 15도 VIZARD FP-7', price: '가격문의', image: null },
-  { id: 2, name: 'TW747 460 15도 VIZARD FP-6', price: '가격문의', image: null },
-  { id: 3, name: 'TW747 455 15도 VIZARD FP-6', price: '가격문의', image: null },
-  { id: 4, name: 'TW737 455 15도 비자드 S', price: '가격문의', image: null },
-  { id: 5, name: 'TW737 460 15도 SR', price: '가격문의', image: null },
-  { id: 6, name: 'BERES NX 15도 ARMRQ 43 4-STAR', price: '가격문의', image: null },
-  { id: 7, name: 'BERES S-06 15도 ARMRQ X 43 S', price: '가격문의', image: null },
-  { id: 8, name: 'Be ZEAL 525 15도 VIZARD for Be ZEAL S', price: '가격문의', image: null },
-  { id: 9, name: 'TW747 VX 15도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 10, name: 'TW717 455 15도 비자드 55 R', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function HonmaWoods() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const honmaProducts = await getProductsForPage('woods/honma');
+        setProducts(honmaProducts);
+      } catch (error) {
+        console.error('혼마 우드 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="혼마 우드"
       subtitle="| HONMA WOODS"
-      products={honmaWoods}
-      totalCount={honmaWoods.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="혼마 우드"
     />
   );

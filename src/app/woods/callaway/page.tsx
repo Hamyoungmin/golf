@@ -1,25 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const callawayWoods = [
-  { id: 1, name: 'PARADYM 15도 Project X HZRDUS Smoke IM10 60', price: '가격문의', image: null },
-  { id: 2, name: 'ROGUE ST MAX 15도 Fujikura VENTUS Blue 6 R', price: '가격문의', image: null },
-  { id: 3, name: 'EPIC MAX LS 15도 Project X HZRDUS Smoke IM10', price: '가격문의', image: null },
-  { id: 4, name: 'EPIC SPEED 15도 Diamana 50 for Callaway S', price: '가격문의', image: null },
-  { id: 5, name: 'MAVRIK LITE 20.5도 Diamana 40 for Callaway L', price: '가격문의', image: null },
-  { id: 6, name: 'MAVRIK 15도 4 SR', price: '가격문의', image: null },
-  { id: 7, name: 'ROGUE STAR 15도 Speeder EVOLUTION R', price: '가격문의', image: null },
-  { id: 8, name: 'XR16 FAIRWAY 15도 SR', price: '가격문의', image: null },
-  { id: 9, name: 'EPIC MAX FAST 15도 R FAST Driver Speeder Evolution', price: '가격문의', image: null },
-  { id: 10, name: 'ROGUE ST MAX FAST 15도 S Speeder NX 40', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function CallawayWoods() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const callawayProducts = await getProductsForPage('woods/callaway');
+        setProducts(callawayProducts);
+      } catch (error) {
+        console.error('캘러웨이 우드 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="캘러웨이 우드"
       subtitle="| CALLAWAY WOODS"
-      products={callawayWoods}
-      totalCount={callawayWoods.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="캘러웨이 우드"
     />
   );

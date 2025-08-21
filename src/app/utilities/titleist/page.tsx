@@ -1,25 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const titleistUtilities = [
-  { id: 1, name: 'TSi3 US U2 18 X TENSEI AV RAW WHITE HY 90', price: '가격문의', image: null },
-  { id: 2, name: 'TSR2 U3 21도 TSP111 50 SR', price: '가격문의', image: null },
-  { id: 3, name: 'TSR3 U3 21도 TSP110 60 S', price: '가격문의', image: null },
-  { id: 4, name: 'TSi2 U3 21도 TSP322 55 SR', price: '가격문의', image: null },
-  { id: 5, name: 'TS2 23 S N.S.PRO 950GH neo', price: '가격문의', image: null },
-  { id: 6, name: 'TS3 U3 21도 TENSEI CK Pro Orange 70 S', price: '가격문의', image: null },
-  { id: 7, name: '915H U3 21 S N.S.PRO 950GH UTILITY', price: '가격문의', image: null },
-  { id: 8, name: '917H U3 21도 Diamana D+ 70 S', price: '가격문의', image: null },
-  { id: 9, name: 'TSR1 U4 24도 TSP322 45 A', price: '가격문의', image: null },
-  { id: 10, name: 'TSi1 U4 24도 TSP322 45 L', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function TitleistUtilities() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const titleistProducts = await getProductsForPage('utilities/titleist');
+        setProducts(titleistProducts);
+      } catch (error) {
+        console.error('타이틀리스트 유틸리티 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="타이틀리스트 유틸리티"
       subtitle="| TITLEIST UTILITIES"
-      products={titleistUtilities}
-      totalCount={titleistUtilities.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="타이틀리스트 유틸리티"
     />
   );

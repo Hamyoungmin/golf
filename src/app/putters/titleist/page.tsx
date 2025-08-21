@@ -1,25 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const titleistPutters = [
-  { id: 1, name: 'Scotty Cameron Newport 2 스틸샤프트', price: '가격문의', image: null },
-  { id: 2, name: 'Scotty Cameron Newport 2.5 스틸샤프트', price: '가격문의', image: null },
-  { id: 3, name: 'Scotty Cameron Studio Select Newport 2 스틸샤프트', price: '가격문의', image: null },
-  { id: 4, name: 'Scotty Cameron Select Newport 3 스틸샤프트', price: '가격문의', image: null },
-  { id: 5, name: 'Scotty Cameron Futura X5 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 6, name: 'Scotty Cameron Phantom X 5.5 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 7, name: 'Scotty Cameron Special Select Newport 2 스틸샤프트', price: '가격문의', image: null },
-  { id: 8, name: 'Scotty Cameron GoLo 5 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 9, name: 'Scotty Cameron Phantom X 12.5 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 10, name: 'Scotty Cameron T5W 말렛 스틸샤프트', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function TitleistPutters() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const titleistProducts = await getProductsForPage('putters/titleist');
+        setProducts(titleistProducts);
+      } catch (error) {
+        console.error('타이틀리스트 퍼터 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="타이틀리스트 퍼터"
       subtitle="| TITLEIST PUTTERS"
-      products={titleistPutters}
-      totalCount={titleistPutters.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="타이틀리스트 퍼터"
     />
   );

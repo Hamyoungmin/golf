@@ -1,25 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const honmaUtilities = [
-  { id: 1, name: 'TW757 TYPE-S U3 21도 VIZARD FP-7', price: '가격문의', image: null },
-  { id: 2, name: 'TW747 U3 21도 VIZARD FP-6', price: '가격문의', image: null },
-  { id: 3, name: 'TW737 U3 21도 비자드 S', price: '가격문의', image: null },
-  { id: 4, name: 'BERES NX U3 21도 ARMRQ 43 4-STAR', price: '가격문의', image: null },
-  { id: 5, name: 'BERES S-06 U3 21도 ARMRQ X 43 S', price: '가격문의', image: null },
-  { id: 6, name: 'Be ZEAL 525 U3 21도 VIZARD for Be ZEAL S', price: '가격문의', image: null },
-  { id: 7, name: 'TW747 VX U3 21도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 8, name: 'TW717 455 U3 21도 비자드 55 R', price: '가격문의', image: null },
-  { id: 9, name: 'TW737 P U3 21도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 10, name: 'BERES U4 24도 ARMRQ 43 4-STAR', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function HonmaUtilities() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const honmaProducts = await getProductsForPage('utilities/honma');
+        setProducts(honmaProducts);
+      } catch (error) {
+        console.error('혼마 유틸리티 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="혼마 유틸리티"
       subtitle="| HONMA UTILITIES"
-      products={honmaUtilities}
-      totalCount={honmaUtilities.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="혼마 유틸리티"
     />
   );

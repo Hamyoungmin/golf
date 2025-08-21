@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { createOrder } from '@/lib/orders';
 import { getUserData } from '@/lib/users';
 import { createPaymentInfo, COMPANY_BANK_ACCOUNTS } from '@/lib/payments';
 import { CartItem, Product, Address, User as UserType, PaymentMethod } from '@/types';
+import { useCustomAlert } from '@/hooks/useCustomAlert';
 
 // 임시 상품 데이터 (실제로는 Firebase에서 가져와야 함)
 const sampleProducts: Product[] = [
@@ -50,6 +52,9 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { cartItems, cartTotal, clearCart } = useCart();
+  const { settings } = useSettings();
+  const { showAlert, AlertComponent } = useCustomAlert();
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   const [userData, setUserData] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(false);
@@ -63,8 +68,18 @@ export default function CheckoutPage() {
     zipCode: '',
   });
 
-  // 결제 방법
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bank_transfer');
+  // 결제 방법 - 활성화된 첫 번째 결제 수단을 기본값으로 설정
+  const getDefaultPaymentMethod = (): PaymentMethod => {
+    if (settings.payment.enabledMethods.transfer) return 'bank_transfer';
+    if (settings.payment.enabledMethods.card) return 'card';
+    if (settings.payment.enabledMethods.vbank) return 'vbank';
+    if (settings.payment.enabledMethods.kakaopay) return 'kakaopay';
+    if (settings.payment.enabledMethods.naverpay) return 'naverpay';
+    if (settings.payment.enabledMethods.phone) return 'phone';
+    return 'bank_transfer'; // fallback
+  };
+  
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(getDefaultPaymentMethod());
 
   // 주문자 동의
   const [agreements, setAgreements] = useState({
@@ -78,20 +93,22 @@ export default function CheckoutPage() {
   // 로그인 체크
   useEffect(() => {
     if (!user) {
-      alert('로그인이 필요합니다.');
-      router.push('/login');
+      showAlert('로그인이 필요합니다.', 'warning', {
+        onConfirm: () => router.push('/login')
+      });
       return;
     }
-  }, [user, router]);
+  }, [user, router, showAlert]);
 
   // 장바구니 체크
   useEffect(() => {
     if (cartItems.length === 0) {
-      alert('주문할 상품이 없습니다.');
-      router.push('/cart');
+      showAlert('주문할 상품이 없습니다.', 'warning', {
+        onConfirm: () => router.push('/cart')
+      });
       return;
     }
-  }, [cartItems, router]);
+  }, [cartItems, router, showAlert]);
 
   // 사용자 정보 로드
   useEffect(() => {
@@ -143,6 +160,36 @@ export default function CheckoutPage() {
     setCartItemsWithProducts(itemsWithProducts);
   }, [cartItems]);
 
+  // 설정 업데이트 이벤트 리스너
+  useEffect(() => {
+    const handleSettingsUpdate = (event: CustomEvent) => {
+      console.log('🔄 CheckoutPage: 설정 업데이트 감지 (결제수단 재설정)', event.detail);
+      setForceUpdate(prev => prev + 1);
+      
+      // 결제 방법 재설정 - 활성화된 첫 번째 결제 수단으로
+      const newSettings = event.detail.settings;
+      if (newSettings.payment.enabledMethods.transfer) {
+        setPaymentMethod('bank_transfer');
+      } else if (newSettings.payment.enabledMethods.card) {
+        setPaymentMethod('card');
+      } else if (newSettings.payment.enabledMethods.vbank) {
+        setPaymentMethod('vbank');
+      } else if (newSettings.payment.enabledMethods.kakaopay) {
+        setPaymentMethod('kakaopay');
+      } else if (newSettings.payment.enabledMethods.naverpay) {
+        setPaymentMethod('naverpay');
+      } else if (newSettings.payment.enabledMethods.phone) {
+        setPaymentMethod('phone');
+      }
+    };
+
+    window.addEventListener('settingsUpdated', handleSettingsUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('settingsUpdated', handleSettingsUpdate as EventListener);
+    };
+  }, []);
+
   const handleShippingInfoChange = (field: keyof Address, value: string) => {
     setShippingInfo(prev => ({
       ...prev,
@@ -159,12 +206,12 @@ export default function CheckoutPage() {
 
   const validateForm = () => {
     if (!shippingInfo.street || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode) {
-      alert('배송지 정보를 모두 입력해주세요.');
+      showAlert('배송지 정보를 모두 입력해주세요.', 'warning');
       return false;
     }
 
     if (!agreements.terms || !agreements.privacy || !agreements.age) {
-      alert('필수 약관에 모두 동의해주세요.');
+      showAlert('필수 약관에 모두 동의해주세요.', 'warning');
       return false;
     }
 
@@ -223,7 +270,7 @@ export default function CheckoutPage() {
       router.push(`/checkout/success?orderId=${orderId}`);
     } catch (error) {
       console.error('주문 처리 오류:', error);
-      alert('주문 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+      showAlert('주문 처리 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
     } finally {
       setLoading(false);
     }
@@ -245,7 +292,9 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <>
+      <AlertComponent />
+      <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">주문/결제</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -336,29 +385,95 @@ export default function CheckoutPage() {
           <div className="bg-white border rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">결제 방법</h2>
             <div className="space-y-3">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="bank_transfer"
-                  checked={paymentMethod === 'bank_transfer'}
-                  onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                  className="mr-3"
-                />
-                <span>무통장 입금</span>
-              </label>
-              <label className="flex items-center opacity-50">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="card"
-                  checked={paymentMethod === 'card'}
-                  onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                  className="mr-3"
-                  disabled
-                />
-                <span>신용카드 (준비중)</span>
-              </label>
+              {/* 계좌이체 */}
+              {settings.payment.enabledMethods.transfer && (
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="bank_transfer"
+                    checked={paymentMethod === 'bank_transfer'}
+                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                    className="mr-3"
+                  />
+                  <span>무통장 입금</span>
+                </label>
+              )}
+              
+              {/* 신용카드 */}
+              {settings.payment.enabledMethods.card && (
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="card"
+                    checked={paymentMethod === 'card'}
+                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                    className="mr-3"
+                  />
+                  <span>신용카드/체크카드</span>
+                </label>
+              )}
+              
+              {/* 가상계좌 */}
+              {settings.payment.enabledMethods.vbank && (
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="vbank"
+                    checked={paymentMethod === 'vbank'}
+                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                    className="mr-3"
+                  />
+                  <span>가상계좌</span>
+                </label>
+              )}
+              
+              {/* 휴대폰 결제 */}
+              {settings.payment.enabledMethods.phone && (
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="phone"
+                    checked={paymentMethod === 'phone'}
+                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                    className="mr-3"
+                  />
+                  <span>휴대폰 결제</span>
+                </label>
+              )}
+              
+              {/* 카카오페이 */}
+              {settings.payment.enabledMethods.kakaopay && (
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="kakaopay"
+                    checked={paymentMethod === 'kakaopay'}
+                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                    className="mr-3"
+                  />
+                  <span>카카오페이</span>
+                </label>
+              )}
+              
+              {/* 네이버페이 */}
+              {settings.payment.enabledMethods.naverpay && (
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="naverpay"
+                    checked={paymentMethod === 'naverpay'}
+                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                    className="mr-3"
+                  />
+                  <span>네이버페이</span>
+                </label>
+              )}
             </div>
             
             {/* 계좌이체 선택 시 계좌 정보 표시 */}
@@ -493,5 +608,6 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

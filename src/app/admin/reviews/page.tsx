@@ -76,6 +76,8 @@ export default function ReviewsPage() {
     setAlert(prev => ({ ...prev, isOpen: false }));
   };
 
+
+
   // 데이터 로드
   useEffect(() => {
     loadReviews();
@@ -84,8 +86,7 @@ export default function ReviewsPage() {
   const loadReviews = async () => {
     setLoading(true);
     try {
-      // 초기 데이터 생성 (필요시)
-      await initializeReviews();
+              // 실제 사용자 리뷰만 사용
       
       // 리뷰 목록 로드
       const allReviews = await getAllReviews();
@@ -128,12 +129,25 @@ export default function ReviewsPage() {
     try {
       const success = await addAdminReply(selectedReviewId, replyText.trim(), user.uid);
       if (success) {
-        showAlert('success', '답글이 등록되었습니다.', '', () => {
-          setShowReplyModal(false);
-          setReplyText('');
-          loadReviews();
-          closeAlert();
-        });
+        // 즉시 로컬 상태에서 답글 업데이트
+        setReviews(prevReviews => 
+          prevReviews.map(review => 
+            review.id === selectedReviewId 
+              ? { 
+                  ...review, 
+                  adminReply: replyText.trim(),
+                  adminReplyAt: new Date(),
+                  repliedBy: user.uid
+                }
+              : review
+          )
+        );
+        
+        // 모달 닫기 및 상태 초기화
+        setShowReplyModal(false);
+        setReplyText('');
+        
+        showAlert('success', '답글이 등록되었습니다.');
       } else {
         showAlert('error', '답글 등록에 실패했습니다.');
       }
@@ -156,10 +170,22 @@ export default function ReviewsPage() {
       try {
         const success = await resolveReport(reviewId, user.uid);
         if (success) {
-          showAlert('success', '신고가 해제되었습니다.', '', () => {
-            loadReviews();
-            closeAlert();
-          });
+          // 즉시 로컬 상태에서 신고 상태 해제
+          setReviews(prevReviews => 
+            prevReviews.map(review => 
+              review.id === reviewId 
+                ? { ...review, isReported: false, reportCount: 0 }
+                : review
+            )
+          );
+          
+          // 통계에서 신고된 리뷰 수 감소
+          setReviewStats(prevStats => ({
+            ...prevStats,
+            reportedReviews: Math.max(0, prevStats.reportedReviews - 1)
+          }));
+          
+          showAlert('success', '신고가 해제되었습니다.');
         } else {
           showAlert('error', '신고 해제에 실패했습니다.');
         }
@@ -177,10 +203,21 @@ export default function ReviewsPage() {
       try {
         const success = await deleteReview(reviewId);
         if (success) {
-          showAlert('success', '리뷰가 삭제되었습니다.', '', () => {
-            loadReviews();
-            closeAlert();
-          });
+          // 즉시 로컬 상태에서 삭제된 리뷰 제거
+          setReviews(prevReviews => prevReviews.filter(review => review.id !== reviewId));
+          
+          // 통계도 즉시 업데이트
+          setReviewStats(prevStats => ({
+            ...prevStats,
+            totalReviews: prevStats.totalReviews - 1,
+            // 삭제된 리뷰의 상태에 따라 해당 카운트 감소
+            approvedReviews: prevStats.approvedReviews - (reviews.find(r => r.id === reviewId)?.status === 'approved' ? 1 : 0),
+            pendingReviews: prevStats.pendingReviews - (reviews.find(r => r.id === reviewId)?.status === 'pending' ? 1 : 0),
+            rejectedReviews: prevStats.rejectedReviews - (reviews.find(r => r.id === reviewId)?.status === 'rejected' ? 1 : 0),
+            reportedReviews: prevStats.reportedReviews - (reviews.find(r => r.id === reviewId)?.isReported ? 1 : 0)
+          }));
+          
+          showAlert('success', '리뷰가 삭제되었습니다.');
         } else {
           showAlert('error', '리뷰 삭제에 실패했습니다.');
         }
@@ -236,12 +273,14 @@ export default function ReviewsPage() {
         </h1>
         <p style={{
           textAlign: 'center',
-          marginBottom: '30px',
+          marginBottom: '20px',
           fontSize: '14px',
           color: '#666'
         }}>
           고객 리뷰에 답글을 작성하고 신고된 리뷰를 관리할 수 있습니다.
         </p>
+
+
 
         {/* 리뷰 통계 */}
         {!loading && reviewStats.totalReviews > 0 && (
@@ -473,7 +512,7 @@ export default function ReviewsPage() {
                       }}
                     >
                       💬 답글
-                    </button>
+                      </button>
                   ) : (
                     <span style={{
                       padding: '6px 12px',

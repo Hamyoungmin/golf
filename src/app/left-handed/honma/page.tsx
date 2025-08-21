@@ -1,27 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const honmaLeftHanded = [
-  { id: 1, name: 'TW757 TYPE-S 9.5도 왼손용 VIZARD FP-7', price: '가격문의', image: null },
-  { id: 2, name: 'TW747 460 10.5도 왼손용 VIZARD FP-6', price: '가격문의', image: null },
-  { id: 3, name: 'TW747 455 9.5도 왼손용 VIZARD FP-6', price: '가격문의', image: null },
-  { id: 4, name: 'TW737 455 9.5도 왼손용 비자드 S', price: '가격문의', image: null },
-  { id: 5, name: 'TW737 460 10.5도 왼손용 SR', price: '가격문의', image: null },
-  { id: 6, name: 'BERES NX 10.5도 왼손용 ARMRQ 43 4-STAR', price: '가격문의', image: null },
-  { id: 7, name: 'BERES S-06 10.5도 왼손용 ARMRQ X 43 S', price: '가격문의', image: null },
-  { id: 8, name: 'Be ZEAL 525 10.5도 왼손용 VIZARD for Be ZEAL S', price: '가격문의', image: null },
-  { id: 9, name: 'TW-PT01 왼손용 블레이드 스틸샤프트', price: '가격문의', image: null },
-  { id: 10, name: 'TW-W 56도 왼손용 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 11, name: 'TW747 VX 15도 왼손용 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 12, name: 'TW757 IRON 6-P 왼손용 NSPRO 950GH', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function HonmaLeftHanded() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const honmaProducts = await getProductsForPage('left-handed/honma');
+        setProducts(honmaProducts);
+      } catch (error) {
+        console.error('혼마 왼손용 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="혼마 왼손용"
       subtitle="| HONMA LEFT-HANDED"
-      products={honmaLeftHanded}
-      totalCount={honmaLeftHanded.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="혼마 왼손용"
     />
   );

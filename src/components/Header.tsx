@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface NavigationItem {
   name: string;
@@ -17,6 +18,8 @@ const Header = () => {
   const pathname = usePathname();
   const { user, loading, signOut } = useAuth();
   const { cartItemCount } = useCart();
+  const { settings } = useSettings();
+  const [forceUpdate, setForceUpdate] = useState(0);
   const [isDriversOpen, setIsDriversOpen] = useState(false);
   const [isWoodsOpen, setIsWoodsOpen] = useState(false);
   const [isUtilitiesOpen, setIsUtilitiesOpen] = useState(false);
@@ -125,12 +128,26 @@ const Header = () => {
     }
   };
 
+  // 설정 업데이트 이벤트 리스너
+  useEffect(() => {
+    const handleSettingsUpdate = (event: CustomEvent) => {
+      console.log('🔄 Header: 설정 업데이트 감지', event.detail);
+      setForceUpdate(prev => prev + 1);
+    };
+
+    window.addEventListener('settingsUpdated', handleSettingsUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('settingsUpdated', handleSettingsUpdate as EventListener);
+    };
+  }, []);
+
   return (
     <header className="header">
       <div className="container">
         <div className="header-top">
                   <Link href="/" className="logo">
-          골프상회
+          {settings.general.siteName}
         </Link>
           <div className="auth-buttons">
             {/* 장바구니 아이콘 */}

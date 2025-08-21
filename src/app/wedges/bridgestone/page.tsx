@@ -1,24 +1,60 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const bridgestoneWedges = [
-  { id: 1, name: 'TOUR B BRM 52도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 2, name: 'TOUR B BRM 56도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 3, name: 'TOUR B BRM 60도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 4, name: 'TOUR B WG 52도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 5, name: 'TOUR B WG 56도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 6, name: 'TOUR B WG 60도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 7, name: 'J15 WEDGE 52도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 8, name: 'J15 WEDGE 56도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 9, name: 'J15 WEDGE 60도 NSPRO 950GH', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function BridgestoneWedges() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // 'wedges/bridgestone' 페이지에 표시될 상품들 가져오기
+        const bridgestoneProducts = await getProductsForPage('wedges/bridgestone');
+        setProducts(bridgestoneProducts);
+      } catch (error) {
+        console.error('브리지스톤 웨지 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Product 타입을 ProductList가 기대하는 형태로 변환
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="브리지스톤 웨지"
       subtitle="| BRIDGESTONE WEDGES"
-      products={bridgestoneWedges}
-      totalCount={bridgestoneWedges.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="브리지스톤 웨지"
     />
   );

@@ -1,27 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const callawayWomens = [
-  { id: 1, name: 'PARADYM 여성용 10.5도 Project X HZRDUS Smoke IM10 50 L', price: '가격문의', image: null },
-  { id: 2, name: 'ROGUE ST MAX 여성용 12도 Fujikura VENTUS Blue 5 A', price: '가격문의', image: null },
-  { id: 3, name: 'EPIC MAX FAST 여성용 12도 FAST Driver Speeder Evolution L', price: '가격문의', image: null },
-  { id: 4, name: 'MAVRIK LITE 여성용 13도 Diamana 40 for Callaway A', price: '가격문의', image: null },
-  { id: 5, name: 'ROGUE STAR 여성용 12도 Speeder EVOLUTION A', price: '가격문의', image: null },
-  { id: 6, name: 'ROGUE ST MAX 여성용 18도 Fujikura VENTUS Blue 5 A', price: '가격문의', image: null },
-  { id: 7, name: 'APEX DCB 여성용 7I-P A Diamana 50 for Callaway', price: '가격문의', image: null },
-  { id: 8, name: 'ROGUE ST MAX LITE 여성용 6-P L Speeder NX 30', price: '가격문의', image: null },
-  { id: 9, name: 'ROGUE ST MAX 여성용 U3 21도 Fujikura VENTUS Blue 5 A', price: '가격문의', image: null },
-  { id: 10, name: 'WHITE HOT VERSA DOUBLE WIDE DB 여성용 블레이드 32인치', price: '가격문의', image: null },
-  { id: 11, name: 'JAWS RAW 여성용 56도 NSPRO 950GH neo', price: '가격문의', image: null },
-  { id: 12, name: 'MAVRIK LITE 여성용 20.5도 Diamana 40 for Callaway A', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function CallawayWomens() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const callawayProducts = await getProductsForPage('womens/callaway');
+        setProducts(callawayProducts);
+      } catch (error) {
+        console.error('캘러웨이 여성용 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="캘러웨이 여성용"
-      subtitle="| CALLAWAY WOMENS"
-      products={callawayWomens}
-      totalCount={callawayWomens.length}
+      subtitle="| CALLAWAY LADIES"
+      products={formattedProducts}
+      totalCount={products.length}
       category="캘러웨이 여성용"
     />
   );

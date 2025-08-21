@@ -9,7 +9,10 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { RecentlyViewedProvider } from "@/contexts/RecentlyViewedContext";
+import { FAQProvider } from "@/contexts/FAQContext";
+import { SettingsProvider } from "@/contexts/SettingsContext";
 import VisitorTracker from "@/components/VisitorTracker";
+import GlobalAlertProvider from "@/components/GlobalAlertProvider";
 
 export const metadata: Metadata = {
   title: "골프상회 - 골프용품 전문 도매몰",
@@ -28,16 +31,22 @@ export default function RootLayout({
           <CartProvider>
             <WishlistProvider>
               <RecentlyViewedProvider>
-                <AuthGuard>
-                  <VisitorTracker />
-                  <Header />
-                  <main>
-                    {children}
-                  </main>
-                  <Footer />
-                  <NoticeButton />
-                  <PhoneCall />
-                </AuthGuard>
+                <FAQProvider>
+                  <SettingsProvider>
+                    <GlobalAlertProvider>
+                      <AuthGuard>
+                        <VisitorTracker />
+                        <Header />
+                        <main>
+                          {children}
+                        </main>
+                        <Footer />
+                        <NoticeButton />
+                        <PhoneCall />
+                      </AuthGuard>
+                    </GlobalAlertProvider>
+                  </SettingsProvider>
+                </FAQProvider>
               </RecentlyViewedProvider>
             </WishlistProvider>
           </CartProvider>

@@ -1,28 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const callawayLeftHanded = [
-  { id: 1, name: '캘러웨이 엘리트 10.5도', price: '600,000원', image: '/z1.jpg' },
-  { id: 2, name: 'PARADYM 10.5도 왼손용 Project X HZRDUS Smoke IM10 60', price: '가격문의', image: null },
-  { id: 3, name: 'ROGUE ST MAX 10.5도 왼손용 Fujikura VENTUS Blue 6 R', price: '가격문의', image: null },
-  { id: 4, name: 'EPIC MAX LS 9.5도 왼손용 Project X HZRDUS Smoke IM10', price: '가격문의', image: null },
-  { id: 5, name: 'EPIC SPEED 10.5도 왼손용 Diamana 50 for Callaway S', price: '가격문의', image: null },
-  { id: 6, name: 'MAVRIK LITE 12도 왼손용 Diamana 40 for Callaway L', price: '가격문의', image: null },
-  { id: 7, name: 'MAVRIK 10.5도 왼손용 4 SR', price: '가격문의', image: null },
-  { id: 8, name: 'ROGUE STAR 10.5도 왼손용 Speeder EVOLUTION R', price: '가격문의', image: null },
-  { id: 9, name: 'XR16 10.5도 왼손용 SR', price: '가격문의', image: null },
-  { id: 10, name: 'WHITE HOT VERSA TWELVE DB 왼손용 말렛', price: '가격문의', image: null },
-  { id: 11, name: 'JAWS RAW 56도 왼손용 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 12, name: 'APEX DCB 7I-P 왼손용 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 13, name: 'ROGUE ST MAX 15도 왼손용 Fujikura VENTUS Blue 6 R', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function CallawayLeftHanded() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const callawayProducts = await getProductsForPage('left-handed/callaway');
+        setProducts(callawayProducts);
+      } catch (error) {
+        console.error('캘러웨이 왼손용 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="캘러웨이 왼손용"
       subtitle="| CALLAWAY LEFT-HANDED"
-      products={callawayLeftHanded}
-      totalCount={callawayLeftHanded.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="캘러웨이 왼손용"
     />
   );

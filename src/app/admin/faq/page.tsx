@@ -9,61 +9,110 @@ import {
   ChevronUpIcon,
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
+import { useFAQ, FAQItem } from '@/contexts/FAQContext';
 
 export default function FAQPage() {
+  const { faqs, addFaq, updateFaq, deleteFaq, toggleVisibility, moveFaq } = useFAQ();
+  
   const [showForm, setShowForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [editingFaq, setEditingFaq] = useState<FAQItem | null>(null);
+  const [formData, setFormData] = useState({
+    category: '주문/결제',
+    question: '',
+    answer: '',
+    order: 1,
+    isVisible: true
+  });
 
-  // 더미 FAQ 데이터
-  const faqs = [
-    {
-      id: 1,
-      category: '주문/결제',
-      question: '주문 취소는 어떻게 하나요?',
-      answer: '주문 완료 후 결제 전까지는 마이페이지에서 직접 취소 가능하며, 결제 완료 후에는 고객센터로 연락 주시기 바랍니다.',
-      isVisible: true,
-      order: 1,
-      views: 1247
-    },
-    {
-      id: 2,
-      category: '배송',
-      question: '배송비는 얼마인가요?',
-      answer: '기본 배송비는 3,000원이며, 5만원 이상 구매 시 무료배송입니다. 제주도는 추가 3,000원, 도서산간은 추가 5,000원입니다.',
-      isVisible: true,
-      order: 2,
-      views: 856
-    },
-    {
-      id: 3,
-      category: '상품',
-      question: '중고 상품의 상태는 어떤가요?',
-      answer: '모든 중고 상품은 전문가가 검수하여 상태를 확인한 후 판매하며, 상품별로 상세한 상태 정보를 제공합니다.',
-      isVisible: true,
-      order: 3,
-      views: 432
-    },
-    {
-      id: 4,
-      category: '교환/환불',
-      question: '교환이나 환불이 가능한가요?',
-      answer: '상품 수령 후 7일 이내에 교환/환불 신청이 가능하며, 상품에 이상이 없어야 합니다.',
-      isVisible: true,
-      order: 4,
-      views: 678
-    },
-    {
-      id: 5,
-      category: '회원',
-      question: '회원가입 시 필요한 서류가 있나요?',
-      answer: '사업자 회원가입 시 사업자등록증과 샵 내부/간판 사진이 필요합니다.',
-      isVisible: false,
-      order: 5,
-      views: 234
+  // 이미지 업로드 처리 함수
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
-  ];
+  };
 
-  const categories = ['all', '주문/결제', '배송', '상품', '교환/환불', '회원', '기타'];
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+  };
+
+  // FAQ 관리 함수들
+  const resetForm = () => {
+    setFormData({
+      category: '주문/결제',
+      question: '',
+      answer: '',
+      order: 1,
+      isVisible: true
+    });
+    setSelectedImage(null);
+    setImagePreview(null);
+    setEditingFaq(null);
+    setShowForm(false);
+  };
+
+  const handleAddFaq = () => {
+    addFaq({
+      category: formData.category,
+      question: formData.question,
+      answer: formData.answer,
+      isVisible: formData.isVisible,
+      order: formData.order,
+      imageUrl: imagePreview || null
+    });
+    resetForm();
+    alert('FAQ가 추가되었습니다.');
+  };
+
+  const handleEditFaq = (faq: FAQItem) => {
+    setEditingFaq(faq);
+    setFormData({
+      category: faq.category,
+      question: faq.question,
+      answer: faq.answer,
+      order: faq.order,
+      isVisible: faq.isVisible
+    });
+    if (faq.imageUrl) {
+      setImagePreview(faq.imageUrl);
+    }
+    setShowForm(true);
+  };
+
+  const handleUpdateFaq = () => {
+    if (!editingFaq) return;
+    
+    updateFaq(editingFaq.id, {
+      category: formData.category,
+      question: formData.question,
+      answer: formData.answer,
+      order: formData.order,
+      isVisible: formData.isVisible,
+      imageUrl: imagePreview
+    });
+    resetForm();
+    alert('FAQ가 수정되었습니다.');
+  };
+
+  const handleDeleteFaq = (id: number) => {
+    if (confirm('이 FAQ를 삭제하시겠습니까?')) {
+      deleteFaq(id);
+      alert('FAQ가 삭제되었습니다.');
+    }
+  };
+
+
+
+  const categories = ['all', '주문/결제', '배송', '상품', '교환/환불', '회원', '기능', '시스템', '기타'];
 
   const filteredFAQs = faqs.filter(faq => 
     selectedCategory === 'all' || faq.category === selectedCategory
@@ -130,7 +179,7 @@ export default function FAQPage() {
             borderBottom: '1px solid #e0e0e0',
             paddingBottom: '8px'
           }}>
-            새 FAQ 추가
+            {editingFaq ? 'FAQ 수정' : '새 FAQ 추가'}
           </h3>
           <div style={{ 
             border: '1px solid #ddd', 
@@ -148,13 +197,17 @@ export default function FAQPage() {
                 }}>
                   카테고리
                 </label>
-                <select style={{
-                  width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '14px'
-                }}>
+                <select 
+                  value={formData.category}
+                  onChange={(e) => setFormData({...formData, category: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '14px'
+                  }}
+                >
                   {categories.filter(cat => cat !== 'all').map(category => (
                     <option key={category} value={category}>{category}</option>
                   ))}
@@ -172,6 +225,8 @@ export default function FAQPage() {
                 <input
                   type="text"
                   placeholder="자주 묻는 질문을 입력하세요"
+                  value={formData.question}
+                  onChange={(e) => setFormData({...formData, question: e.target.value})}
                   style={{
                     width: '100%',
                     padding: '10px',
@@ -193,6 +248,8 @@ export default function FAQPage() {
                 <textarea
                   rows={4}
                   placeholder="질문에 대한 답변을 입력하세요"
+                  value={formData.answer}
+                  onChange={(e) => setFormData({...formData, answer: e.target.value})}
                   style={{
                     width: '100%',
                     padding: '10px',
@@ -202,6 +259,87 @@ export default function FAQPage() {
                     resize: 'vertical'
                   }}
                 />
+              </div>
+              <div>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '5px',
+                  fontWeight: '500',
+                  fontSize: '14px'
+                }}>
+                  이미지 첨부 (선택사항)
+                </label>
+                <div style={{ 
+                  border: '2px dashed #ddd', 
+                  borderRadius: '4px', 
+                  padding: '20px', 
+                  textAlign: 'center' as const,
+                  backgroundColor: '#fafafa'
+                }}>
+                  {imagePreview ? (
+                    <div>
+                      <img 
+                        src={imagePreview} 
+                        alt="미리보기" 
+                        style={{ 
+                          maxWidth: '100%', 
+                          maxHeight: '200px', 
+                          borderRadius: '4px',
+                          marginBottom: '10px'
+                        }} 
+                      />
+                      <div>
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          style={{
+                            padding: '4px 8px',
+                            fontSize: '12px',
+                            color: '#dc3545',
+                            backgroundColor: 'transparent',
+                            border: '1px solid #dc3545',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          이미지 제거
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        style={{ display: 'none' }}
+                        id="faq-image-upload"
+                      />
+                      <label
+                        htmlFor="faq-image-upload"
+                        style={{
+                          display: 'inline-block',
+                          padding: '8px 16px',
+                          fontSize: '14px',
+                          color: '#007bff',
+                          backgroundColor: 'transparent',
+                          border: '1px solid #007bff',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        📷 이미지 선택
+                      </label>
+                      <p style={{ 
+                        fontSize: '12px', 
+                        color: '#666', 
+                        margin: '10px 0 0 0'
+                      }}>
+                        JPG, PNG 파일만 업로드 가능 (최대 5MB)
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
                 <div>
@@ -215,7 +353,8 @@ export default function FAQPage() {
                   </label>
                   <input
                     type="number"
-                    defaultValue="1"
+                    value={formData.order}
+                    onChange={(e) => setFormData({...formData, order: parseInt(e.target.value) || 1})}
                     style={{
                       width: '100%',
                       padding: '10px',
@@ -227,14 +366,19 @@ export default function FAQPage() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', paddingTop: '25px' }}>
                   <label style={{ display: 'flex', alignItems: 'center' }}>
-                    <input type="checkbox" defaultChecked style={{ marginRight: '8px' }} />
+                    <input 
+                      type="checkbox" 
+                      checked={formData.isVisible}
+                      onChange={(e) => setFormData({...formData, isVisible: e.target.checked})}
+                      style={{ marginRight: '8px' }} 
+                    />
                     <span style={{ fontSize: '14px' }}>즉시 게시</span>
                   </label>
                 </div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                 <button
-                  onClick={() => setShowForm(false)}
+                  onClick={resetForm}
                   style={{
                     padding: '8px 16px',
                     border: '1px solid #ddd',
@@ -248,17 +392,20 @@ export default function FAQPage() {
                 >
                   취소
                 </button>
-                <button style={{
-                  padding: '8px 16px',
-                  border: 'none',
-                  borderRadius: '4px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#fff',
-                  backgroundColor: '#007bff',
-                  cursor: 'pointer'
-                }}>
-                  추가
+                <button 
+                  onClick={editingFaq ? handleUpdateFaq : handleAddFaq}
+                  style={{
+                    padding: '8px 16px',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#fff',
+                    backgroundColor: '#007bff',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {editingFaq ? '수정' : '추가'}
                 </button>
               </div>
             </div>
@@ -358,48 +505,76 @@ export default function FAQPage() {
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <button style={{
-                    padding: '4px 8px',
-                    fontSize: '12px',
-                    color: '#666',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}>
+                  <button 
+                    onClick={() => moveFaq(faq.id, 'up')}
+                    disabled={index === 0}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      color: index === 0 ? '#ccc' : '#666',
+                      backgroundColor: 'transparent',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      cursor: index === 0 ? 'not-allowed' : 'pointer'
+                    }}
+                  >
                     ↑
                   </button>
-                  <button style={{
-                    padding: '4px 8px',
-                    fontSize: '12px',
-                    color: '#666',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}>
+                  <button 
+                    onClick={() => moveFaq(faq.id, 'down')}
+                    disabled={index === filteredFAQs.length - 1}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      color: index === filteredFAQs.length - 1 ? '#ccc' : '#666',
+                      backgroundColor: 'transparent',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      cursor: index === filteredFAQs.length - 1 ? 'not-allowed' : 'pointer'
+                    }}
+                  >
                     ↓
                   </button>
-                  <button style={{
-                    padding: '4px 8px',
-                    fontSize: '12px',
-                    color: '#007bff',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #007bff',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}>
+                  <button 
+                    onClick={() => toggleVisibility(faq.id)}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      color: faq.isVisible ? '#28a745' : '#6c757d',
+                      backgroundColor: 'transparent',
+                      border: `1px solid ${faq.isVisible ? '#28a745' : '#6c757d'}`,
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {faq.isVisible ? '숨김' : '공개'}
+                  </button>
+                  <button 
+                    onClick={() => handleEditFaq(faq)}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      color: '#007bff',
+                      backgroundColor: 'transparent',
+                      border: '1px solid #007bff',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
                     수정
                   </button>
-                  <button style={{
-                    padding: '4px 8px',
-                    fontSize: '12px',
-                    color: '#dc3545',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #dc3545',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}>
+                  <button 
+                    onClick={() => handleDeleteFaq(faq.id)}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      color: '#dc3545',
+                      backgroundColor: 'transparent',
+                      border: '1px solid #dc3545',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
                     삭제
                   </button>
                 </div>
@@ -420,10 +595,25 @@ export default function FAQPage() {
                   fontSize: '14px', 
                   color: '#666',
                   margin: 0,
-                  lineHeight: '1.4'
+                  lineHeight: '1.4',
+                  marginBottom: faq.imageUrl ? '10px' : '0'
                 }}>
                   A. {faq.answer}
                 </p>
+                {faq.imageUrl && (
+                  <div style={{ marginTop: '10px' }}>
+                    <img 
+                      src={faq.imageUrl} 
+                      alt="FAQ 이미지" 
+                      style={{ 
+                        maxWidth: '100%', 
+                        maxHeight: '200px', 
+                        borderRadius: '4px',
+                        border: '1px solid #e0e0e0'
+                      }} 
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ))}

@@ -1,24 +1,60 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const bridgestoneDrivers = [
-  { id: 1, name: 'TOUR B X 10.5도 TOUR AD DI-6 S', price: '가격문의', image: null },
-  { id: 2, name: 'TOUR B XD-3 9.5도 TOUR AD PT-6', price: '가격문의', image: null },
-  { id: 3, name: 'TOUR B XD-3 9.5도 디아마나BF 6S', price: '가격문의', image: null },
-  { id: 4, name: 'TOUR B JGR 10.5도 Air Speeder BS-JGR', price: '가격문의', image: null },
-  { id: 5, name: 'TOUR B JGR HF2 5~P Air Speeder for JGR', price: '가격문의', image: null },
-  { id: 6, name: 'TOUR B 213 4~P NSPRO MODUS3 TOUR 120', price: '가격문의', image: null },
-  { id: 7, name: 'TOUR B X-CB 4~P NSPRO MODUS3 TOUR 105', price: '가격문의', image: null },
-  { id: 8, name: 'J715 B3 9.5 S Tour AD J15-11W', price: '가격문의', image: null },
-  { id: 9, name: 'B3 DD 10.5 SR TENSEI BS Red 40', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function BridgestoneDrivers() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // 'drivers/bridgestone' 페이지에 표시될 상품들 가져오기
+        const bridgestoneProducts = await getProductsForPage('drivers/bridgestone');
+        setProducts(bridgestoneProducts);
+      } catch (error) {
+        console.error('브리지스톤 드라이버 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Product 타입을 ProductList가 기대하는 형태로 변환
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="브리지스톤 드라이버"
       subtitle="| BRIDGESTONE DRIVERS"
-      products={bridgestoneDrivers}
-      totalCount={bridgestoneDrivers.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="브리지스톤 드라이버"
     />
   );

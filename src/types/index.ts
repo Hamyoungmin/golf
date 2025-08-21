@@ -14,8 +14,20 @@ export interface Product {
   isWomens: boolean;
   isKids: boolean;
   isLeftHanded: boolean;
+  targetPages?: string[]; // 상품이 표시될 페이지들 (예: ["drivers/titleist", "drivers/callaway"])
   createdAt: Date;
   updatedAt: Date;
+}
+
+// 카테고리별 페이지 매핑
+export interface CategoryPageMap {
+  [key: string]: {
+    label: string;
+    pages: {
+      path: string;
+      label: string;
+    }[];
+  };
 }
 
 // 사용자 관련 타입 정의
@@ -71,7 +83,7 @@ export interface OrderItem {
 export type OrderStatus = 'pending' | 'payment_pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
 
 // 결제 관련 타입 정의
-export type PaymentMethod = 'bank_transfer' | 'card' | 'cash';
+export type PaymentMethod = 'bank_transfer' | 'card' | 'cash' | 'vbank' | 'kakaopay' | 'naverpay' | 'phone';
 
 export interface BankTransferInfo {
   bankName: string;
@@ -187,6 +199,7 @@ export interface ProductFilter {
   isKids?: boolean;
   isLeftHanded?: boolean;
   inStock?: boolean;
+  targetPage?: string; // 특정 페이지에 표시되는 상품만 필터링
 }
 
 export interface ProductSort {

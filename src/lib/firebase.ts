@@ -48,6 +48,7 @@ const mockStorage = {
   ref: () => ({
     put: () => Promise.resolve({ ref: { getDownloadURL: () => Promise.resolve('') } }),
     getDownloadURL: () => Promise.resolve(''),
+    putString: () => Promise.resolve({ ref: { getDownloadURL: () => Promise.resolve('') } }),
   }),
 };
 
@@ -97,6 +98,25 @@ let writeBatch: any = (db: any) => ({
   delete: () => {},
   commit: () => Promise.resolve()
 });
+let onSnapshot: any = (query: any, callback: any) => {
+  console.log('Mock onSnapshot called');
+  // Mock function that returns an unsubscribe function
+  return () => console.log('Mock unsubscribe called');
+};
+
+// Mock Storage functions
+let ref: any = (storage: any, path?: string) => ({
+  put: (file: any) => Promise.resolve({ 
+    ref: { getDownloadURL: () => Promise.resolve(`https://mock-storage.com/${path}`) } 
+  }),
+  getDownloadURL: () => Promise.resolve(`https://mock-storage.com/${path}`),
+});
+let uploadBytes: any = (ref: any, file: any) => Promise.resolve({ 
+  ref: { getDownloadURL: () => Promise.resolve('https://mock-storage.com/file') } 
+});
+let getDownloadURL: any = (ref: any) => Promise.resolve('https://mock-storage.com/file');
+
+
 
 // Types
 let DocumentSnapshot: any = {};
@@ -126,12 +146,20 @@ if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
     updateDoc = firestoreFunctions.updateDoc;
     arrayUnion = firestoreFunctions.arrayUnion;
     arrayRemove = firestoreFunctions.arrayRemove;
+
     orderBy = firestoreFunctions.orderBy;
     limit = firestoreFunctions.limit;
     startAfter = firestoreFunctions.startAfter;
     addDoc = firestoreFunctions.addDoc;
     Timestamp = firestoreFunctions.Timestamp;
     writeBatch = firestoreFunctions.writeBatch;
+    onSnapshot = firestoreFunctions.onSnapshot;
+    
+    // Import Storage functions
+    const storageFunctions = require('firebase/storage');
+    ref = storageFunctions.ref;
+    uploadBytes = storageFunctions.uploadBytes;
+    getDownloadURL = storageFunctions.getDownloadURL;
     
     // Types
     DocumentSnapshot = firestoreFunctions.DocumentSnapshot;
@@ -170,13 +198,18 @@ export {
   updateDoc,
   arrayUnion,
   arrayRemove,
+
   orderBy,
   limit,
   startAfter,
   addDoc,
   Timestamp,
   writeBatch,
+  onSnapshot,
   DocumentSnapshot,
-  WhereFilterOp
+  WhereFilterOp,
+  ref,
+  uploadBytes,
+  getDownloadURL
 };
 export default app;

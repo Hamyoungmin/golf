@@ -1,25 +1,60 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const titleistWedges = [
-  { id: 1, name: 'Vokey SM9 52도 08 M NSPRO 950GH', price: '가격문의', image: null },
-  { id: 2, name: 'Vokey SM9 56도 10 S NSPRO 950GH', price: '가격문의', image: null },
-  { id: 3, name: 'Vokey SM9 60도 08 M NSPRO 950GH', price: '가격문의', image: null },
-  { id: 4, name: 'Vokey SM8 52도 08 F NSPRO 950GH', price: '가격문의', image: null },
-  { id: 5, name: 'Vokey SM8 56도 14 F NSPRO 950GH', price: '가격문의', image: null },
-  { id: 6, name: 'Vokey SM8 60도 10 S NSPRO 950GH', price: '가격문의', image: null },
-  { id: 7, name: 'Vokey SM7 52도 08 M NSPRO 950GH', price: '가격문의', image: null },
-  { id: 8, name: 'Vokey SM7 56도 10 S NSPRO 950GH', price: '가격문의', image: null },
-  { id: 9, name: 'Vokey SM7 60도 04 L NSPRO 950GH', price: '가격문의', image: null },
-  { id: 10, name: 'Vokey Design 58도 NSPRO 950GH', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function TitleistWedges() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // 'wedges/titleist' 페이지에 표시될 상품들 가져오기
+        const titleistProducts = await getProductsForPage('wedges/titleist');
+        setProducts(titleistProducts);
+      } catch (error) {
+        console.error('타이틀리스트 웨지 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Product 타입을 ProductList가 기대하는 형태로 변환
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="타이틀리스트 웨지"
       subtitle="| TITLEIST WEDGES"
-      products={titleistWedges}
-      totalCount={titleistWedges.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="타이틀리스트 웨지"
     />
   );

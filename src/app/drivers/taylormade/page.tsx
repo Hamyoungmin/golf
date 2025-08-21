@@ -1,28 +1,60 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const taylormadeDrivers = [
-  { id: 1, name: 'STEALTH HD 10.5도 TENSEI RED TM50', price: '가격문의', image: null },
-  { id: 2, name: '스텔스 HD 10.5 SR TENSEI RED TM50(2022)', price: '가격문의', image: null },
-  { id: 3, name: 'SIM2 MAX 10.5도 VENTUS Blue 6 SR', price: '가격문의', image: null },
-  { id: 4, name: 'SIM MAX 10.5도 VENTUS BLUE 6 S', price: '가격문의', image: null },
-  { id: 5, name: 'SIM 글로레 9.5 S Air Speeder TM', price: '가격문의', image: null },
-  { id: 6, name: 'M6 9 S FUBUKI TM5 2019', price: '가격문의', image: null },
-  { id: 7, name: 'M6 10.5 S Tour AD IZ-6', price: '가격문의', image: null },
-  { id: 8, name: 'M4(2021) 10.5 R FUBUKI TM5 2019', price: '가격문의', image: null },
-  { id: 9, name: 'M4 10.5도 FUBUKI TM5 R', price: '가격문의', image: null },
-  { id: 10, name: 'M4 10.5도 FUBUKI TM5 SR', price: '가격문의', image: null },
-  { id: 11, name: 'M4 10.5 S FUBUKI TM5', price: '가격문의', image: null },
-  { id: 12, name: 'P790 4~P KBS TOUR 130 S', price: '가격문의', image: null },
-  { id: 13, name: 'P770 4~P KBS TOUR 120 S', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function TaylormadeDrivers() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // 'drivers/taylormade' 페이지에 표시될 상품들 가져오기
+        const taylormadeProducts = await getProductsForPage('drivers/taylormade');
+        setProducts(taylormadeProducts);
+      } catch (error) {
+        console.error('테일러메이드 드라이버 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Product 타입을 ProductList가 기대하는 형태로 변환
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="테일러메이드 드라이버"
       subtitle="| TAYLORMADE DRIVERS"
-      products={taylormadeDrivers}
-      totalCount={taylormadeDrivers.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="테일러메이드 드라이버"
     />
   );

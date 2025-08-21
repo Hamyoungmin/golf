@@ -1,25 +1,60 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const titleistDrivers = [
-  { id: 1, name: 'TSR4 8.25도 TSP110 60 X', price: '가격문의', image: null },
-  { id: 2, name: 'TSR3 9도 TSP110 60 S', price: '가격문의', image: null },
-  { id: 3, name: 'TSR2 10도 TSP111 50 SR', price: '가격문의', image: null },
-  { id: 4, name: 'TSR1 10도 TSP322 45', price: '가격문의', image: null },
-  { id: 5, name: 'TSi3 10 S ATTAS 6☆ 7', price: '가격문의', image: null },
-  { id: 6, name: 'TSi2 10도 TSP322 55 SR', price: '가격문의', image: null },
-  { id: 7, name: 'TS2 10.5 SR Tour AD 60', price: '가격문의', image: null },
-  { id: 8, name: 'TS3 9.5도 TENSEI CK Pro Orange 70 X', price: '가격문의', image: null },
-  { id: 9, name: '917D3 9.5도 Diamana D+ 70 S', price: '가격문의', image: null },
-  { id: 10, name: '915D3 9.5도 Tour AD DI-7 S', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function TitleistDrivers() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // 'drivers/titleist' 페이지에 표시될 상품들 가져오기
+        const titleistProducts = await getProductsForPage('drivers/titleist');
+        setProducts(titleistProducts);
+      } catch (error) {
+        console.error('타이틀리스트 드라이버 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Product 타입을 ProductList가 기대하는 형태로 변환
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="타이틀리스트 드라이버"
       subtitle="| TITLEIST DRIVERS"
-      products={titleistDrivers}
-      totalCount={titleistDrivers.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="타이틀리스트 드라이버"
     />
   );

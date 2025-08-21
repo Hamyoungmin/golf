@@ -2,172 +2,23 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-
-interface FAQItem {
-  id: number;
-  category: string;
-  question: string;
-  answer: string;
-}
-
-// 임시 FAQ 데이터
-const sampleFAQs: FAQItem[] = [
-  {
-    id: 1,
-    category: '주문/결제',
-    question: '주문은 어떻게 하나요?',
-    answer: `주문 방법은 다음과 같습니다:
-
-1. 원하시는 상품을 선택하여 장바구니에 담습니다
-2. 장바구니에서 주문할 상품을 확인합니다
-3. 주문/결제 페이지에서 배송지 정보를 입력합니다
-4. 결제 방법을 선택하고 결제를 완료합니다
-
-로그인 후 주문하시면 더욱 편리합니다.`
-  },
-  {
-    id: 2,
-    category: '주문/결제',
-    question: '결제 방법은 어떤 것들이 있나요?',
-    answer: `다음과 같은 결제 방법을 제공합니다:
-
-• 무통장 입금
-• 신용카드 결제
-• 카카오페이
-
-무통장 입금의 경우 입금 확인 후 배송이 시작됩니다.`
-  },
-  {
-    id: 3,
-    category: '주문/결제',
-    question: '주문 취소는 어떻게 하나요?',
-    answer: `주문 취소는 다음과 같이 가능합니다:
-
-• 결제 완료 전: 마이페이지에서 직접 취소 가능
-• 결제 완료 후: 고객센터로 연락 필요
-• 배송 시작 후: 취소 불가 (반품/교환으로 처리)
-
-취소 요청은 가급적 빠른 시일 내에 해주세요.`
-  },
-  {
-    id: 4,
-    category: '배송',
-    question: '배송비는 얼마인가요?',
-    answer: `배송비는 다음과 같습니다:
-
-• 3만원 이상 주문: 무료배송
-• 3만원 미만 주문: 3,000원
-
-제주도 및 도서산간 지역은 추가 배송비가 발생할 수 있습니다.`
-  },
-  {
-    id: 5,
-    category: '배송',
-    question: '배송기간은 얼마나 걸리나요?',
-    answer: `일반적인 배송기간은 다음과 같습니다:
-
-• 결제 완료 후 2-3일 내 배송 (영업일 기준)
-• 무통장 입금의 경우 입금 확인 후 2-3일
-• 주말 및 공휴일은 배송되지 않습니다
-
-급하신 경우 고객센터로 연락주세요.`
-  },
-  {
-    id: 6,
-    category: '배송',
-    question: '배송지 변경이 가능한가요?',
-    answer: `배송지 변경은 다음과 같은 경우에 가능합니다:
-
-• 배송 시작 전: 마이페이지에서 변경 가능
-• 배송 시작 후: 택배사 직접 연락 필요
-
-배송 시작 후에는 변경이 어려우니 주문 시 정확한 주소를 입력해주세요.`
-  },
-  {
-    id: 7,
-    category: '반품/교환',
-    question: '반품이나 교환이 가능한가요?',
-    answer: `반품/교환은 다음 조건에서 가능합니다:
-
-• 상품 수령 후 7일 이내
-• 상품의 포장, 라벨이 훼손되지 않은 경우
-• 사용하지 않은 새 상품
-
-단, 맞춤 제작 상품이나 개인 위생용품은 반품/교환이 불가합니다.`
-  },
-  {
-    id: 8,
-    category: '반품/교환',
-    question: '반품 배송비는 누가 부담하나요?',
-    answer: `반품 배송비 부담은 다음과 같습니다:
-
-• 단순 변심: 고객 부담
-• 상품 불량/오배송: 판매자 부담
-
-반품 시 반품 배송비를 선불로 지불하신 후, 판매자 귀책사유인 경우 환불 시 함께 돌려드립니다.`
-  },
-  {
-    id: 9,
-    category: '회원',
-    question: '회원가입은 어떻게 하나요?',
-    answer: `회원가입 절차는 다음과 같습니다:
-
-1. 회원가입 페이지에서 필수 정보를 입력합니다
-2. 사업자등록증과 샵 사진을 업로드합니다
-3. 이용약관 및 개인정보처리방침에 동의합니다
-4. 가입 완료 후 승인까지 1-2일 소요됩니다
-
-사업자 회원만 가입 가능합니다.`
-  },
-  {
-    id: 10,
-    category: '회원',
-    question: '비밀번호를 잊었어요.',
-    answer: `비밀번호 분실 시 다음과 같이 처리해주세요:
-
-1. 로그인 페이지에서 "비밀번호 찾기"를 클릭합니다
-2. 가입 시 등록한 이메일을 입력합니다
-3. 이메일로 임시 비밀번호가 발송됩니다
-4. 로그인 후 마이페이지에서 비밀번호를 변경하세요
-
-이메일이 오지 않으면 스팸함도 확인해보세요.`
-  },
-  {
-    id: 11,
-    category: '상품',
-    question: '상품 문의는 어떻게 하나요?',
-    answer: `상품 문의는 다음과 같은 방법으로 가능합니다:
-
-• 상품 상세 페이지에서 "가격 문의" 버튼 클릭
-• 고객센터 전화 문의
-• 이메일 문의
-
-상품별 재고, 가격, 사양 등을 문의하실 수 있습니다.`
-  },
-  {
-    id: 12,
-    category: '기타',
-    question: '영업시간은 언제인가요?',
-    answer: `영업시간은 다음과 같습니다:
-
-• 평일: 오전 9시 ~ 오후 6시
-• 토요일: 오전 9시 ~ 오후 1시
-• 일요일 및 공휴일: 휴무
-
-고객센터도 동일한 시간에 운영됩니다.`
-  }
-];
+import { useFAQ } from '@/contexts/FAQContext';
 
 export default function FAQPage() {
+  const { faqs, incrementViews } = useFAQ();
+  
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
   const [openItems, setOpenItems] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
+  // 공개된 FAQ만 필터링
+  const visibleFaqs = faqs.filter(faq => faq.isVisible);
+
   // 카테고리 목록
-  const categories = ['전체', ...Array.from(new Set(sampleFAQs.map(faq => faq.category)))];
+  const categories = ['전체', ...Array.from(new Set(visibleFaqs.map(faq => faq.category)))];
 
   // 필터링된 FAQ
-  const filteredFAQs = sampleFAQs.filter(faq => {
+  const filteredFAQs = visibleFaqs.filter(faq => {
     const categoryMatch = selectedCategory === '전체' || faq.category === selectedCategory;
     const searchMatch = searchTerm === '' || 
       faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -177,11 +28,16 @@ export default function FAQPage() {
   });
 
   const toggleItem = (id: number) => {
-    setOpenItems(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id)
-        : [...prev, id]
-    );
+    setOpenItems(prev => {
+      const isCurrentlyOpen = prev.includes(id);
+      if (!isCurrentlyOpen) {
+        // FAQ를 열 때만 조회수 증가
+        incrementViews(id);
+        return [...prev, id];
+      } else {
+        return prev.filter(item => item !== id);
+      }
+    });
   };
 
   const toggleAll = () => {
@@ -316,6 +172,16 @@ export default function FAQPage() {
                     <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                       {faq.answer}
                     </div>
+                    {faq.imageUrl && (
+                      <div className="mt-4">
+                        <img 
+                          src={faq.imageUrl} 
+                          alt="FAQ 이미지" 
+                          className="max-w-full h-auto rounded-lg border border-gray-200 shadow-sm"
+                          style={{ maxHeight: '300px' }}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

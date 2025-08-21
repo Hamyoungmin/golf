@@ -1,25 +1,60 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
-const xxioDrivers = [
-  { id: 1, name: 'XXIO 13 드라이버 11.5도 S', price: '가격문의', image: null },
-  { id: 2, name: 'XXIO 13 드라이버 10.5도 R', price: '가격문의', image: null },
-  { id: 3, name: 'XXIO 12 드라이버 9.5도 S', price: '가격문의', image: null },
-  { id: 4, name: 'XXIO 12 드라이버 10.5도 SR', price: '가격문의', image: null },
-  { id: 5, name: 'XXIO X 드라이버 9.5도 R', price: '가격문의', image: null },
-  { id: 6, name: 'XXIO X 드라이버 10.5도 S', price: '가격문의', image: null },
-  { id: 7, name: 'XXIO 11 드라이버 11.5도 R', price: '가격문의', image: null },
-  { id: 8, name: 'XXIO 11 드라이버 10.5도 S', price: '가격문의', image: null },
-  { id: 9, name: 'XXIO Prime 드라이버 11.5도 R', price: '가격문의', image: null },
-  { id: 10, name: 'XXIO Prime 드라이버 10.5도 S', price: '가격문의', image: null }
-];
+export default function XxioDrivers() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default function XXIODrivers() {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // 'drivers/xxio' 페이지에 표시될 상품들 가져오기
+        const xxioProducts = await getProductsForPage('drivers/xxio');
+        setProducts(xxioProducts);
+      } catch (error) {
+        console.error('젝시오 드라이버 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Product 타입을 ProductList가 기대하는 형태로 변환
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="젝시오 드라이버"
       subtitle="| XXIO DRIVERS"
-      products={xxioDrivers}
-      totalCount={xxioDrivers.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="젝시오 드라이버"
     />
   );

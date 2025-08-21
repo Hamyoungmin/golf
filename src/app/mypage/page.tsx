@@ -7,10 +7,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getUserData } from '@/lib/users';
 import { getUserOrders } from '@/lib/orders';
 import { User as UserType, Order } from '@/types';
+import { useCustomAlert } from '@/hooks/useCustomAlert';
 
 export default function MyPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { showAlert, AlertComponent } = useCustomAlert();
   
   const [userData, setUserData] = useState<UserType | null>(null);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
@@ -19,11 +21,12 @@ export default function MyPage() {
   // 로그인 체크
   useEffect(() => {
     if (!authLoading && !user) {
-      alert('로그인이 필요합니다.');
-      router.push('/login');
+      showAlert('로그인이 필요합니다.', 'warning', {
+        onConfirm: () => router.push('/login')
+      });
       return;
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, showAlert]);
 
   // 사용자 정보 및 최근 주문 로드
   useEffect(() => {
@@ -105,7 +108,9 @@ export default function MyPage() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: '900px', margin: '50px auto', padding: '20px' }}>
+    <>
+      <AlertComponent />
+      <div className="container" style={{ maxWidth: '900px', margin: '50px auto', padding: '20px' }}>
       <div style={{ 
         border: '1px solid #e0e0e0', 
         borderRadius: '8px', 
@@ -411,7 +416,7 @@ export default function MyPage() {
         {/* 간단한 네비게이션 링크들 */}
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(4, 1fr)', 
+          gridTemplateColumns: 'repeat(5, 1fr)', 
           gap: '10px',
           marginBottom: '25px'
         }}>
@@ -486,9 +491,28 @@ export default function MyPage() {
           >
             최근본상품
           </Link>
+
+          <Link 
+            href="/mypage/faq"
+            style={{
+              display: 'block',
+              padding: '10px 8px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              textAlign: 'center',
+              textDecoration: 'none',
+              color: '#333',
+              backgroundColor: '#f9f9f9',
+              fontSize: '13px',
+              fontWeight: '500'
+            }}
+          >
+            자주묻는질문
+          </Link>
         </div>
 
       </div>
     </div>
+    </>
   );
 }

@@ -1,25 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const honmaPutters = [
-  { id: 1, name: 'TW-PT01 블레이드 스틸샤프트', price: '가격문의', image: null },
-  { id: 2, name: 'TW-PT02 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 3, name: 'TW-PT03 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 4, name: 'BERES PT-02 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 5, name: 'BERES PT-01 블레이드 스틸샤프트', price: '가격문의', image: null },
-  { id: 6, name: 'TW747 PT 001 블레이드 스틸샤프트', price: '가격문의', image: null },
-  { id: 7, name: 'TW747 PT 002 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 8, name: 'Be ZEAL PT-01 블레이드 스틸샤프트', price: '가격문의', image: null },
-  { id: 9, name: 'Be ZEAL PT-02 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 10, name: 'TW717 PT 001 블레이드 스틸샤프트', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function HonmaPutters() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const honmaProducts = await getProductsForPage('putters/honma');
+        setProducts(honmaProducts);
+      } catch (error) {
+        console.error('혼마 퍼터 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="혼마 퍼터"
       subtitle="| HONMA PUTTERS"
-      products={honmaPutters}
-      totalCount={honmaPutters.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="혼마 퍼터"
     />
   );

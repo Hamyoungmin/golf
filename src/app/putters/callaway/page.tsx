@@ -1,25 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const callawayPutters = [
-  { id: 1, name: 'WHITE HOT VERSA TWELVE DB 말렛 카본, 스틸 복합 샤프트', price: '가격문의', image: null },
-  { id: 2, name: 'WHITE HOT VERSA DOUBLE WIDE DB 블레이드 와이드 스틸샤프트', price: '가격문의', image: null },
-  { id: 3, name: 'WHITE HOT RX #9 반달 스틸샤프트', price: '가격문의', image: null },
-  { id: 4, name: 'DFX 2-BALL 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 5, name: 'ODYSSEY O-WORKS BLACK #7 스틸샤프트', price: '가격문의', image: null },
-  { id: 6, name: 'ODYSSEY O-WORKS BLACK 2-BALL 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 7, name: 'ODYSSEY STROKE LAB BLACK TEN 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 8, name: 'ODYSSEY TRI-BALL SRT 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 9, name: 'WHITE HOT PRO 2.0 #7 스틸샤프트', price: '가격문의', image: null },
-  { id: 10, name: 'ODYSSEY METAL-X MILLED 2-BALL 말렛 스틸샤프트', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function CallawayPutters() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const callawayProducts = await getProductsForPage('putters/callaway');
+        setProducts(callawayProducts);
+      } catch (error) {
+        console.error('캘러웨이 퍼터 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="캘러웨이 퍼터"
       subtitle="| CALLAWAY PUTTERS"
-      products={callawayPutters}
-      totalCount={callawayPutters.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="캘러웨이 퍼터"
     />
   );

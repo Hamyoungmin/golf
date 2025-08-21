@@ -1,27 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const honmaWomens = [
-  { id: 1, name: 'TW757 LADIES 11.5도 여성용 VIZARD for TW757 LADIES', price: '가격문의', image: null },
-  { id: 2, name: 'TW747 LADIES 11.5도 여성용 VIZARD for TW747 LADIES', price: '가격문의', image: null },
-  { id: 3, name: 'BERES LADIES NX 11.5도 여성용 ARMRQ 39 3-STAR', price: '가격문의', image: null },
-  { id: 4, name: 'BERES LADIES S-06 11.5도 여성용 ARMRQ X 39 A', price: '가격문의', image: null },
-  { id: 5, name: 'Be ZEAL LADIES 525 11.5도 여성용 VIZARD for Be ZEAL LADIES', price: '가격문의', image: null },
-  { id: 6, name: 'TW757 LADIES 18도 여성용 VIZARD for TW757 LADIES', price: '가격문의', image: null },
-  { id: 7, name: 'BERES LADIES NX 18도 여성용 ARMRQ 39 3-STAR', price: '가격문의', image: null },
-  { id: 8, name: 'TW757 LADIES IRON 7-P 여성용 NSPRO 850GH neo', price: '가격문의', image: null },
-  { id: 9, name: 'BERES LADIES NX IRON 7-P 여성용 ARMRQ 33 3-STAR', price: '가격문의', image: null },
-  { id: 10, name: 'TW757 LADIES U4 24도 여성용 VIZARD for TW757 LADIES', price: '가격문의', image: null },
-  { id: 11, name: 'TW-PT LADIES 여성용 말렛 32인치 스틸샤프트', price: '가격문의', image: null },
-  { id: 12, name: 'TW-W LADIES 여성용 56도 NSPRO 850GH neo', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function HonmaWomens() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const honmaProducts = await getProductsForPage('womens/honma');
+        setProducts(honmaProducts);
+      } catch (error) {
+        console.error('혼마 여성용 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="혼마 여성용"
-      subtitle="| HONMA WOMENS"
-      products={honmaWomens}
-      totalCount={honmaWomens.length}
+      subtitle="| HONMA LADIES"
+      products={formattedProducts}
+      totalCount={products.length}
       category="혼마 여성용"
     />
   );

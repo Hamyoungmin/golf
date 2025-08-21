@@ -1,24 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const bridgestoneWoods = [
-  { id: 1, name: 'TOUR B X 15도 TOUR AD DI-6 S', price: '가격문의', image: null },
-  { id: 2, name: 'TOUR B XD-3 15도 TOUR AD PT-6', price: '가격문의', image: null },
-  { id: 3, name: 'TOUR B XD-3 15도 디아마나BF 6S', price: '가격문의', image: null },
-  { id: 4, name: 'TOUR B JGR 15도 Air Speeder BS-JGR', price: '가격문의', image: null },
-  { id: 5, name: 'J715 B3 15도 S Tour AD J15-11W', price: '가격문의', image: null },
-  { id: 6, name: 'B3 DD 15도 SR TENSEI BS Red 40', price: '가격문의', image: null },
-  { id: 7, name: 'J815 15도 Diamana B60', price: '가격문의', image: null },
-  { id: 8, name: '투어B JGR 15도 TG2-5 SR', price: '가격문의', image: null },
-  { id: 9, name: '투어B XD-3 15도 TX1 - 6S', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function BridgestoneWoods() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const bridgestoneProducts = await getProductsForPage('woods/bridgestone');
+        setProducts(bridgestoneProducts);
+      } catch (error) {
+        console.error('브리지스톤 우드 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="브리지스톤 우드"
       subtitle="| BRIDGESTONE WOODS"
-      products={bridgestoneWoods}
-      totalCount={bridgestoneWoods.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="브리지스톤 우드"
     />
   );

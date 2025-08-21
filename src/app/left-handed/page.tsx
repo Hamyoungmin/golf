@@ -1,25 +1,60 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const leftHandedProducts = [
-  { id: 1, name: '캘러웨이 엘리트 10.5도', price: '600,000원', image: '/z1.jpg' },
-  { id: 2, name: '왼손용 드라이버 LH-002', price: '가격문의', image: null },
-  { id: 3, name: '왼손용 페어웨이우드 LH-003', price: '가격문의', image: null },
-  { id: 4, name: '왼손용 아이언세트 LH-004', price: '가격문의', image: null },
-  { id: 5, name: '왼손용 웨지 LH-005', price: '가격문의', image: null },
-  { id: 6, name: '왼손용 퍼터 LH-006', price: '가격문의', image: null },
-  { id: 7, name: '왼손용 하이브리드 LH-007', price: '가격문의', image: null },
-  { id: 8, name: '왼손용 유틸리티 LH-008', price: '가격문의', image: null },
-  { id: 9, name: '왼손용 샌드웨지 LH-009', price: '가격문의', image: null },
-  { id: 10, name: '왼손용 칩퍼 LH-010', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function LeftHanded() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // 'left-handed' 페이지에 표시될 상품들 가져오기
+        const leftHandedProducts = await getProductsForPage('left-handed');
+        setProducts(leftHandedProducts);
+      } catch (error) {
+        console.error('왼손용 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Product 타입을 ProductList가 기대하는 형태로 변환
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="왼손용"
-      subtitle="| Left Handed"
-      products={leftHandedProducts}
-      totalCount={leftHandedProducts.length}
+      subtitle="| Left-Handed"
+      products={formattedProducts}
+      totalCount={products.length}
       category="왼손용"
     />
   );

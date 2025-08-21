@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { CartItem, Product, Address } from '@/types';
 import { createOrder } from '@/lib/orders';
+import { useCustomAlert } from '@/hooks/useCustomAlert';
 
 // 임시 상품 데이터 매핑 (실제로는 Firebase에서 가져와야 함)
 const sampleProducts: Product[] = [
@@ -61,6 +63,9 @@ export default function CartPage() {
     clearCart,
     loading 
   } = useCart();
+  const { settings } = useSettings();
+  const { showAlert, AlertComponent } = useCustomAlert();
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   const [cartItemsWithProducts, setCartItemsWithProducts] = useState<(CartItem & { product: Product })[]>([]);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -108,35 +113,53 @@ export default function CartPage() {
     setIsAddressValid(street.trim() !== '' && city.trim() !== '' && state.trim() !== '' && zipCode.trim() !== '');
   }, [shippingAddress]);
 
+  // 설정 업데이트 이벤트 리스너
+  useEffect(() => {
+    const handleSettingsUpdate = (event: CustomEvent) => {
+      console.log('🔄 CartPage: 설정 업데이트 감지 (배송비 재계산)', event.detail);
+      setForceUpdate(prev => prev + 1);
+    };
+
+    window.addEventListener('settingsUpdated', handleSettingsUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('settingsUpdated', handleSettingsUpdate as EventListener);
+    };
+  }, []);
+
   const handleQuantityChange = async (productId: string, newQuantity: number) => {
     try {
       await updateCartItemQuantity(productId, newQuantity);
     } catch (error) {
       console.error('수량 변경 오류:', error);
-      alert('수량 변경 중 오류가 발생했습니다.');
+      showAlert('수량 변경 중 오류가 발생했습니다.', 'error');
     }
   };
 
   const handleRemoveItem = async (productId: string) => {
-    if (confirm('해당 상품을 장바구니에서 제거하시겠습니까?')) {
-      try {
-        await removeFromCart(productId);
-      } catch (error) {
-        console.error('상품 제거 오류:', error);
-        alert('상품 제거 중 오류가 발생했습니다.');
+    showAlert('해당 상품을 장바구니에서 제거하시겠습니까?', 'confirm', {
+      onConfirm: async () => {
+        try {
+          await removeFromCart(productId);
+        } catch (error) {
+          console.error('상품 제거 오류:', error);
+          showAlert('상품 제거 중 오류가 발생했습니다.', 'error');
+        }
       }
-    }
+    });
   };
 
   const handleClearCart = async () => {
-    if (confirm('장바구니를 비우시겠습니까?')) {
-      try {
-        await clearCart();
-      } catch (error) {
-        console.error('장바구니 비우기 오류:', error);
-        alert('장바구니 비우기 중 오류가 발생했습니다.');
+    showAlert('장바구니를 비우시겠습니까?', 'confirm', {
+      onConfirm: async () => {
+        try {
+          await clearCart();
+        } catch (error) {
+          console.error('장바구니 비우기 오류:', error);
+          showAlert('장바구니 비우기 중 오류가 발생했습니다.', 'error');
+        }
       }
-    }
+    });
   };
 
   const handleSelectItem = (productId: string) => {
@@ -157,38 +180,41 @@ export default function CartPage() {
 
   const handleRemoveSelected = async () => {
     if (selectedItems.length === 0) {
-      alert('삭제할 상품을 선택해주세요.');
+      showAlert('삭제할 상품을 선택해주세요.', 'warning');
       return;
     }
 
-    if (confirm(`선택한 ${selectedItems.length}개 상품을 장바구니에서 제거하시겠습니까?`)) {
-      try {
-        for (const productId of selectedItems) {
-          await removeFromCart(productId);
+    showAlert(`선택한 ${selectedItems.length}개 상품을 장바구니에서 제거하시겠습니까?`, 'confirm', {
+      onConfirm: async () => {
+        try {
+          for (const productId of selectedItems) {
+            await removeFromCart(productId);
+          }
+          setSelectedItems([]);
+          showAlert('선택한 상품이 장바구니에서 제거되었습니다.', 'success');
+        } catch (error) {
+          console.error('선택 상품 제거 오류:', error);
+          showAlert('상품 제거 중 오류가 발생했습니다.', 'error');
         }
-        setSelectedItems([]);
-        alert('선택한 상품이 장바구니에서 제거되었습니다.');
-      } catch (error) {
-        console.error('선택 상품 제거 오류:', error);
-        alert('상품 제거 중 오류가 발생했습니다.');
       }
-    }
+    });
   };
 
   const handleCheckout = async () => {
     if (!user) {
-      alert('로그인이 필요합니다.');
-      router.push('/login');
+      showAlert('로그인이 필요합니다.', 'warning', {
+        onConfirm: () => router.push('/login')
+      });
       return;
     }
 
     if (selectedItems.length === 0) {
-      alert('구매할 상품을 선택해주세요.');
+      showAlert('구매할 상품을 선택해주세요.', 'warning');
       return;
     }
 
     if (!isAddressValid) {
-      alert('배송 주소를 모두 입력해주세요.');
+      showAlert('배송 주소를 모두 입력해주세요.', 'warning');
       return;
     }
 
@@ -199,14 +225,14 @@ export default function CartPage() {
       // 가격 문의 상품이 있는지 확인
       const priceInquiryItems = selectedCartItems.filter(item => item.product.price === '가격문의');
       if (priceInquiryItems.length > 0) {
-        alert('가격 문의 상품은 주문할 수 없습니다. 해당 상품을 제거해주세요.');
+        showAlert('가격 문의 상품은 주문할 수 없습니다. 해당 상품을 제거해주세요.', 'warning');
         return;
       }
 
       // 재고 부족 상품 확인
       const outOfStockItems = selectedCartItems.filter(item => item.product.stock === 0);
       if (outOfStockItems.length > 0) {
-        alert('품절된 상품이 포함되어 있습니다. 해당 상품을 제거해주세요.');
+        showAlert('품절된 상품이 포함되어 있습니다. 해당 상품을 제거해주세요.', 'warning');
         return;
       }
 
@@ -219,7 +245,7 @@ export default function CartPage() {
       }));
 
       const totalAmount = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
-      const shippingFee = totalAmount >= 30000 ? 0 : 3000;
+      const shippingFee = totalAmount >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.baseShippingCost;
       const finalAmount = totalAmount + shippingFee;
 
       const orderData = {
@@ -239,14 +265,15 @@ export default function CartPage() {
           await removeFromCart(productId);
         }
         
-        alert('주문이 성공적으로 생성되었습니다. 관리자 확인 후 결제 안내를 드리겠습니다.');
-        router.push(`/mypage/orders/${orderId}`);
+        showAlert('주문이 성공적으로 생성되었습니다. 관리자 확인 후 결제 안내를 드리겠습니다.', 'success', {
+          onConfirm: () => router.push(`/mypage/orders/${orderId}`)
+        });
       } else {
-        alert('주문 생성 중 오류가 발생했습니다.');
+        showAlert('주문 생성 중 오류가 발생했습니다.', 'error');
       }
     } catch (error) {
       console.error('주문 생성 오류:', error);
-      alert('주문 생성 중 오류가 발생했습니다.');
+      showAlert('주문 생성 중 오류가 발생했습니다.', 'error');
     }
   };
 
@@ -263,7 +290,7 @@ export default function CartPage() {
   };
 
   const selectedTotal = calculateSelectedTotal();
-  const shippingFee = selectedTotal >= 30000 ? 0 : 3000;
+  const shippingFee = selectedTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.baseShippingCost;
   const finalTotal = selectedTotal + shippingFee;
 
   if (loading) {
@@ -275,7 +302,9 @@ export default function CartPage() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: '90%', margin: '50px auto', padding: '20px' }}>
+    <>
+      <AlertComponent />
+      <div className="container" style={{ maxWidth: '90%', margin: '50px auto', padding: '20px' }}>
       <div style={{ 
         border: '1px solid #e0e0e0', 
         borderRadius: '8px', 
@@ -654,7 +683,7 @@ export default function CartPage() {
               </div>
 
               <div style={{ fontSize: '12px', color: '#856404', marginBottom: '15px' }}>
-                <p>• 3만원 이상 주문 시 무료배송</p>
+                <p>• {formatPrice(settings.shipping.freeShippingThreshold)} 이상 주문 시 무료배송</p>
                 <p>• 주문 후 관리자 확인을 거쳐 결제 안내를 드립니다</p>
                 <p>• 결제는 무통장입금으로 진행됩니다</p>
               </div>
@@ -707,5 +736,6 @@ export default function CartPage() {
 
       </div>
     </div>
+    </>
   );
 }

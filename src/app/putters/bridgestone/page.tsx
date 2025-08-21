@@ -1,24 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const bridgestonePutters = [
-  { id: 1, name: 'TOUR B JGR PUTTER 01 블레이드 스틸샤프트', price: '가격문의', image: null },
-  { id: 2, name: 'TOUR B JGR PUTTER 02 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 3, name: 'B-LD PT-01 블레이드 스틸샤프트', price: '가격문의', image: null },
-  { id: 4, name: 'B-LD PT-02 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 5, name: 'B-LD PT-03 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 6, name: 'TOURSTAGE PT-01 블레이드 스틸샤프트', price: '가격문의', image: null },
-  { id: 7, name: 'TOURSTAGE PT-02 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 8, name: 'J15 PUTTER 01 블레이드 스틸샤프트', price: '가격문의', image: null },
-  { id: 9, name: 'J15 PUTTER 02 말렛 스틸샤프트', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function BridgestonePutters() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const bridgestoneProducts = await getProductsForPage('putters/bridgestone');
+        setProducts(bridgestoneProducts);
+      } catch (error) {
+        console.error('브리지스톤 퍼터 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="브리지스톤 퍼터"
       subtitle="| BRIDGESTONE PUTTERS"
-      products={bridgestonePutters}
-      totalCount={bridgestonePutters.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="브리지스톤 퍼터"
     />
   );

@@ -1,25 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const titleistWoods = [
-  { id: 1, name: '타이틀리스트 917 우드', price: '150,000원', image: '/o2.png' },
-  { id: 2, name: 'TSR3 15도 TSP110 60 S', price: '가격문의', image: null },
-  { id: 3, name: 'TSi2 15도 TSP322 55 SR', price: '가격문의', image: null },
-  { id: 4, name: 'TSi3 15도 TENSEI CK Pro Orange 70 S', price: '가격문의', image: null },
-  { id: 5, name: 'TS2 15도 Tour AD 60 SR', price: '가격문의', image: null },
-  { id: 6, name: 'TS3 15도 TENSEI CK Pro Orange 70 S', price: '가격문의', image: null },
-  { id: 7, name: '917F2 15도 Diamana D+ 70 S', price: '가격문의', image: null },
-  { id: 8, name: '915F 15도 Tour AD DI-7 S', price: '가격문의', image: null },
-  { id: 9, name: 'TSR1 18도 TSP322 45 A', price: '가격문의', image: null },
-  { id: 10, name: 'TSi1 18도 TSP322 45 L', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function TitleistWoods() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const titleistProducts = await getProductsForPage('woods/titleist');
+        setProducts(titleistProducts);
+      } catch (error) {
+        console.error('타이틀리스트 우드 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="타이틀리스트 우드"
       subtitle="| TITLEIST WOODS"
-      products={titleistWoods}
-      totalCount={titleistWoods.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="타이틀리스트 우드"
     />
   );

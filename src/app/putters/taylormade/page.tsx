@@ -1,25 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const taylormadePutters = [
-  { id: 1, name: 'SPIDER GT MAX 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 2, name: 'SPIDER GT TM-1 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 3, name: 'SPIDER X COPPER 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 4, name: 'SPIDER X NAVY 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 5, name: 'SPIDER TOUR RED 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 6, name: 'SPIDER TOUR DOUBLE BEND 말렛 스틸샤프트', price: '가격문의', image: null },
-  { id: 7, name: 'P790 TM1 블레이드 스틸샤프트', price: '가격문의', image: null },
-  { id: 8, name: 'TP COLLECTION BANDON 3 스틸샤프트', price: '가격문의', image: null },
-  { id: 9, name: 'TP COLLECTION ARDMORE 3 스틸샤프트', price: '가격문의', image: null },
-  { id: 10, name: 'DADDY LONG LEGS 말렛 스틸샤프트', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function TaylormadePutters() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const taylormadeProducts = await getProductsForPage('putters/taylormade');
+        setProducts(taylormadeProducts);
+      } catch (error) {
+        console.error('테일러메이드 퍼터 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="테일러메이드 퍼터"
       subtitle="| TAYLORMADE PUTTERS"
-      products={taylormadePutters}
-      totalCount={taylormadePutters.length}
+      products={formattedProducts}
+      totalCount={products.length}
       category="테일러메이드 퍼터"
     />
   );

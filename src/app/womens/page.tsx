@@ -1,25 +1,60 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const womensProducts = [
-  { id: 1, name: '젝시오 MP1200 11.5도', price: '550,000원', image: '/y1.jpg' },
-  { id: 2, name: 'Callaway REVA Ladies 세트', price: '가격문의', image: null },
-  { id: 3, name: 'TaylorMade KALEA Ladies 아이언', price: '가격문의', image: null },
-  { id: 4, name: 'PING G Le3 Ladies 퍼터', price: '가격문의', image: null },
-  { id: 5, name: 'Cobra F-MAX Airspeed Ladies', price: '가격문의', image: null },
-  { id: 6, name: 'Mizuno JPX Ladies 세트', price: '가격문의', image: null },
-  { id: 7, name: 'Wilson Staff Ladies 드라이버', price: '가격문의', image: null },
-  { id: 8, name: 'Honma BEZEAL Ladies 아이언', price: '가격문의', image: null },
-  { id: 9, name: 'Titleist TSi1 Ladies 드라이버', price: '가격문의', image: null },
-  { id: 10, name: 'Srixon Z-FORGED Ladies 웨지', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function Womens() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // 'womens' 페이지에 표시될 상품들 가져오기
+        const womensProducts = await getProductsForPage('womens');
+        setProducts(womensProducts);
+      } catch (error) {
+        console.error('여성용 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Product 타입을 ProductList가 기대하는 형태로 변환
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="여성용"
       subtitle="| Ladies"
-      products={womensProducts}
-      totalCount={10}
+      products={formattedProducts}
+      totalCount={products.length}
       category="여성용"
     />
   );

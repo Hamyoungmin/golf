@@ -1,27 +1,58 @@
-import ProductList from '@/components/ProductList';
+'use client';
 
-const bridgestoneWomens = [
-  { id: 1, name: 'TOUR B JGR 여성용 12도 Air Speeder BS-JGR for Women', price: '가격문의', image: null },
-  { id: 2, name: 'B-LD 여성용 12도 Air Speeder BS-LD for Women', price: '가격문의', image: null },
-  { id: 3, name: 'J715 LADIES B3 12도 여성용 Air Speeder J15-11W for Women', price: '가격문의', image: null },
-  { id: 4, name: 'PHYZ LADIES 12도 여성용 PHYZ for Women', price: '가격문의', image: null },
-  { id: 5, name: 'TOUR B JGR 여성용 18도 Air Speeder BS-JGR for Women', price: '가격문의', image: null },
-  { id: 6, name: 'B-LD 여성용 18도 Air Speeder BS-LD for Women', price: '가격문의', image: null },
-  { id: 7, name: 'TOUR B JGR LADIES IRON 7-P 여성용 Air Speeder BS-JGR', price: '가격문의', image: null },
-  { id: 8, name: 'B-LD LADIES IRON 7-P 여성용 Air Speeder BS-LD', price: '가격문의', image: null },
-  { id: 9, name: 'PHYZ LADIES IRON 7-P 여성용 PHYZ for Women', price: '가격문의', image: null },
-  { id: 10, name: 'TOUR B JGR 여성용 U4 24도 Air Speeder BS-JGR for Women', price: '가격문의', image: null },
-  { id: 11, name: 'B-LD LADIES PUTTER 여성용 말렛 32인치 스틸샤프트', price: '가격문의', image: null },
-  { id: 12, name: 'TOUR B LADIES WEDGE 56도 여성용 NSPRO 850GH neo', price: '가격문의', image: null }
-];
+import { useState, useEffect } from 'react';
+import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
 export default function BridgestoneWomens() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const bridgestoneProducts = await getProductsForPage('womens/bridgestone');
+        setProducts(bridgestoneProducts);
+      } catch (error) {
+        console.error('브리지스톤 여성용 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
       title="브리지스톤 여성용"
-      subtitle="| BRIDGESTONE WOMENS"
-      products={bridgestoneWomens}
-      totalCount={bridgestoneWomens.length}
+      subtitle="| BRIDGESTONE LADIES"
+      products={formattedProducts}
+      totalCount={products.length}
       category="브리지스톤 여성용"
     />
   );

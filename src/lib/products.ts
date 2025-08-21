@@ -47,6 +47,10 @@ export async function getProducts(
       if (filter.inStock !== undefined && filter.inStock) {
         q = query(q, where('stock', '>', 0));
       }
+      // targetPage 필터: 특정 페이지에 표시되는 상품만 가져오기
+      if (filter.targetPage) {
+        q = query(q, where('targetPages', 'array-contains', filter.targetPage));
+      }
     }
 
     // 정렬 적용
@@ -251,6 +255,32 @@ export async function getPopularProducts(limit: number = 8): Promise<Product[]> 
   } catch (error) {
     console.error('인기 상품 가져오기 오류:', error);
     return [];
+  }
+}
+
+// 특정 페이지에 표시될 상품들 가져오기
+export async function getProductsForPage(
+  pagePath: string,
+  filter?: Omit<ProductFilter, 'targetPage'>,
+  sort?: ProductSort,
+  limit?: number
+): Promise<Product[]> {
+  const pageFilter: ProductFilter = {
+    ...filter,
+    targetPage: pagePath
+  };
+  
+  return getProducts(pageFilter, sort, limit);
+}
+
+// 페이지별 상품 개수 가져오기
+export async function getProductCountForPage(pagePath: string): Promise<number> {
+  try {
+    const products = await getProductsForPage(pagePath);
+    return products.length;
+  } catch (error) {
+    console.error('페이지별 상품 개수 가져오기 오류:', error);
+    return 0;
   }
 }
 

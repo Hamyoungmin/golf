@@ -1,31 +1,60 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import ProductList from '@/components/ProductList';
+import { getProductsForPage } from '@/lib/products';
+import { Product } from '@/types';
 
-const othersWedges = [
-  { id: 1, name: '웨지 클리브랜드 RTX6 56도', price: '120,000원', image: '/w.jpg' },
-  { id: 2, name: 'PING GLIDE 4.0 52도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 3, name: 'PING GLIDE 4.0 56도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 4, name: 'PING GLIDE 4.0 60도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 5, name: 'MIZUNO T22 52도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 6, name: 'MIZUNO T22 56도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 7, name: 'MIZUNO T22 60도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 8, name: 'CLEVELAND RTX4 52도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 9, name: 'CLEVELAND RTX4 56도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 10, name: 'CLEVELAND RTX4 60도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 11, name: 'YAMAHA RMX WEDGE 52도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 12, name: 'YAMAHA RMX WEDGE 56도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 13, name: 'YAMAHA RMX WEDGE 60도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 14, name: 'COBRA KING WEDGE 52도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 15, name: 'COBRA KING WEDGE 56도 NSPRO 950GH', price: '가격문의', image: null },
-  { id: 16, name: 'COBRA KING WEDGE 60도 NSPRO 950GH', price: '가격문의', image: null }
-];
+export default function OtherWedges() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default function OthersWedges() {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // 'wedges/others' 페이지에 표시될 상품들 가져오기
+        const otherProducts = await getProductsForPage('wedges/others');
+        setProducts(otherProducts);
+      } catch (error) {
+        console.error('기타 웨지 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Product 타입을 ProductList가 기대하는 형태로 변환
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: `₩${Number(product.price).toLocaleString()}`,
+    image: product.images?.[0] || '/placeholder.jpg'
+  }));
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        상품을 불러오는 중...
+      </div>
+    );
+  }
+
   return (
     <ProductList 
-      title="기타 브랜드 웨지"
-      subtitle="| OTHER BRAND WEDGES"
-      products={othersWedges}
-      totalCount={othersWedges.length}
+      title="기타 웨지"
+      subtitle="| OTHER WEDGES"
+      products={formattedProducts}
+      totalCount={products.length}
       category="기타 웨지"
     />
   );
