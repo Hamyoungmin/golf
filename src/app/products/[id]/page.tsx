@@ -56,7 +56,7 @@ export default function ProductPage() {
   }, [params.id]);
 
   const isInWishlist = (productId) => {
-    return wishlist.some(item => item.id === productId);
+    return wishlist && wishlist.some(item => item.id === productId);
   };
 
   const handleWishlistToggle = () => {
