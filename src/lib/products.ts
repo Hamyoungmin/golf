@@ -241,18 +241,18 @@ export async function updateProductStock(productId: string, newStock: number): P
   }
 }
 
-// 인기 상품 가져오기 (임시로 최신 순으로 정렬)
+// 인기 상품 가져오기 (재고가 있는 최신 상품)
 export async function getPopularProducts(limit: number = 8): Promise<Product[]> {
   try {
+    // 먼저 최신 상품을 가져온 후 클라이언트에서 재고 필터링 (인덱스 에러 방지)
     const q = query(
       collection(db, 'products'),
-      where('stock', '>', 0),
       orderBy('createdAt', 'desc'),
-      firestoreLimit(limit)
+      firestoreLimit(limit * 3) // 여유분을 두고 가져와서 재고가 있는 상품 중에서 선택
     );
 
     const querySnapshot = await getDocs(q);
-    const products = querySnapshot.docs.map((doc: any) => {
+    let products = querySnapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,
@@ -261,6 +261,11 @@ export async function getPopularProducts(limit: number = 8): Promise<Product[]> 
         updatedAt: data.updatedAt?.toDate() || new Date(),
       } as Product;
     });
+
+    // 클라이언트 사이드에서 재고 필터링 및 제한 적용
+    products = products
+      .filter(product => product.stock > 0)
+      .slice(0, limit);
 
     return products;
   } catch (error) {
@@ -361,3 +366,5 @@ export async function getProductCountForPage(pagePath: string): Promise<number> 
   }
 }
 
+// Alias for backward compatibility
+export { getProduct as getProductById };

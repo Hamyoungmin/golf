@@ -477,3 +477,19 @@ export function subscribeToReviewStats(callback: (stats: ReviewStats) => void): 
     callback(stats);
   });
 }
+
+// Additional functions for compatibility
+export async function addReview(reviewData: any): Promise<void> {
+  try {
+    await addDoc(collection(db, 'reviews'), {
+      ...reviewData,
+      createdAt: new Date(),
+      status: 'pending'
+    });
+  } catch (error) {
+    console.error('리뷰 추가 오류:', error);
+    throw error;
+  }
+}
+
+
