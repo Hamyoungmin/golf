@@ -117,7 +117,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   // 상품이 위시리스트에 있는지 확인
   const isInWishlist = (productId: string): boolean => {
-    return wishlistProductIds.includes(productId);
+    return wishlistProductIds ? wishlistProductIds.includes(productId) : false;
   };
 
   // 위시리스트 새로고침

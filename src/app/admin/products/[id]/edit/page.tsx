@@ -282,9 +282,23 @@ export default function AdminProductEditPage() {
                 가격 <span style={{ color: '#ff4757' }}>*</span>
               </label>
               <input
-                type="number"
+                type="text"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                onChange={(e) => {
+                  // 숫자와 쉼표만 허용
+                  let value = e.target.value.replace(/[^\d,]/g, '');
+                  
+                  // 쉼표 제거 후 숫자만 추출
+                  const numbers = value.replace(/,/g, '');
+                  
+                  // 숫자가 있으면 천 단위 구분자 추가
+                  if (numbers) {
+                    const formatted = parseInt(numbers).toLocaleString('ko-KR');
+                    setFormData({ ...formData, price: formatted });
+                  } else {
+                    setFormData({ ...formData, price: '' });
+                  }
+                }}
                 style={{
                   width: '100%',
                   padding: '12px',
@@ -295,6 +309,7 @@ export default function AdminProductEditPage() {
                 }}
                 onFocus={(e) => e.target.style.borderColor = '#3742fa'}
                 onBlur={(e) => e.target.style.borderColor = '#e1e5e9'}
+                placeholder="예: 140,000"
                 required
               />
             </div>

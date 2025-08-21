@@ -7,6 +7,7 @@ export interface Product {
   brand: string;
   images: string[];
   description: string;
+  inquiry?: string; // 상품 문의 정보
   stock: number;
   specifications: {
     [key: string]: string;

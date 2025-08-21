@@ -9,22 +9,23 @@ import { useWishlist } from '../../../contexts/WishlistContext';
 import { useCustomAlert } from '../../../hooks/useCustomAlert';
 import { getProductById } from '../../../lib/products';
 import { addReview, getProductReviews } from '../../../lib/reviews';
+import { Product, Review } from '../../../types';
 
 export default function ProductPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const { addToCart, showAlert } = useCart();
-  const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
-  const { AlertComponent } = useCustomAlert();
+  const { addToCart } = useCart();
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const { AlertComponent, showAlert } = useCustomAlert();
 
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, title: '', content: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -33,7 +34,7 @@ export default function ProductPage() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        if (params.id) {
+        if (params.id && typeof params.id === 'string') {
           const productData = await getProductById(params.id);
           if (productData) {
             setProduct(productData);
@@ -55,19 +56,21 @@ export default function ProductPage() {
     fetchProduct();
   }, [params.id]);
 
-  const isInWishlist = (productId) => {
-    return wishlist && wishlist.some(item => item.id === productId);
-  };
+
 
   const handleWishlistToggle = () => {
+    if (!product) return;
+    
     if (isInWishlist(product.id)) {
       removeFromWishlist(product.id);
     } else {
-      addToWishlist(product);
+      addToWishlist(product.id);
     }
   };
 
   const handleBuyNow = () => {
+    if (!product) return;
+    
     if (product.price === '가격문의') {
       setShowContactModal(true);
       return;
@@ -77,6 +80,8 @@ export default function ProductPage() {
   };
 
   const handleAddToCart = () => {
+    if (!product) return;
+    
     if (product.price === '가격문의') {
       setShowContactModal(true);
       return;
@@ -89,8 +94,10 @@ export default function ProductPage() {
   };
 
   const handleSubmitReview = async () => {
-    if (!user) {
-      showAlert('리뷰 작성을 위해 로그인이 필요합니다.', 'error');
+    if (!user || !product) {
+      if (!user) {
+        showAlert('리뷰 작성을 위해 로그인이 필요합니다.', 'error');
+      }
       return;
     }
 
@@ -395,77 +402,87 @@ export default function ProductPage() {
           }}>
             {/* 상품설명 섹션 */}
             <div id="description" style={{ marginBottom: '60px' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '30px', color: '#333' }}>
-                상품설명
-              </h2>
-              <div style={{ 
-                fontSize: '16px', 
-                lineHeight: '1.8', 
-                color: '#333',
-                whiteSpace: 'pre-line',
-                padding: '20px 0'
-              }}>
-                {product.description}
-              </div>
+               {product.description ? (
+                 <div style={{ 
+                   fontSize: '16px', 
+                   lineHeight: '1.8', 
+                   color: '#333',
+                   whiteSpace: 'pre-line',
+                   padding: '20px 0'
+                 }}>
+                   {product.description}
+                 </div>
+               ) : (
+                 <div style={{
+                   textAlign: 'center',
+                   padding: '60px 20px',
+                   color: '#999'
+                 }}>
+                   관리자가 상품설명을 등록하지 않았습니다.
+                 </div>
+               )}
             </div>
 
             {/* 상세정보 섹션 */}
             <div id="details" style={{ marginBottom: '60px' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '30px', color: '#333' }}>
-                상세정보
-              </h2>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '20px'
-              }}>
-                <div style={{
-                  border: '1px solid #e0e0e0',
-                  borderRadius: '8px',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    backgroundColor: '#f8f9fa',
-                    padding: '15px',
-                    fontWeight: 'bold',
-                    fontSize: '16px'
-                  }}>
-                    제품 사양
-                  </div>
-                  <div style={{ padding: '0' }}>
-                    {Object.entries(product.specifications || {}).map(([key, value], index) => (
-                      <div
-                        key={key}
-                        style={{
-                          display: 'flex',
-                          padding: '12px 15px',
-                          borderBottom: index < Object.entries(product.specifications || {}).length - 1 ? '1px solid #f0f0f0' : 'none',
-                          backgroundColor: index % 2 === 0 ? '#fff' : '#fafafa'
-                        }}
-                      >
-                        <div style={{ 
-                          minWidth: '120px', 
-                          fontWeight: '500', 
-                          color: '#666' 
-                        }}>
-                          {key}:
-                        </div>
-                        <div style={{ color: '#333' }}>
-                          {value}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+             {product.specifications && Object.keys(product.specifications).length > 0 ? (
+               <div style={{
+                 display: 'grid',
+                 gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                 gap: '20px'
+               }}>
+                 <div style={{
+                   border: '1px solid #e0e0e0',
+                   borderRadius: '8px',
+                   overflow: 'hidden'
+                 }}>
+                   <div style={{
+                     backgroundColor: '#f8f9fa',
+                     padding: '15px',
+                     fontWeight: 'bold',
+                     fontSize: '16px'
+                   }}>
+                     제품 사양
+                   </div>
+                   <div style={{ padding: '0' }}>
+                     {Object.entries(product.specifications).map(([key, value], index) => (
+                       <div
+                         key={key}
+                         style={{
+                           display: 'flex',
+                           padding: '12px 15px',
+                           borderBottom: index < Object.entries(product.specifications).length - 1 ? '1px solid #f0f0f0' : 'none',
+                           backgroundColor: index % 2 === 0 ? '#fff' : '#fafafa'
+                         }}
+                       >
+                         <div style={{ 
+                           minWidth: '120px', 
+                           fontWeight: '500', 
+                           color: '#666' 
+                         }}>
+                           {key}:
+                         </div>
+                         <div style={{ color: '#333' }}>
+                           {value}
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+               </div>
+             ) : (
+               <div style={{
+                 textAlign: 'center',
+                 padding: '60px 20px',
+                 color: '#999'
+               }}>
+                 관리자가 상세정보를 등록하지 않았습니다.
+               </div>
+             )}
             </div>
 
-            {/* 후기 섹션 */}
+                        {/* 후기 섹션 */}
             <div id="reviews" style={{ marginBottom: '60px' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '30px', color: '#333' }}>
-                후기 ({reviews.filter(r => r.status === 'approved').length}개)
-              </h2>
-              
               {/* 리뷰 작성 버튼 */}
               <div style={{ textAlign: 'center', marginBottom: '30px' }}>
                 <button
@@ -528,38 +545,28 @@ export default function ProductPage() {
               </div>
             </div>
 
-            {/* 문의 섹션 */}
-            <div id="qna" style={{ marginBottom: '60px' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '30px', color: '#333' }}>
-                상품 문의
-              </h2>
-              
-              <div style={{ 
-                textAlign: 'center', 
-                padding: '60px 20px',
-                color: '#666'
-              }}>
-                <div style={{ fontSize: '48px', marginBottom: '20px' }}>💬</div>
-                <h4 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
-                  상품 문의
-                </h4>
-                <p style={{ fontSize: '14px', marginBottom: '20px', lineHeight: '1.6' }}>
-                  상품에 대한 문의사항이 있으시면<br />
-                  전화나 이메일로 연락주세요.
-                </p>
-                <div style={{ 
-                  display: 'inline-block',
-                  backgroundColor: '#f8f9fa',
-                  padding: '20px',
-                  borderRadius: '8px',
-                  border: '1px solid #e0e0e0'
-                }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>📞 연락처</div>
-                  <div style={{ marginBottom: '8px' }}>전화: 02-1234-5678</div>
-                  <div>이메일: info@golfshop.com</div>
-                </div>
-              </div>
-            </div>
+                         {/* 문의 섹션 */}
+             <div id="qna" style={{ marginBottom: '60px' }}>
+               {product.inquiry ? (
+                 <div style={{
+                   fontSize: '16px', 
+                   lineHeight: '1.8', 
+                   color: '#333',
+                   whiteSpace: 'pre-line',
+                   padding: '20px 0'
+                 }}>
+                   {product.inquiry}
+                 </div>
+               ) : (
+                 <div style={{
+                   textAlign: 'center',
+                   padding: '60px 20px',
+                   color: '#999'
+                 }}>
+                   관리자가 문의 정보를 등록하지 않았습니다.
+                 </div>
+               )}
+             </div>
           </div>
         </div>
       </div>
