@@ -13,7 +13,7 @@ const AdminHeader: React.FC = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      router.push('/login');
+      router.push('/');
     } catch (error) {
       console.error('로그아웃 실패:', error);
     }

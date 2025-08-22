@@ -5,12 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getOrder } from '@/lib/orders';
 import { getPaymentByOrderId, updateBankTransferInfo, COMPANY_BANK_ACCOUNTS } from '@/lib/payments';
+import { useSettings } from '@/contexts/SettingsContext';
 import { Order, PaymentInfo, BankTransferInfo } from '@/types';
 
 function CheckoutSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
+  const { settings } = useSettings();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -248,11 +250,11 @@ function CheckoutSuccessContent() {
           <div className="space-y-3">
             <div className="flex justify-between">
               <span>상품 총액</span>
-              <span>{formatPrice(order.totalAmount - (order.totalAmount >= 30000 ? 0 : 3000))}</span>
+              <span>{formatPrice(order.totalAmount - (order.totalAmount >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.baseShippingCost))}</span>
             </div>
             <div className="flex justify-between">
               <span>배송비</span>
-              <span>{order.totalAmount >= 30000 ? '무료' : '3,000원'}</span>
+              <span>{order.totalAmount >= settings.shipping.freeShippingThreshold ? '무료' : formatPrice(settings.shipping.baseShippingCost)}</span>
             </div>
             <hr />
             <div className="flex justify-between text-lg font-semibold">

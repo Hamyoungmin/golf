@@ -233,8 +233,8 @@ export default function CheckoutPage() {
         totalPrice: item.price * item.quantity,
       }));
 
-      // 배송비 계산
-      const shippingCost = cartTotal >= 30000 ? 0 : 3000;
+      // 배송비 계산 (설정값 사용)
+      const shippingCost = cartTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.baseShippingCost;
       const totalAmount = cartTotal + shippingCost;
 
       // 주문 생성
@@ -280,7 +280,7 @@ export default function CheckoutPage() {
     return new Intl.NumberFormat('ko-KR').format(price) + '원';
   };
 
-  const shippingCost = cartTotal >= 30000 ? 0 : 3000;
+  const shippingCost = cartTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.baseShippingCost;
   const totalAmount = cartTotal + shippingCost;
 
   if (userDataLoading) {

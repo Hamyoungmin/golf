@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
@@ -16,6 +16,7 @@ interface NavigationItem {
 
 const Header = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, loading, signOut } = useAuth();
   const { cartItemCount } = useCart();
   const { settings } = useSettings();
@@ -121,7 +122,8 @@ const Header = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      // 로그아웃 후 홈페이지로 이동하지 않고 현재 페이지에 머물기
+      // 로그아웃 후 홈페이지로 이동
+      router.push('/');
     } catch (error) {
       console.error('로그아웃 오류:', error);
       alert('로그아웃 중 오류가 발생했습니다.');

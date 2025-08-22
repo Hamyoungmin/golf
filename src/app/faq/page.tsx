@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { useFAQ } from '@/contexts/FAQContext';
 
 export default function FAQPage() {
-  const { faqs, incrementViews } = useFAQ();
+  const { faqs, loading, incrementViews } = useFAQ();
   
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
-  const [openItems, setOpenItems] = useState<number[]>([]);
+  const [openItems, setOpenItems] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   // 공개된 FAQ만 필터링
@@ -27,12 +27,14 @@ export default function FAQPage() {
     return categoryMatch && searchMatch;
   });
 
-  const toggleItem = (id: number) => {
+  const toggleItem = async (id: string) => {
     setOpenItems(prev => {
       const isCurrentlyOpen = prev.includes(id);
       if (!isCurrentlyOpen) {
         // FAQ를 열 때만 조회수 증가
-        incrementViews(id);
+        incrementViews(id).catch(error => {
+          console.error('조회수 증가 오류:', error);
+        });
         return [...prev, id];
       } else {
         return prev.filter(item => item !== id);
@@ -47,6 +49,19 @@ export default function FAQPage() {
       setOpenItems(filteredFAQs.map(faq => faq.id));
     }
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+            <p className="mt-4 text-gray-600">FAQ를 불러오는 중...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -5,10 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { auth, db, storage } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { User } from '@/types';
-import { useToast } from '@/hooks/useToast';
+import { useCustomAlert } from '@/hooks/useCustomAlert';
 
 // 동적 렌더링 강제 설정
 export const dynamic = 'force-dynamic';
@@ -33,7 +32,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { showToast, ToastComponent } = useToast();
+  const { showAlert, AlertComponent } = useCustomAlert();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFormData = {
@@ -67,11 +66,10 @@ export default function Register() {
     });
   };
 
-  // 파일 업로드 함수
+  // 임시 파일 업로드 함수 (Firebase Storage 구매 전)
   const uploadFile = async (file: File, path: string): Promise<string> => {
-    const storageRef = ref(storage, path);
-    const snapshot = await uploadBytes(storageRef, file);
-    return await getDownloadURL(snapshot.ref);
+    // Firebase Storage 구매 전까지 임시 처리
+    return `https://placeholder-image.com/${path}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -136,15 +134,25 @@ export default function Register() {
       
       await setDoc(doc(db, 'users', user.uid), userData);
       
+      // 승인 대기 상태 보장을 위해 즉시 로그아웃
+      await auth.signOut();
+      console.log('🚪 승인 대기를 위해 자동 로그아웃');
+      
       if (process.env.NODE_ENV === 'development') {
         console.log('✅ 회원가입 성공:', user);
         console.log('✅ 사용자 프로필 저장 완료');
       }
       
-      // 성공 메시지 표시 후 페이지 이동
+      // 성공 메시지 팝업 표시 후 페이지 이동
       setError('');
-      showToast('🎊 회원가입이 완료되었습니다! 관리자 승인 후 서비스를 이용하실 수 있습니다.', 'success');
-      setTimeout(() => router.push('/login'), 2000);
+      showAlert(
+        '잠시만 기다려주세요!\n관리자님께서 바로 승인해주실거에요!',
+        'success',
+        {
+          title: '🎊 회원가입 완료',
+          onConfirm: () => router.push('/login')
+        }
+      );
     } catch (error: unknown) {
       console.error('❌ 회원가입 실패:', error);
       
@@ -178,7 +186,7 @@ export default function Register() {
 
   return (
     <>
-      <ToastComponent />
+      <AlertComponent />
       <div className="container" style={{ maxWidth: '500px', margin: '50px auto', padding: '20px' }}>
         <div style={{ 
           border: '1px solid #e0e0e0', 
@@ -352,21 +360,38 @@ export default function Register() {
             }}>
               샵 내부 사진 *
             </label>
-            <input
-              type="file"
-              name="shopInteriorPhoto"
-              accept="image/*"
-              onChange={handleFileChange}
-              required
-              style={{
+            <div style={{ position: 'relative' }}>
+              <input
+                type="file"
+                name="shopInteriorPhoto"
+                accept="image/*"
+                onChange={handleFileChange}
+                required
+                style={{
+                  position: 'absolute',
+                  opacity: 0,
+                  width: '100%',
+                  height: '100%',
+                  cursor: 'pointer'
+                }}
+              />
+              <div style={{
                 width: '100%',
                 padding: '12px',
                 border: '1px solid #ddd',
                 borderRadius: '4px',
                 fontSize: '16px',
-                backgroundColor: '#fff'
-              }}
-            />
+                backgroundColor: '#fff',
+                color: shopPhotos.shopInteriorPhoto ? '#333' : '#999',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '48px'
+              }}>
+                {shopPhotos.shopInteriorPhoto ? shopPhotos.shopInteriorPhoto.name : '클릭해주세요!'}
+              </div>
+            </div>
           </div>
 
           <div style={{ marginBottom: '20px' }}>
@@ -377,21 +402,38 @@ export default function Register() {
             }}>
               샵 간판 사진 *
             </label>
-            <input
-              type="file"
-              name="shopSignPhoto"
-              accept="image/*"
-              onChange={handleFileChange}
-              required
-              style={{
+            <div style={{ position: 'relative' }}>
+              <input
+                type="file"
+                name="shopSignPhoto"
+                accept="image/*"
+                onChange={handleFileChange}
+                required
+                style={{
+                  position: 'absolute',
+                  opacity: 0,
+                  width: '100%',
+                  height: '100%',
+                  cursor: 'pointer'
+                }}
+              />
+              <div style={{
                 width: '100%',
                 padding: '12px',
                 border: '1px solid #ddd',
                 borderRadius: '4px',
                 fontSize: '16px',
-                backgroundColor: '#fff'
-              }}
-            />
+                backgroundColor: '#fff',
+                color: shopPhotos.shopSignPhoto ? '#333' : '#999',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '48px'
+              }}>
+                {shopPhotos.shopSignPhoto ? shopPhotos.shopSignPhoto.name : '클릭해주세요!'}
+              </div>
+            </div>
           </div>
           
           <div style={{ marginBottom: '20px' }}>

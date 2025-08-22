@@ -9,6 +9,7 @@ import {
   ClockIcon 
 } from '@heroicons/react/24/outline';
 import { 
+  db,
   collection, 
   query, 
   where, 
@@ -16,8 +17,7 @@ import {
   doc, 
   updateDoc, 
   orderBy 
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+} from '@/lib/firebase';
 import { User } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -41,8 +41,9 @@ export default function UsersManagement() {
       }
       
       const querySnapshot = await getDocs(q);
-      const usersData = querySnapshot.docs.map(doc => ({
+      const usersData = querySnapshot.docs.map((doc: any) => ({
         ...doc.data(),
+        uid: doc.id,
         createdAt: doc.data().createdAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate(),
         approvedAt: doc.data().approvedAt?.toDate(),

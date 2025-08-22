@@ -51,9 +51,9 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
   // 승인 대기 중인 사용자 (관리자 제외)
   if (userData.status === 'pending' && !userData.isAdmin && userData.role !== 'admin') {
-    // 로그인/회원가입/비공개 페이지는 접근 허용
+    // 승인 대기 사용자는 홈페이지, 로그인/회원가입 페이지만 접근 허용
     const allowedPaths = ['/login', '/register', '/'];
-    if (!allowedPaths.includes(pathname) && !pathname.startsWith('/admin')) {
+    if (!allowedPaths.includes(pathname)) {
       return <PendingApproval />;
     }
   }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import ImageSlider from '@/components/ImageSlider';
+import SettingsDisplay from '@/components/SettingsDisplay';
 
 export default function Home() {
   const { user, isAdmin, loading } = useAuth();
@@ -66,6 +67,8 @@ export default function Home() {
   return (
     <div>
       <ImageSlider />
+      {/* 관리자에게만 설정 표시 위젯 보이기 */}
+      {isAdmin && <SettingsDisplay />}
     </div>
   );
 }
