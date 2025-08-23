@@ -1158,10 +1158,12 @@ button {
 .dropdown-menu-item:nth-child(4) { animation-delay: 0.2s !important; }
 .dropdown-menu-item:nth-child(5) { animation-delay: 0.25s !important; }
 .dropdown-menu-item:nth-child(6) { animation-delay: 0.3s !important; }
+.dropdown-menu-item:nth-child(7) { animation-delay: 0.35s !important; }
+.dropdown-menu-item:nth-child(8) { animation-delay: 0.4s !important; }
 
-/* 6번째 항목 확실한 적용 */
+/* 마지막 항목 확실한 적용 */
 .dropdown-menu .dropdown-menu-item:last-child {
-  animation-delay: 0.3s !important;
+  animation-delay: 0.4s !important;
 }
 
 @keyframes dropdownItemFadeIn {

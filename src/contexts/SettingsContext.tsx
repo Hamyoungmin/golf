@@ -89,14 +89,14 @@ const defaultSettings: AllSettings = {
   general: {
     siteName: '골프상회',
     siteDescription: '최고 품질의 골프용품을 합리적인 가격에 제공하는 골프상회입니다.',
-    operatingHours: '평일 09:00 - 18:00',
-    holidays: '토요일, 일요일, 공휴일'
+    operatingHours: '24시간 연중무휴',
+    holidays: '없음'
   },
   store: {
     businessNumber: '740-47-00888',
     businessRegistration: '제 2023-화성봉담-0314호',
     companyName: '골프상회',
-    representative: '홍길동',
+    representative: '권혁규',
     address: '경기도 수원시 권선구 세지로28번길 15-30 104호',
     phone: '010-7236-8400',
     email: 'crover.kk@gmail.com'

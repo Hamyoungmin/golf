@@ -186,31 +186,7 @@ export async function getRecentlyViewedProducts(userId: string, limitCount?: num
     const productsCacheKey = `${STORAGE_KEYS.PRODUCTS_CACHE}_${userId}`;
     const cachedProducts = localStorageUtils.get(productsCacheKey) || {};
     
-    // 상품 상세 페이지의 샘플 데이터 (fallback용)
-    const sampleProducts = [
-      {
-        id: '1',
-        name: '캘러웨이 로그 드라이버',
-        price: '140,000원',
-        category: 'drivers',
-        brand: 'callaway',
-        images: ['/d1.jpg'],
-        description: '캘러웨이의 최신 로그(ROGUE) 드라이버입니다. 혁신적인 기술과 뛰어난 성능으로 최고의 비거리와 정확성을 제공합니다. 모든 레벨의 골퍼에게 적합한 고성능 드라이버입니다.',
-        stock: 5,
-        specifications: {
-          '로프트': '10.5도',
-          '샤프트': 'Aldila Rogue MAX 65',
-          '플렉스': 'S',
-          '클럽 길이': '45.5인치',
-          '헤드 볼륨': '460cc'
-        },
-        isWomens: false,
-        isKids: false,
-        isLeftHanded: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-    ];
+    // 실제 Firebase 데이터만 사용
     
     // 상품 ID 목록 추출
     const productIds = recentlyViewedItems.map(item => item.productId);
@@ -236,27 +212,22 @@ export async function getRecentlyViewedProducts(userId: string, limitCount?: num
       try {
         let product: Product | null = null;
         
-        // 샘플 데이터에서 먼저 찾기 (Firestore 사용량 줄이기)
-        product = sampleProducts.find(p => p.id === productId) || null;
-        
-        // 샘플 데이터에 없는 경우에만 Firestore 조회 (할당량 절약)
-        if (!product) {
-          try {
-            const productRef = doc(db, 'products', productId);
-            const productSnap = await getDoc(productRef);
-            
-            if (productSnap.exists()) {
-              const productData = productSnap.data();
-              product = {
-                id: productSnap.id,
-                ...productData,
-                createdAt: productData.createdAt?.toDate() || new Date(),
-                updatedAt: productData.updatedAt?.toDate() || new Date(),
-              } as Product;
-            }
-          } catch (firestoreError) {
-            console.warn(`Firestore에서 상품 ${productId} 조회 실패:`, firestoreError);
+        // 실제 Firebase에서 직접 조회 (샘플 데이터 제거)
+        try {
+          const productRef = doc(db, 'products', productId);
+          const productSnap = await getDoc(productRef);
+          
+          if (productSnap.exists()) {
+            const productData = productSnap.data();
+            product = {
+              id: productSnap.id,
+              ...productData,
+              createdAt: productData.createdAt?.toDate() || new Date(),
+              updatedAt: productData.updatedAt?.toDate() || new Date(),
+            } as Product;
           }
+        } catch (firestoreError) {
+          console.warn(`Firebase에서 상품 ${productId} 조회 실패:`, firestoreError);
         }
         
         if (product) {
@@ -270,11 +241,7 @@ export async function getRecentlyViewedProducts(userId: string, limitCount?: num
         }
       } catch (error) {
         console.error(`상품 ${productId} 조회 오류:`, error);
-        // 에러 발생 시 샘플 데이터에서 찾기
-        const product = sampleProducts.find(p => p.id === productId);
-        if (product) {
-          products.push(product);
-        }
+        // 에러 발생 시에는 건너뛰기 (실제 데이터만 사용)
       }
     }
     

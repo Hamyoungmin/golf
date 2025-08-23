@@ -17,6 +17,8 @@ export default function AdminProductCreatePage() {
     brand: '' as Brand | '',
     description: '',
     stock: 0,
+    cover: false,
+    productCode: '',
     specifications: {} as { [key: string]: string },
     images: [] as string[],
     isWomens: false,
@@ -269,6 +271,8 @@ export default function AdminProductCreatePage() {
         brand: formData.brand as Brand,
         description: formData.description,
         stock: formData.stock,
+        cover: formData.cover,
+        productCode: formData.productCode,
         specifications: formData.specifications,
         images: formData.images.length > 0 ? formData.images : ['/placeholder.jpg'],
         isWomens: formData.isWomens,
@@ -632,6 +636,62 @@ export default function AdminProductCreatePage() {
                     fontSize: '14px'
                   }}
                   min="0"
+                />
+              </div>
+
+              <div>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '5px',
+                  fontWeight: '500',
+                  fontSize: '14px'
+                }}>
+                  커버
+                </label>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '10px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  backgroundColor: '#f9f9f9'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.cover}
+                    onChange={(e) => setFormData({ ...formData, cover: e.target.checked })}
+                    style={{ 
+                      marginRight: '8px',
+                      transform: 'scale(1.2)'
+                    }}
+                  />
+                  <span style={{ fontSize: '14px', color: '#666' }}>
+                    커버 포함
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '5px',
+                  fontWeight: '500',
+                  fontSize: '14px'
+                }}>
+                  상품 코드
+                </label>
+                <input
+                  type="text"
+                  value={formData.productCode}
+                  onChange={(e) => setFormData({ ...formData, productCode: e.target.value })}
+                  placeholder="예: PRD001"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '14px'
+                  }}
                 />
               </div>
             </div>

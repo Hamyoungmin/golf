@@ -7,73 +7,7 @@ import { searchProducts } from '@/lib/products';
 import { Product, ProductFilter, ProductSort } from '@/types';
 import ProductCard from '@/components/ProductCard';
 
-// 임시 샘플 상품 데이터
-const sampleProducts: Product[] = [
-  {
-    id: '1',
-    name: 'TW717 455 10.5도 비자드 55 R',
-    price: '가격문의',
-    category: 'drivers',
-    brand: 'titleist',
-    images: ['https://images.unsplash.com/photo-1551524164-6cf2ac531c3b?w=400&h=300&fit=crop'],
-    description: '타이틀리스트의 프리미엄 드라이버입니다.',
-    stock: 5,
-    specifications: {},
-    isWomens: false,
-    isKids: false,
-    isLeftHanded: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '2',
-    name: 'Callaway Epic Speed 드라이버',
-    price: '450,000원',
-    category: 'drivers',
-    brand: 'callaway',
-    images: ['https://images.unsplash.com/photo-1593111774240-d529f12af4ce?w=400&h=300&fit=crop'],
-    description: '캘러웨이의 혁신적인 Epic Speed 드라이버입니다.',
-    stock: 3,
-    specifications: {},
-    isWomens: false,
-    isKids: false,
-    isLeftHanded: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '3',
-    name: 'TaylorMade SIM2 Max 드라이버',
-    price: '380,000원',
-    category: 'drivers',
-    brand: 'taylormade',
-    images: ['https://images.unsplash.com/photo-1566228015668-4c45dbc4e2f5?w=400&h=300&fit=crop'],
-    description: '테일러메이드의 최신 SIM2 Max 드라이버입니다.',
-    stock: 7,
-    specifications: {},
-    isWomens: false,
-    isKids: false,
-    isLeftHanded: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '4',
-    name: 'Titleist AP3 아이언세트',
-    price: '1,200,000원',
-    category: 'irons',
-    brand: 'titleist',
-    images: ['https://images.unsplash.com/photo-1579952363873-27d3bfad9c0d?w=400&h=300&fit=crop'],
-    description: '타이틀리스트 AP3 아이언세트입니다.',
-    stock: 2,
-    specifications: {},
-    isWomens: false,
-    isKids: false,
-    isLeftHanded: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
-];
+// 실제 Firebase 데이터를 사용하도록 변경 (샘플 데이터 제거)
 
 function SearchContent() {
   const searchParams = useSearchParams();

@@ -241,6 +241,67 @@ export async function updateProductStock(productId: string, newStock: number): P
   }
 }
 
+// 기존 상품들에 새 필드 추가 (마이그레이션)
+export async function migrateProductsWithNewFields(): Promise<{ success: number; failed: number; total: number }> {
+  try {
+    console.log('상품 마이그레이션 시작...');
+    
+    // 모든 상품 가져오기
+    const allProducts = await getProducts();
+    const results = { success: 0, failed: 0, total: allProducts.length };
+    
+    console.log(`총 ${allProducts.length}개 상품 발견`);
+    
+    for (const product of allProducts) {
+      try {
+        // 이미 새 필드가 있는 상품은 건너뛰기
+        if (product.cover !== undefined && product.productCode !== undefined) {
+          console.log(`상품 ${product.name} - 이미 업데이트됨`);
+          results.success++;
+          continue;
+        }
+        
+        // 새 필드 추가
+        const updateData: Partial<Product> = {};
+        
+        if (product.cover === undefined) {
+          // 브랜드별로 기본 커버 설정 (예시)
+          updateData.cover = ['titleist', 'callaway'].includes(product.brand.toLowerCase());
+        }
+        
+        if (product.productCode === undefined) {
+          // 브랜드별 프리픽스로 상품 코드 생성
+          const brandPrefix = product.brand.slice(0, 2).toUpperCase();
+          const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+          updateData.productCode = `${brandPrefix}${randomNum}`;
+        }
+        
+        // 상품 업데이트
+        const success = await updateProduct(product.id, updateData);
+        
+        if (success) {
+          console.log(`상품 ${product.name} - 업데이트 완료: 커버=${updateData.cover}, 코드=${updateData.productCode}`);
+          results.success++;
+        } else {
+          console.error(`상품 ${product.name} - 업데이트 실패`);
+          results.failed++;
+        }
+        
+      } catch (error) {
+        console.error(`상품 ${product.name} 처리 중 오류:`, error);
+        results.failed++;
+      }
+    }
+    
+    console.log(`마이그레이션 완료: 성공 ${results.success}개, 실패 ${results.failed}개`);
+    return results;
+    
+  } catch (error) {
+    console.error('상품 마이그레이션 오류:', error);
+    return { success: 0, failed: 0, total: 0 };
+  }
+}
+
 // 인기 상품 가져오기 (재고가 있는 최신 상품)
 export async function getPopularProducts(limit: number = 8): Promise<Product[]> {
   try {

@@ -321,23 +321,7 @@ export default function SetupAdminPage() {
                       🛍️ 주문관리
                     </Link>
 
-                    <Link 
-                      href="/admin/payments"
-                      style={{
-                        display: 'block',
-                        padding: '12px 8px',
-                        border: '1px solid #ddd',
-                        borderRadius: '4px',
-                        textAlign: 'center',
-                        textDecoration: 'none',
-                        color: '#333',
-                        backgroundColor: '#f9f9f9',
-                        fontSize: '13px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      💰 결제관리
-                    </Link>
+
 
                     <Link 
                       href="/admin/users"

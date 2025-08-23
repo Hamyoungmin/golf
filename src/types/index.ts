@@ -9,6 +9,8 @@ export interface Product {
   description: string;
   inquiry?: string; // 상품 문의 정보
   stock: number;
+  cover?: boolean; // 커버 포함 여부
+  productCode?: string; // 상품 코드
   specifications: {
     [key: string]: string;
   };

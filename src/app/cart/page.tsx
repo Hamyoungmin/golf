@@ -9,48 +9,9 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { CartItem, Product, Address } from '@/types';
 import { createOrder } from '@/lib/orders';
 import { useCustomAlert } from '@/hooks/useCustomAlert';
+import { getProduct } from '@/lib/products';
 
-// 임시 상품 데이터 매핑 (실제로는 Firebase에서 가져와야 함)
-const sampleProducts: Product[] = [
-  {
-    id: '1',
-    name: '캘러웨이 로그 드라이버',
-    price: '140,000원',
-    category: 'drivers',
-    brand: 'callaway',
-    images: ['/d1.jpg'],
-    description: '캘러웨이의 최신 로그(ROGUE) 드라이버입니다. 혁신적인 기술과 뛰어난 성능으로 최고의 비거리와 정확성을 제공합니다.',
-    stock: 5,
-    specifications: {
-      '로프트': '10.5도',
-      '샤프트': 'Aldila Rogue MAX 65',
-      '플렉스': 'S',
-      '클럽 길이': '45.5인치',
-      '헤드 볼륨': '460cc'
-    },
-    isWomens: false,
-    isKids: false,
-    isLeftHanded: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '2',
-    name: 'Callaway Epic Speed 드라이버',
-    price: '450,000원',
-    category: 'drivers',
-    brand: 'callaway',
-    images: ['https://images.unsplash.com/photo-1593111774240-d529f12af4ce?w=300&h=200&fit=crop'],
-    description: '',
-    stock: 3,
-    specifications: {},
-    isWomens: false,
-    isKids: false,
-    isLeftHanded: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
-];
+// 실제 Firebase 데이터를 사용하도록 변경 (샘플 데이터 제거)
 
 export default function CartPage() {
   const router = useRouter();
@@ -79,32 +40,44 @@ export default function CartPage() {
 
   // 장바구니 아이템에 상품 정보 매핑
   useEffect(() => {
-    const itemsWithProducts = cartItems.map(cartItem => {
-      const product = sampleProducts.find(p => p.id === cartItem.productId);
-      return {
-        ...cartItem,
-        product: product || {
-          id: cartItem.productId,
-          name: '상품 정보를 찾을 수 없습니다',
-          price: '0원',
-          category: '',
-          brand: '',
-          images: [],
-          description: '',
-          stock: 0,
-          specifications: {},
-          isWomens: false,
-          isKids: false,
-          isLeftHanded: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }
-      };
-    });
-    setCartItemsWithProducts(itemsWithProducts);
-    
-    // 모든 아이템을 기본 선택으로 설정
-    setSelectedItems(cartItems.map(item => item.productId));
+    // 장바구니 아이템에 상품 정보 추가 (실제 Firebase에서 가져오기)
+    const loadCartProducts = async () => {
+      const itemsWithProducts = await Promise.all(
+        cartItems.map(async (cartItem) => {
+          const product = await getProduct(cartItem.productId);
+          return {
+            ...cartItem,
+            product: product || {
+              id: cartItem.productId,
+              name: '상품 정보를 찾을 수 없습니다',
+              price: '0원',
+              category: '',
+              brand: '',
+              images: [],
+              description: '',
+              stock: 0,
+              specifications: {},
+              isWomens: false,
+              isKids: false,
+              isLeftHanded: false,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            }
+          };
+        })
+      );
+      setCartItemsWithProducts(itemsWithProducts);
+      
+      // 모든 아이템을 기본 선택으로 설정
+      setSelectedItems(cartItems.map(item => item.productId));
+    };
+
+    if (cartItems.length > 0) {
+      loadCartProducts();
+    } else {
+      setCartItemsWithProducts([]);
+      setSelectedItems([]);
+    }
   }, [cartItems]);
 
   // 주소 유효성 검사

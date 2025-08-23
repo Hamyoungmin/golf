@@ -49,6 +49,7 @@ const Header = () => {
     { name: '혼마', href: '/drivers/honma' },
     { name: '젝시오', href: '/drivers/xxio' },
     { name: '브리지스톤', href: '/drivers/bridgestone' },
+    { name: '핑', href: '/drivers/ping' },
     { name: '기타', href: '/drivers/others' }
   ];
 
@@ -59,6 +60,7 @@ const Header = () => {
     { name: '혼마', href: '/woods/honma' },
     { name: '젝시오', href: '/woods/xxio' },
     { name: '브리지스톤', href: '/woods/bridgestone' },
+    { name: '핑', href: '/woods/ping' },
     { name: '기타', href: '/woods/others' }
   ];
 
@@ -69,6 +71,7 @@ const Header = () => {
     { name: '혼마', href: '/utilities/honma' },
     { name: '젝시오', href: '/utilities/xxio' },
     { name: '브리지스톤', href: '/utilities/bridgestone' },
+    { name: '핑', href: '/utilities/ping' },
     { name: '기타', href: '/utilities/others' }
   ];
 
@@ -79,6 +82,7 @@ const Header = () => {
     { name: '혼마', href: '/wedges/honma' },
     { name: '젝시오', href: '/wedges/xxio' },
     { name: '브리지스톤', href: '/wedges/bridgestone' },
+    { name: '핑', href: '/wedges/ping' },
     { name: '기타', href: '/wedges/others' }
   ];
 
@@ -89,6 +93,7 @@ const Header = () => {
     { name: '혼마', href: '/putters/honma' },
     { name: '젝시오', href: '/putters/xxio' },
     { name: '브리지스톤', href: '/putters/bridgestone' },
+    { name: '핑', href: '/putters/ping' },
     { name: '기타', href: '/putters/others' }
   ];
 
@@ -99,6 +104,7 @@ const Header = () => {
     { name: '혼마', href: '/left-handed/honma' },
     { name: '젝시오', href: '/left-handed/xxio' },
     { name: '브리지스톤', href: '/left-handed/bridgestone' },
+    { name: '핑', href: '/left-handed/ping' },
     { name: '기타', href: '/left-handed/others' }
   ];
 
@@ -109,6 +115,7 @@ const Header = () => {
     { name: '혼마', href: '/womens/honma' },
     { name: '젝시오', href: '/womens/xxio' },
     { name: '브리지스톤', href: '/womens/bridgestone' },
+    { name: '핑', href: '/womens/ping' },
     { name: '기타', href: '/womens/others' }
   ];
 

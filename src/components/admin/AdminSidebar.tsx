@@ -37,11 +37,6 @@ const AdminSidebar: React.FC = () => {
       icon: ClipboardDocumentListIcon 
     },
     { 
-      name: '입금 관리', 
-      href: '/admin/payments', 
-      icon: BanknotesIcon 
-    },
-    { 
       name: '사용자 관리', 
       href: '/admin/users', 
       icon: UsersIcon 

@@ -11,7 +11,7 @@ import {
   FunnelIcon
 } from '@heroicons/react/24/outline';
 import DataTable from '@/components/admin/DataTable';
-import { getProducts, deleteProduct } from '@/lib/products';
+import { getProducts, deleteProduct, migrateProductsWithNewFields } from '@/lib/products';
 import { ProductFilter, Category, Brand, Product } from '@/types';
 
 export default function AdminProductsPage() {
@@ -23,6 +23,7 @@ export default function AdminProductsPage() {
   const [showFilter, setShowFilter] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [migrating, setMigrating] = useState(false);
 
   const categories: Category[] = ['drivers', 'irons', 'putters', 'wedges', 'woods', 'utilities'];
   const brands: Brand[] = ['titleist', 'taylormade', 'callaway', 'honma', 'bridgestone', 'others'];
@@ -56,6 +57,24 @@ export default function AdminProductsPage() {
     } catch (error) {
       console.error('상품 삭제 실패:', error);
       alert('상품 삭제에 실패했습니다.');
+    }
+  };
+
+  const handleMigration = async () => {
+    if (!confirm('기존 상품들에 커버와 상품코드 필드를 추가하시겠습니까?\n이 작업은 시간이 걸릴 수 있습니다.')) {
+      return;
+    }
+
+    setMigrating(true);
+    try {
+      const results = await migrateProductsWithNewFields();
+      alert(`마이그레이션 완료!\n성공: ${results.success}개\n실패: ${results.failed}개\n총 ${results.total}개 상품 처리`);
+      await fetchProducts(); // 목록 새로고침
+    } catch (error) {
+      console.error('마이그레이션 오류:', error);
+      alert('마이그레이션 중 오류가 발생했습니다.');
+    } finally {
+      setMigrating(false);
     }
   };
 
@@ -108,6 +127,28 @@ export default function AdminProductsPage() {
       render: (product: Product) => getStockStatus(product.stock),
     },
     {
+      key: 'cover',
+      header: '커버',
+      render: (product: Product) => (
+        <span className={`text-xs px-2 py-1 rounded ${
+          product.cover 
+            ? 'bg-green-100 text-green-800' 
+            : 'bg-gray-100 text-gray-500'
+        }`}>
+          {product.cover ? '포함' : '없음'}
+        </span>
+      ),
+    },
+    {
+      key: 'productCode',
+      header: '상품코드',
+      render: (product: Product) => (
+        <span className="text-sm font-mono text-gray-700">
+          {product.productCode || '-'}
+        </span>
+      ),
+    },
+    {
       key: 'options',
       header: '옵션',
       render: (product: Product) => (
@@ -152,24 +193,44 @@ export default function AdminProductsPage() {
           }}>
             상품 관리
           </h1>
-          <Link
-            href="/admin/products/new"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '4px',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#fff',
-              backgroundColor: '#007bff',
-              textDecoration: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            + 새 상품 등록
-          </Link>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={handleMigration}
+              disabled={migrating}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#fff',
+                backgroundColor: migrating ? '#6c757d' : '#28a745',
+                cursor: migrating ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {migrating ? '마이그레이션 중...' : '🔄 데이터 업데이트'}
+            </button>
+            <Link
+              href="/admin/products/new"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#fff',
+                backgroundColor: '#007bff',
+                textDecoration: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              + 새 상품 등록
+            </Link>
+          </div>
         </div>
 
       {/* 검색 및 필터 */}
