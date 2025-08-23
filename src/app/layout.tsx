@@ -17,6 +17,27 @@ import GlobalAlertProvider from "@/components/GlobalAlertProvider";
 export const metadata: Metadata = {
   title: "골프상회 - 골프용품 전문 도매몰",
   description: "골프용품 전문 도매몰 골프상회입니다. 드라이버, 아이언, 퍼터 등 다양한 골프용품을 만나보세요.",
+  manifest: "/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.ico" }
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }
+    ],
+    other: [
+      { url: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png" }
+    ]
+  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
