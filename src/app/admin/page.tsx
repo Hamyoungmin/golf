@@ -123,11 +123,46 @@ export default function AdminDashboard() {
   }, []);
 
   const handleSeedData = async () => {
-    alert('Firebase가 제거되었습니다. 샘플 데이터 기능을 사용할 수 없습니다.');
+    setSeedLoading(true);
+    try {
+      const response = await fetch('/api/seed', {
+        method: 'POST',
+      });
+      
+      if (response.ok) {
+        alert('샘플 데이터가 성공적으로 생성되었습니다!');
+        window.location.reload();
+      } else {
+        throw new Error('샘플 데이터 생성 실패');
+      }
+    } catch (error) {
+      console.error('샘플 데이터 생성 오류:', error);
+      alert('샘플 데이터 생성에 실패했습니다.');
+    } finally {
+      setSeedLoading(false);
+    }
   };
 
   const handleDeleteAllProducts = async () => {
-    alert('Firebase가 제거되었습니다. 데이터 삭제 기능을 사용할 수 없습니다.');
+    if (!confirm('정말로 모든 상품 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/seed/delete-all', {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        alert('모든 상품 데이터가 삭제되었습니다.');
+        window.location.reload();
+      } else {
+        throw new Error('데이터 삭제 실패');
+      }
+    } catch (error) {
+      console.error('데이터 삭제 오류:', error);
+      alert('데이터 삭제에 실패했습니다.');
+    }
   };
 
   if (loading) {

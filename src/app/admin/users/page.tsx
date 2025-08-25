@@ -16,7 +16,8 @@ import {
   getDocs, 
   doc, 
   updateDoc, 
-  orderBy 
+  orderBy,
+  serverTimestamp 
 } from '@/lib/firebase';
 import { User } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,21 +25,43 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function UsersManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
+  const [filter, setFilter] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [counts, setCounts] = useState({
+    pending: 0,
+    approved: 0,
+    rejected: 0
+  });
   const { user: currentUser } = useAuth();
+
+  // 모든 상태별 카운트 가져오기
+  const fetchCounts = async () => {
+    try {
+      const statusTypes = ['pending', 'approved', 'rejected'] as const;
+      const countPromises = statusTypes.map(async (status) => {
+        const q = query(collection(db, 'users'), where('status', '==', status));
+        const snapshot = await getDocs(q);
+        return { status, count: snapshot.size };
+      });
+      
+      const results = await Promise.all(countPromises);
+      const newCounts = { pending: 0, approved: 0, rejected: 0 };
+      results.forEach(result => {
+        newCounts[result.status] = result.count;
+      });
+      
+      setCounts(newCounts);
+    } catch (error) {
+      console.error('카운트 가져오기 실패:', error);
+    }
+  };
 
   // 사용자 목록 가져오기
   const fetchUsers = async () => {
     try {
-      let q;
-      if (filter === 'all') {
-        q = query(collection(db, 'users'));
-      } else {
-        q = query(
-          collection(db, 'users'), 
-          where('status', '==', filter)
-        );
-      }
+      const q = query(
+        collection(db, 'users'), 
+        where('status', '==', filter)
+      );
       
       const querySnapshot = await getDocs(q);
       const usersData = querySnapshot.docs.map((doc: any) => ({
@@ -66,52 +89,81 @@ export default function UsersManagement() {
 
   // 사용자 승인
   const approveUser = async (uid: string) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+    
+    if (!confirm('정말로 이 사용자를 승인하시겠습니까?')) {
+      return;
+    }
     
     try {
+      console.log('승인 시작:', uid, '관리자:', currentUser.uid);
       const userRef = doc(db, 'users', uid);
-      await updateDoc(userRef, {
+      const updateData = {
         status: 'approved',
-        approvedAt: new Date(),
+        approvedAt: serverTimestamp(),
         approvedBy: currentUser.uid,
-        updatedAt: new Date()
-      });
+        updatedAt: serverTimestamp()
+      };
+      
+      console.log('업데이트 데이터:', updateData);
+      await updateDoc(userRef, updateData);
       
       alert('사용자가 승인되었습니다.');
       fetchUsers(); // 목록 새로고침
+      fetchCounts(); // 카운트 새로고침
     } catch (error) {
       console.error('사용자 승인 실패:', error);
-      alert('승인 처리 중 오류가 발생했습니다.');
+      alert(`승인 처리 중 오류가 발생했습니다: ${error}`);
     }
   };
 
   // 사용자 거부
   const rejectUser = async (uid: string, reason?: string) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
     
     const rejectionReason = reason || prompt('거부 사유를 입력해주세요:');
     if (!rejectionReason) return;
     
+    if (!confirm('정말로 이 사용자를 거부하시겠습니까?')) {
+      return;
+    }
+    
     try {
+      console.log('거부 시작:', uid, '관리자:', currentUser.uid);
       const userRef = doc(db, 'users', uid);
-      await updateDoc(userRef, {
+      const updateData = {
         status: 'rejected',
         rejectionReason,
-        approvedBy: currentUser.uid,
-        updatedAt: new Date()
-      });
+        rejectedBy: currentUser.uid,
+        rejectedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      
+      console.log('업데이트 데이터:', updateData);
+      await updateDoc(userRef, updateData);
       
       alert('사용자가 거부되었습니다.');
       fetchUsers(); // 목록 새로고침
+      fetchCounts(); // 카운트 새로고침
     } catch (error) {
       console.error('사용자 거부 실패:', error);
-      alert('거부 처리 중 오류가 발생했습니다.');
+      alert(`거부 처리 중 오류가 발생했습니다: ${error}`);
     }
   };
 
   useEffect(() => {
     fetchUsers();
   }, [filter]);
+
+  useEffect(() => {
+    fetchCounts();
+  }, []);
 
   const getStatusBadge = (status: string) => {
     const badges = {
@@ -193,14 +245,13 @@ export default function UsersManagement() {
           gap: '10px'
         }}>
           {[
-            { key: 'pending', label: '승인 대기', count: users.filter(u => u.status === 'pending').length },
-            { key: 'approved', label: '승인됨', count: users.filter(u => u.status === 'approved').length },
-            { key: 'rejected', label: '거부됨', count: users.filter(u => u.status === 'rejected').length },
-            { key: 'all', label: '전체', count: users.length }
+            { key: 'pending', label: '승인 대기', count: counts.pending },
+            { key: 'approved', label: '승인됨', count: counts.approved },
+            { key: 'rejected', label: '거부됨', count: counts.rejected }
           ].map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setFilter(tab.key as 'all' | 'pending' | 'approved' | 'rejected')}
+              onClick={() => setFilter(tab.key as 'pending' | 'approved' | 'rejected')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -257,7 +308,6 @@ export default function UsersManagement() {
                 {filter === 'pending' && '승인 대기 중인 사용자가 없습니다.'}
                 {filter === 'approved' && '승인된 사용자가 없습니다.'}
                 {filter === 'rejected' && '거부된 사용자가 없습니다.'}
-                {filter === 'all' && '등록된 사용자가 없습니다.'}
               </p>
             </div>
           ) : (
@@ -310,9 +360,31 @@ export default function UsersManagement() {
                                 objectFit: 'cover',
                                 borderRadius: '4px',
                                 cursor: 'pointer',
-                                border: '1px solid #ddd'
+                                border: '1px solid #ddd',
+                                backgroundColor: '#f5f5f5'
                               }}
                               onClick={() => window.open(user.shopInteriorPhotoUrl, '_blank')}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = `
+                                    <p style="fontSize: 12px; color: #666; marginBottom: 4px;">샵 내부</p>
+                                    <div style="
+                                      width: 64px;
+                                      height: 64px;
+                                      backgroundColor: #f5f5f5;
+                                      border: 1px solid #ddd;
+                                      borderRadius: 4px;
+                                      display: flex;
+                                      alignItems: center;
+                                      justifyContent: center;
+                                      fontSize: 12px;
+                                      color: #999;
+                                    ">📷 이미지 없음</div>
+                                  `;
+                                }
+                              }}
                             />
                           </div>
                         )}
@@ -328,10 +400,37 @@ export default function UsersManagement() {
                                 objectFit: 'cover',
                                 borderRadius: '4px',
                                 cursor: 'pointer',
-                                border: '1px solid #ddd'
+                                border: '1px solid #ddd',
+                                backgroundColor: '#f5f5f5'
                               }}
                               onClick={() => window.open(user.shopSignPhotoUrl, '_blank')}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = `
+                                    <p style="fontSize: 12px; color: #666; marginBottom: 4px;">샵 간판</p>
+                                    <div style="
+                                      width: 64px;
+                                      height: 64px;
+                                      backgroundColor: #f5f5f5;
+                                      border: 1px solid #ddd;
+                                      borderRadius: 4px;
+                                      display: flex;
+                                      alignItems: center;
+                                      justifyContent: center;
+                                      fontSize: 12px;
+                                      color: #999;
+                                    ">📷 이미지 없음</div>
+                                  `;
+                                }
+                              }}
                             />
+                          </div>
+                        )}
+                        {!user.shopInteriorPhotoUrl && !user.shopSignPhotoUrl && (
+                          <div style={{ fontSize: '12px', color: '#999' }}>
+                            📷 업로드된 사진이 없습니다
                           </div>
                         )}
                       </div>

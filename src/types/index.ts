@@ -7,6 +7,7 @@ export interface Product {
   brand: string;
   images: string[];
   description: string;
+  detailedDescription?: string; // 상세 정보 (이미지 URL 포함 가능)
   inquiry?: string; // 상품 문의 정보
   stock: number;
   cover?: boolean; // 커버 포함 여부

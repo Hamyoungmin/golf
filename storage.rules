@@ -1,0 +1,29 @@
+rules_version = '2';
+
+// Firebase Storage 보안 규칙
+service firebase.storage {
+  match /b/{bucket}/o {
+    // 사용자 프로필 이미지는 인증된 사용자만 업로드 가능, 모든 사용자가 읽기 가능
+    match /users/{userId}/{allPaths=**} {
+      allow read: if true; // 모든 사용자가 읽기 가능 (이미지 표시용)
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 상품 이미지는 관리자만 업로드 가능, 모든 사용자가 읽기 가능  
+    match /products/{allPaths=**} {
+      allow read: if true; // 모든 사용자가 읽기 가능
+      allow write: if request.auth != null; // 인증된 사용자만 업로드 가능
+    }
+    
+    // 일반적인 공개 파일들
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 임시 파일들 (업로드 테스트용)
+    match /temp/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

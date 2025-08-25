@@ -1,191 +1,10 @@
-// Firebase가 설정되지 않은 경우에도 빌드가 되도록 모킹
-const mockAuth = {
-  currentUser: null,
-  onAuthStateChanged: () => () => {},
-  signOut: () => Promise.resolve(),
-};
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
-// Mock functions that match Firestore API
-const mockCollection = (db: any, path: string) => ({
-  doc: (id?: string) => mockDoc(db, `${path}/${id || 'mock'}`),
-  add: (data: any) => Promise.resolve({ id: 'mock_' + Date.now() }),
-  where: () => ({ 
-    get: () => Promise.resolve({ docs: [] }),
-    limit: () => ({ get: () => Promise.resolve({ docs: [] }) }),
-    orderBy: () => ({ get: () => Promise.resolve({ docs: [] }) })
-  }),
-  get: () => Promise.resolve({ docs: [] }),
-  orderBy: () => ({ get: () => Promise.resolve({ docs: [] }) }),
-  limit: () => ({ get: () => Promise.resolve({ docs: [] }) }),
-  path: path,
-  parent: db,
-  id: path.split('/').pop() || 'mock'
-});
-
-const mockDoc = (db: any, path: string) => ({
-  get: () => Promise.resolve({ 
-    exists: () => false, 
-    data: () => null,
-    id: path.split('/').pop() || 'mock',
-    ref: { path: path }
-  }),
-  set: (data: any, options?: any) => Promise.resolve(),
-  update: (data: any) => Promise.resolve(),
-  delete: () => Promise.resolve(),
-  path: path,
-  parent: db,
-  id: path.split('/').pop() || 'mock'
-});
-
-const mockDb = {
-  collection: (path: string) => mockCollection(mockDb, path),
-  doc: (path: string) => mockDoc(mockDb, path),
-  app: { name: 'mock' },
-  type: 'firestore'
-};
-
-const mockStorage = {
-  ref: () => ({
-    put: () => Promise.resolve({ ref: { getDownloadURL: () => Promise.resolve('') } }),
-    getDownloadURL: () => Promise.resolve(''),
-    putString: () => Promise.resolve({ ref: { getDownloadURL: () => Promise.resolve('') } }),
-  }),
-};
-
-// Firebase 초기화 시도
-let app: any = null;
-let auth: any = mockAuth;
-let db: any = mockDb;
-let storage: any = mockStorage;
-
-// Mock Firestore functions
-let collection: any = (db: any, path: string) => {
-  if (!db || !path) {
-    console.warn('Collection called with invalid arguments:', db, path);
-    return mockCollection(mockDb, path || 'fallback');
-  }
-  return mockCollection(db, path);
-};
-let doc: any = mockDoc;
-let getDoc: any = (docRef: any) => Promise.resolve({ 
-  exists: false, 
-  data: () => null,
-  id: 'mock'
-});
-let setDoc: any = () => Promise.resolve();
-let deleteDoc: any = () => Promise.resolve();
-let serverTimestamp: any = () => new Date();
-let query: any = (...args: any[]) => ({ get: () => Promise.resolve({ docs: [] }) });
-let where: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
-let getDocs: any = () => Promise.resolve({ docs: [] });
-let updateDoc: any = () => Promise.resolve();
-let arrayUnion: any = (...values: any[]) => values;
-let arrayRemove: any = (...values: any[]) => values;
-let orderBy: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
-let limit: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
-let startAfter: any = () => ({ get: () => Promise.resolve({ docs: [] }) });
-let addDoc: any = (collectionRef: any, data: any) => {
-  console.log('Mock addDoc called with:', collectionRef, data);
-  return Promise.resolve({ id: 'mock_' + Date.now() });
-};
-let Timestamp: any = {
-  now: () => ({ seconds: Math.floor(Date.now() / 1000), nanoseconds: 0 }),
-  fromDate: (date: Date) => ({ seconds: Math.floor(date.getTime() / 1000), nanoseconds: 0 })
-};
-let writeBatch: any = (db: any) => ({
-  set: () => {},
-  update: () => {},
-  delete: () => {},
-  commit: () => Promise.resolve()
-});
-let onSnapshot: any = (query: any, callback: any) => {
-  console.log('Mock onSnapshot called');
-  // Mock function that returns an unsubscribe function
-  return () => console.log('Mock unsubscribe called');
-};
-
-// Mock Storage functions
-let ref: any = (storage: any, path?: string) => ({
-  put: (file: any) => Promise.resolve({ 
-    ref: { getDownloadURL: () => Promise.resolve(`https://mock-storage.com/${path}`) } 
-  }),
-  getDownloadURL: () => Promise.resolve(`https://mock-storage.com/${path}`),
-});
-let uploadBytes: any = (ref: any, file: any) => Promise.resolve({ 
-  ref: { getDownloadURL: () => Promise.resolve('https://mock-storage.com/file') } 
-});
-let getDownloadURL: any = (ref: any) => Promise.resolve('https://mock-storage.com/file');
-
-
-
-// Types
-let DocumentSnapshot: any = {};
-let WhereFilterOp: any = {};
-
-// 환경변수가 모두 있는 경우에만 실제 Firebase 초기화
-if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY && 
-    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN && 
-    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
-  try {
-    const { initializeApp } = require('firebase/app');
-    const { getAuth } = require('firebase/auth');
-    const { getFirestore } = require('firebase/firestore');
-    const { getStorage } = require('firebase/storage');
-    
-    // Import Firestore functions
-    const firestoreFunctions = require('firebase/firestore');
-    collection = firestoreFunctions.collection;
-    doc = firestoreFunctions.doc;
-    getDoc = firestoreFunctions.getDoc;
-    setDoc = firestoreFunctions.setDoc;
-    deleteDoc = firestoreFunctions.deleteDoc;
-    serverTimestamp = firestoreFunctions.serverTimestamp;
-    query = firestoreFunctions.query;
-    where = firestoreFunctions.where;
-    getDocs = firestoreFunctions.getDocs;
-    updateDoc = firestoreFunctions.updateDoc;
-    arrayUnion = firestoreFunctions.arrayUnion;
-    arrayRemove = firestoreFunctions.arrayRemove;
-
-    orderBy = firestoreFunctions.orderBy;
-    limit = firestoreFunctions.limit;
-    startAfter = firestoreFunctions.startAfter;
-    addDoc = firestoreFunctions.addDoc;
-    Timestamp = firestoreFunctions.Timestamp;
-    writeBatch = firestoreFunctions.writeBatch;
-    onSnapshot = firestoreFunctions.onSnapshot;
-    
-    // Import Storage functions
-    const storageFunctions = require('firebase/storage');
-    ref = storageFunctions.ref;
-    uploadBytes = storageFunctions.uploadBytes;
-    getDownloadURL = storageFunctions.getDownloadURL;
-    
-    // Types
-    DocumentSnapshot = firestoreFunctions.DocumentSnapshot;
-    WhereFilterOp = firestoreFunctions.WhereFilterOp;
-    
-    const firebaseConfig = {
-      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    };
-    
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-    storage = getStorage(app);
-  } catch (error) {
-    console.warn('Firebase 초기화 실패, 모킹된 서비스 사용:', error);
-  }
-}
-
+// Firebase exports
 export { 
-  auth, 
-  db, 
-  storage, 
   collection, 
   doc, 
   getDoc, 
@@ -198,7 +17,6 @@ export {
   updateDoc,
   arrayUnion,
   arrayRemove,
-
   orderBy,
   limit,
   startAfter,
@@ -207,9 +25,27 @@ export {
   writeBatch,
   onSnapshot,
   DocumentSnapshot,
-  WhereFilterOp,
+  WhereFilterOp
+} from 'firebase/firestore';
+
+export {
   ref,
   uploadBytes,
   getDownloadURL
+} from 'firebase/storage';
+
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 };
+
+// Firebase 초기화
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
+
 export default app;

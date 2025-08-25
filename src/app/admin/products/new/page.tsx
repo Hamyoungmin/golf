@@ -16,6 +16,7 @@ export default function AdminProductCreatePage() {
     price: '',
     brand: '' as Brand | '',
     description: '',
+    detailedDescription: '',
     stock: 0,
     cover: false,
     productCode: '',
@@ -30,6 +31,18 @@ export default function AdminProductCreatePage() {
   const [selectedMainCategory, setSelectedMainCategory] = useState('');
   const [uploadingImages, setUploadingImages] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  // 모달 상태 관리
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    type: '' as 'imageSelect' | 'urlInput' | 'specAdd' | 'specValue',
+    title: '',
+    placeholder: '',
+    options: [] as string[],
+    callback: null as ((value: string) => void) | null,
+    fieldName: '' as 'description' | 'detailedDescription',
+    specKey: ''
+  });
 
   // 메인 카테고리별 페이지 매핑
   const categoryPageMap: CategoryPageMap = {
@@ -127,6 +140,48 @@ export default function AdminProductCreatePage() {
   };
 
   const brands: Brand[] = ['titleist', 'taylormade', 'callaway', 'honma', 'bridgestone', 'others'];
+
+  // 모달 헬퍼 함수들
+  const openModal = (
+    type: 'imageSelect' | 'urlInput' | 'specAdd' | 'specValue',
+    title: string,
+    placeholder: string = '',
+    options: string[] = [],
+    callback: (value: string) => void,
+    fieldName: 'description' | 'detailedDescription' = 'description',
+    specKey: string = ''
+  ) => {
+    setModalState({
+      isOpen: true,
+      type,
+      title,
+      placeholder,
+      options,
+      callback,
+      fieldName,
+      specKey
+    });
+  };
+
+  const closeModal = () => {
+    setModalState({
+      isOpen: false,
+      type: 'imageSelect',
+      title: '',
+      placeholder: '',
+      options: [],
+      callback: null,
+      fieldName: 'description',
+      specKey: ''
+    });
+  };
+
+  const handleModalSubmit = (value: string) => {
+    if (modalState.callback) {
+      modalState.callback(value);
+    }
+    closeModal();
+  };
 
   // 파일 선택 핸들러
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -270,6 +325,7 @@ export default function AdminProductCreatePage() {
         category: inferredCategory,
         brand: formData.brand as Brand,
         description: formData.description,
+        detailedDescription: formData.detailedDescription,
         stock: formData.stock,
         cover: formData.cover,
         productCode: formData.productCode,
@@ -306,21 +362,135 @@ export default function AdminProductCreatePage() {
   };
 
   const handleSpecificationAdd = () => {
-    const key = prompt('스펙 이름을 입력하세요 (예: 샤프트):');
-    if (key) {
-      const value = prompt(`${key}의 값을 입력하세요:`);
-      if (value) {
-        setFormData({
-          ...formData,
-          specifications: { ...formData.specifications, [key]: value },
-        });
+    openModal(
+      'specAdd',
+      '스펙 이름 입력',
+      '예: 샤프트, 길이, 무게',
+      [],
+      (key: string) => {
+        if (key.trim()) {
+          const specKey = key.trim();
+          openModal(
+            'specValue',
+            `${specKey}의 값 입력`,
+            '예: 카본, 44인치, 300g',
+            [],
+            (value: string) => {
+              if (value.trim()) {
+                setFormData({
+                  ...formData,
+                  specifications: { ...formData.specifications, [specKey]: value.trim() },
+                });
+              }
+            },
+            'description',
+            specKey
+          );
+        }
       }
-    }
+    );
   };
 
   const handleSpecificationRemove = (key: string) => {
     const { [key]: _, ...rest } = formData.specifications;
     setFormData({ ...formData, specifications: rest });
+  };
+
+  // 이미지 URL을 텍스트에 삽입하는 헬퍼 함수
+  const insertImageToText = (fieldName: 'description' | 'detailedDescription', imageUrl: string) => {
+    const imageTag = `<img src="${imageUrl}" alt="상품 이미지" style="max-width: 100%; height: auto; margin: 10px 0;" />`;
+    const currentText = formData[fieldName];
+    const newText = currentText ? `${currentText}\n\n${imageTag}` : imageTag;
+    setFormData({ ...formData, [fieldName]: newText });
+  };
+
+  // 기존 이미지를 텍스트에 삽입
+  const handleInsertExistingImage = (fieldName: 'description' | 'detailedDescription') => {
+    if (formData.images.length === 0) {
+      alert('먼저 상품 이미지를 업로드해주세요.');
+      return;
+    }
+
+    const imageOptions = formData.images.map((url, index) => `${index + 1}번: ${url.split('/').pop()}`);
+    
+    openModal(
+      'imageSelect',
+      '삽입할 이미지를 선택하세요',
+      '',
+      imageOptions,
+      (selection: string) => {
+        const index = parseInt(selection) - 1;
+        if (index >= 0 && index < formData.images.length) {
+          insertImageToText(fieldName, formData.images[index]);
+        }
+      },
+      fieldName
+    );
+  };
+
+  // 새 이미지 URL을 텍스트에 삽입
+  const handleInsertNewImageUrl = (fieldName: 'description' | 'detailedDescription') => {
+    openModal(
+      'urlInput',
+      '이미지 URL 입력',
+      'https://example.com/image.jpg',
+      [],
+      (imageUrl: string) => {
+        if (imageUrl.trim()) {
+          insertImageToText(fieldName, imageUrl.trim());
+        }
+      },
+      fieldName
+    );
+  };
+
+  // 새 이미지 파일을 업로드하고 텍스트에 삽입
+  const handleUploadAndInsertImage = async (fieldName: 'description' | 'detailedDescription') => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      if (!isValidImageFile(file)) {
+        alert('지원되지 않는 파일 형식입니다. (지원: JPG, PNG, WebP, GIF)');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert('파일 크기가 너무 큽니다. (최대 5MB)');
+        return;
+      }
+
+      if (!formData.name.trim()) {
+        alert('상품명을 먼저 입력해주세요.');
+        return;
+      }
+
+      try {
+        setUploadingImages(true);
+        const uploadedUrls = await uploadMultipleProductImages([file], formData.name);
+        const imageUrl = uploadedUrls[0];
+        
+        // 업로드된 이미지를 상품 이미지 목록에 추가
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, imageUrl]
+        }));
+        
+        // 텍스트에 이미지 삽입
+        insertImageToText(fieldName, imageUrl);
+        
+        alert('이미지가 업로드되고 텍스트에 삽입되었습니다.');
+      } catch (error) {
+        console.error('이미지 업로드 실패:', error);
+        alert('이미지 업로드에 실패했습니다.');
+      } finally {
+        setUploadingImages(false);
+      }
+    };
+    input.click();
   };
 
   return (
@@ -699,28 +869,182 @@ export default function AdminProductCreatePage() {
 
           {/* 상품 설명 */}
           <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '5px',
-              fontWeight: '500',
-              fontSize: '14px'
-            }}>
-              상품 설명
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <label style={{ 
+                display: 'block', 
+                fontWeight: '500',
+                fontSize: '14px'
+              }}>
+                상품 설명
+              </label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => handleInsertExistingImage('description')}
+                  disabled={formData.images.length === 0}
+                  style={{
+                    fontSize: '12px',
+                    color: formData.images.length === 0 ? '#ccc' : '#007bff',
+                    backgroundColor: 'transparent',
+                    border: '1px solid',
+                    borderColor: formData.images.length === 0 ? '#ccc' : '#007bff',
+                    borderRadius: '3px',
+                    padding: '4px 8px',
+                    cursor: formData.images.length === 0 ? 'not-allowed' : 'pointer'
+                  }}
+                  title="상품 이미지에서 선택"
+                >
+                  📷 기존 이미지
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleUploadAndInsertImage('description')}
+                  disabled={uploadingImages || !formData.name.trim()}
+                  style={{
+                    fontSize: '12px',
+                    color: (!formData.name.trim() || uploadingImages) ? '#ccc' : '#28a745',
+                    backgroundColor: 'transparent',
+                    border: '1px solid',
+                    borderColor: (!formData.name.trim() || uploadingImages) ? '#ccc' : '#28a745',
+                    borderRadius: '3px',
+                    padding: '4px 8px',
+                    cursor: (!formData.name.trim() || uploadingImages) ? 'not-allowed' : 'pointer'
+                  }}
+                  title="새 이미지 업로드"
+                >
+                  📤 업로드
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleInsertNewImageUrl('description')}
+                  style={{
+                    fontSize: '12px',
+                    color: '#6c757d',
+                    backgroundColor: 'transparent',
+                    border: '1px solid #6c757d',
+                    borderRadius: '3px',
+                    padding: '4px 8px',
+                    cursor: 'pointer'
+                  }}
+                  title="이미지 URL 직접 입력"
+                >
+                  🔗 URL
+                </button>
+              </div>
+            </div>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={5}
+              rows={6}
               style={{
                 width: '100%',
                 padding: '10px',
                 border: '1px solid #ddd',
                 borderRadius: '4px',
                 fontSize: '14px',
-                resize: 'vertical'
+                resize: 'vertical',
+                fontFamily: 'monospace'
               }}
-              placeholder="상품에 대한 상세한 설명을 입력하세요..."
+              placeholder="상품에 대한 간단한 설명을 입력하세요..."
             />
+            <p style={{ 
+              fontSize: '12px', 
+              color: '#666', 
+              marginTop: '5px',
+              fontStyle: 'italic'
+            }}>
+              💡 이미지를 삽입하려면 위의 버튼들을 사용하세요. HTML 태그가 지원됩니다.
+            </p>
+          </div>
+
+          {/* 상세 정보 */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <label style={{ 
+                display: 'block', 
+                fontWeight: '500',
+                fontSize: '14px'
+              }}>
+                상세 정보
+              </label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => handleInsertExistingImage('detailedDescription')}
+                  disabled={formData.images.length === 0}
+                  style={{
+                    fontSize: '12px',
+                    color: formData.images.length === 0 ? '#ccc' : '#007bff',
+                    backgroundColor: 'transparent',
+                    border: '1px solid',
+                    borderColor: formData.images.length === 0 ? '#ccc' : '#007bff',
+                    borderRadius: '3px',
+                    padding: '4px 8px',
+                    cursor: formData.images.length === 0 ? 'not-allowed' : 'pointer'
+                  }}
+                  title="상품 이미지에서 선택"
+                >
+                  📷 기존 이미지
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleUploadAndInsertImage('detailedDescription')}
+                  disabled={uploadingImages || !formData.name.trim()}
+                  style={{
+                    fontSize: '12px',
+                    color: (!formData.name.trim() || uploadingImages) ? '#ccc' : '#28a745',
+                    backgroundColor: 'transparent',
+                    border: '1px solid',
+                    borderColor: (!formData.name.trim() || uploadingImages) ? '#ccc' : '#28a745',
+                    borderRadius: '3px',
+                    padding: '4px 8px',
+                    cursor: (!formData.name.trim() || uploadingImages) ? 'not-allowed' : 'pointer'
+                  }}
+                  title="새 이미지 업로드"
+                >
+                  📤 업로드
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleInsertNewImageUrl('detailedDescription')}
+                  style={{
+                    fontSize: '12px',
+                    color: '#6c757d',
+                    backgroundColor: 'transparent',
+                    border: '1px solid #6c757d',
+                    borderRadius: '3px',
+                    padding: '4px 8px',
+                    cursor: 'pointer'
+                  }}
+                  title="이미지 URL 직접 입력"
+                >
+                  🔗 URL
+                </button>
+              </div>
+            </div>
+            <textarea
+              value={formData.detailedDescription}
+              onChange={(e) => setFormData({ ...formData, detailedDescription: e.target.value })}
+              rows={8}
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px',
+                resize: 'vertical',
+                fontFamily: 'monospace'
+              }}
+              placeholder="상품의 상세한 정보, 스펙, 특징 등을 입력하세요..."
+            />
+            <p style={{ 
+              fontSize: '12px', 
+              color: '#666', 
+              marginTop: '5px',
+              fontStyle: 'italic'
+            }}>
+              💡 이미지를 삽입하려면 위의 버튼들을 사용하세요. HTML 태그가 지원됩니다.
+            </p>
           </div>
 
           {/* 이미지 관리 */}
@@ -1061,6 +1385,186 @@ export default function AdminProductCreatePage() {
           </div>
         </form>
       </div>
+
+      {/* 커스텀 모달 */}
+      {modalState.isOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            padding: '30px',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflow: 'auto'
+          }}>
+            <h3 style={{
+              fontSize: '20px',
+              fontWeight: '600',
+              marginBottom: '20px',
+              color: '#333',
+              textAlign: 'center'
+            }}>
+              {modalState.title}
+            </h3>
+
+            {modalState.type === 'imageSelect' ? (
+              // 이미지 선택 모달
+              <div>
+                <p style={{ fontSize: '14px', color: '#666', marginBottom: '15px' }}>
+                  삽입할 이미지를 선택하세요:
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+                  {modalState.options.map((option, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => handleModalSubmit((index + 1).toString())}
+                      style={{
+                        padding: '12px',
+                        border: '2px solid #e1e5e9',
+                        borderRadius: '8px',
+                        backgroundColor: '#fff',
+                        fontSize: '14px',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.borderColor = '#3742fa';
+                        e.currentTarget.style.backgroundColor = '#f8f9ff';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.borderColor = '#e1e5e9';
+                        e.currentTarget.style.backgroundColor = '#fff';
+                      }}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              // 텍스트 입력 모달
+              <CustomModalInput 
+                onSubmit={handleModalSubmit}
+                onCancel={closeModal}
+                placeholder={modalState.placeholder}
+              />
+            )}
+
+            {modalState.type === 'imageSelect' && (
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  style={{
+                    padding: '10px 20px',
+                    border: '1px solid #ccc',
+                    borderRadius: '8px',
+                    backgroundColor: '#f8f9fa',
+                    color: '#666',
+                    fontSize: '14px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  취소
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+// 모달 입력 컴포넌트
+function CustomModalInput({ 
+  onSubmit, 
+  onCancel, 
+  placeholder 
+}: { 
+  onSubmit: (value: string) => void;
+  onCancel: () => void;
+  placeholder: string;
+}) {
+  const [inputValue, setInputValue] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(inputValue);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        placeholder={placeholder}
+        autoFocus
+        style={{
+          width: '100%',
+          padding: '12px',
+          border: '2px solid #e1e5e9',
+          borderRadius: '8px',
+          fontSize: '16px',
+          marginBottom: '20px',
+          transition: 'border-color 0.2s'
+        }}
+        onFocus={(e) => e.target.style.borderColor = '#3742fa'}
+        onBlur={(e) => e.target.style.borderColor = '#e1e5e9'}
+      />
+      
+      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+        <button
+          type="submit"
+          style={{
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '8px',
+            backgroundColor: '#3742fa',
+            color: '#fff',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2f3542'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3742fa'}
+        >
+          확인
+        </button>
+        
+        <button
+          type="button"
+          onClick={onCancel}
+          style={{
+            padding: '10px 20px',
+            border: '1px solid #ccc',
+            borderRadius: '8px',
+            backgroundColor: '#f8f9fa',
+            color: '#666',
+            fontSize: '14px',
+            cursor: 'pointer'
+          }}
+        >
+          취소
+        </button>
+      </div>
+    </form>
   );
 }

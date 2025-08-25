@@ -137,6 +137,7 @@ export async function searchProducts(
       products = products.filter(product => 
         product.name.toLowerCase().includes(searchTermLower) ||
         product.description.toLowerCase().includes(searchTermLower) ||
+        (product.detailedDescription && product.detailedDescription.toLowerCase().includes(searchTermLower)) ||
         product.brand.toLowerCase().includes(searchTermLower) ||
         product.category.toLowerCase().includes(searchTermLower)
       );
