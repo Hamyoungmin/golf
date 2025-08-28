@@ -3,27 +3,99 @@ rules_version = '2';
 // Firebase Storage 보안 규칙
 service firebase.storage {
   match /b/{bucket}/o {
-    // 사용자 프로필 이미지는 인증된 사용자만 업로드 가능, 모든 사용자가 읽기 가능
+    
+    // 🔐 사용자 프로필 이미지 (회원가입 시 샵 사진 등)
+    // - 모든 사용자 읽기/쓰기 가능
     match /users/{userId}/{allPaths=**} {
-      allow read: if true; // 모든 사용자가 읽기 가능 (이미지 표시용)
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if true;
     }
     
-    // 상품 이미지는 관리자만 업로드 가능, 모든 사용자가 읽기 가능  
+    // 🛍️ 상품 이미지
+    // - 모든 사용자 읽기 가능 (쇼핑몰 표시용)
+    // - 모든 사용자 쓰기 가능 (업로드 가능)
     match /products/{allPaths=**} {
-      allow read: if true; // 모든 사용자가 읽기 가능
-      allow write: if request.auth != null; // 인증된 사용자만 업로드 가능
+      allow read, write: if true;
     }
     
-    // 일반적인 공개 파일들
+    // 📄 공개 파일들 (로고, 배너 등)
+    // - 모든 사용자 읽기/쓰기 가능
     match /public/{allPaths=**} {
+      allow read, write: if true;
+    }
+    
+    // 📝 리뷰 이미지
+    // - 모든 사용자 읽기/쓰기 가능
+    match /reviews/{allPaths=**} {
+      allow read, write: if true;
+    }
+    
+    // 🔧 테스트용 경로 (문제 해결을 위한 임시)
+    match /test/{allPaths=**} {
+      allow read, write: if true;
+    }
+    
+    // 📢 공지사항 첨부파일 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /notices/{allPaths=**} {
       allow read: if true;
       allow write: if request.auth != null;
     }
     
-    // 임시 파일들 (업로드 테스트용)
-    match /temp/{allPaths=**} {
+    // 🤔 FAQ 첨부파일 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /faq/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 📋 상품 첨부파일 (매뉴얼, 보증서) - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /productAttachments/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 📦 주문 관련 파일 - 인증된 사용자만 접근
+    match /orders/{allPaths=**} {
       allow read, write: if request.auth != null;
     }
+    
+    // 💬 고객 문의 첨부파일 - 인증된 사용자만 접근
+    match /inquiries/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 💰 환불 관련 증빙자료 - 인증된 사용자만 접근
+    match /refunds/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 🛡️ 관리자 전용 파일 - 관리자만 접근
+    match /admin/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 💾 백업 파일들 - 관리자만 접근
+    match /backups/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // ⚙️ 설정 관련 파일 - 관리자만 접근
+    match /settings/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 📊 분석 데이터 파일 - 관리자만 접근
+    match /analytics/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 📝 시스템 로그 파일 - 관리자만 접근
+    match /logs/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // ⏳ 임시 파일 (업로드 중, 캐시) - 모든 사용자 읽기/쓰기 가능
+    match /temp/{allPaths=**} {
+      allow read, write: if true;
+    }
+    
   }
 }

@@ -11,7 +11,7 @@ interface AuthGuardProps {
 }
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
-  const { user, userData, loading } = useAuth();
+  const { user, userData, loading, isAdmin } = useAuth();
   const pathname = usePathname();
 
   // 로딩 중이면 로딩 스피너 표시
@@ -33,16 +33,16 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     return <>{children}</>;
   }
 
-  // 관리자 페이지 접근 시 권한 체크 (제거됨 - 모든 사용자 접근 허용)
-  // if (pathname.startsWith('/admin')) {
-  //   if (!userData.isAdmin && userData.role !== 'admin') {
-  //     // 관리자가 아닌 경우 메인 페이지로 리다이렉트
-  //     if (typeof window !== 'undefined') {
-  //       window.location.href = '/';
-  //     }
-  //     return null;
-  //   }
-  // }
+  // 관리자 페이지 접근 시 권한 체크 (dudals7334@naver.com만 허용)
+  if (pathname.startsWith('/admin')) {
+    if (!isAdmin || user?.email !== 'dudals7334@naver.com') {
+      // 관리자가 아닌 경우 메인 페이지로 리다이렉트
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
+      return null;
+    }
+  }
 
   // 거부된 사용자
   if (userData.status === 'rejected') {

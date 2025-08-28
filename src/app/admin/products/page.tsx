@@ -12,6 +12,8 @@ import {
 } from '@heroicons/react/24/outline';
 import DataTable from '@/components/admin/DataTable';
 import { getProducts, deleteProduct, migrateProductsWithNewFields } from '@/lib/products';
+import { formatPrice as safeFormatPrice } from '@/utils/priceUtils';
+import { getAdminProductImage } from '@/utils/imageUtils';
 import { ProductFilter, Category, Brand, Product } from '@/types';
 
 export default function AdminProductsPage() {
@@ -79,10 +81,7 @@ export default function AdminProductsPage() {
   };
 
   const formatPrice = (price: string) => {
-    return new Intl.NumberFormat('ko-KR', {
-      style: 'currency',
-      currency: 'KRW',
-    }).format(Number(price));
+    return safeFormatPrice(price);
   };
 
   const getStockStatus = (stock: number) => {
@@ -100,9 +99,16 @@ export default function AdminProductsPage() {
       header: '이미지',
       render: (product: Product) => (
         <img 
-          src={product.images[0] || '/placeholder.jpg'} 
+          src={getAdminProductImage(product)} 
           alt={product.name}
           className="w-12 h-12 object-cover rounded"
+          style={{ 
+            width: '48px', 
+            height: '48px', 
+            objectFit: 'cover', 
+            borderRadius: '4px',
+            border: '1px solid #e0e0e0'
+          }}
         />
       ),
     },

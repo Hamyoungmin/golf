@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import ProductList from '@/components/ProductList';
 import { getProductsForPage } from '@/lib/products';
+import { formatPrice } from '@/utils/priceUtils';
 import { Product } from '@/types';
 
 export default function Woods() {
@@ -26,12 +27,12 @@ export default function Woods() {
     fetchProducts();
   }, []);
 
-  // Product 타입을 ProductList가 기대하는 형태로 변환
+  // Product 타입을 ProductList가 기대하는 형태로 변환 (카테고리별 이미지 적용)
   const formattedProducts = products.map(product => ({
     id: product.id,
     name: product.name,
-    price: `₩${Number(product.price).toLocaleString()}`,
-    image: product.images?.[0] || '/placeholder.jpg'
+    price: formatPrice(product.price),
+    image: product.images?.[0] || '/placeholder-wood.jpg'
   }));
 
   if (loading) {

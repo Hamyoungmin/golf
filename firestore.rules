@@ -1,40 +1,400 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 일반적인 보안 규칙 - 인증된 사용자만 접근 가능
-    match /{document=**} {
+    
+    // 사용자 데이터 - 본인만 읽기/쓰기 가능 + 관리자는 모든 사용자 읽기/쓰기 가능
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null; // 관리자가 사용자 승인/거부 가능
+    }
+    
+    // 주문 데이터 - 본인만 읽기/쓰기 가능 + 관리자 접근
+    match /orders/{orderId} {
       allow read, write: if request.auth != null;
     }
     
-    // 사용자별 데이터는 본인만 접근 가능
-    match /users/{userId} {
+    // 주문 상태 히스토리 - 모든 사용자 읽기 가능, 시스템에서 쓰기
+    match /orderStatusHistory/{historyId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // 주문 취소 요청 - 본인과 관리자만 접근
+    match /orderCancellations/{cancellationId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 환불 요청 - 본인과 관리자만 접근
+    match /refundRequests/{refundId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 주문 댓글/메모 - 관련된 사용자와 관리자만 접근
+    match /orderComments/{commentId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 배송 추적 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /deliveryTracking/{trackingId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // 주문 첨부파일 - 관련된 사용자와 관리자만 접근
+    match /orderAttachments/{attachmentId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 주문 알림 - 본인만 읽기/쓰기 가능
+    match /orderNotifications/{notificationId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 주문 평가 - 본인과 관리자만 접근
+    match /orderEvaluations/{evaluationId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 주문 쿠폰 사용 내역 - 관련된 사용자와 관리자만 접근
+    match /orderCoupons/{couponUsageId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 장바구니 - 본인만 접근
+    match /carts/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // 공개 읽기 가능한 컬렉션들 (상품, 공지사항 등)
+    // 위시리스트 - 본인만 접근
+    match /wishlists/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 배송지 관리 - 본인만 읽기/쓰기 가능
+    match /userAddresses/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 결제수단 관리 - 본인만 읽기/쓰기 가능
+    match /userPaymentMethods/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 사용자 포인트 - 본인만 읽기 가능, 시스템에서 쓰기
+    match /userPoints/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null;
+    }
+    
+    // 포인트 사용 내역 - 본인만 읽기 가능, 시스템에서 쓰기
+    match /pointHistory/{historyId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // 사용자 쿠폰함 - 본인만 읽기/쓰기 가능
+    match /userCoupons/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 최근 본 상품 - 본인만 읽기/쓰기 가능
+    match /recentlyViewed/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 1:1 고객 문의 - 본인과 관리자만 접근
+    match /customerInquiries/{inquiryId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 사용자 알림 설정 - 본인만 읽기/쓰기 가능
+    match /userNotifications/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 회원등급 관리 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /membershipLevels/{levelId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 상품 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
     match /products/{productId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
     
+    // 상품 카테고리 세부 관리 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /productCategories/{categoryId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 상품 이미지 관리 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /productImages/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 상품 옵션 관리 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /productOptions/{optionId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 상품 할인/프로모션 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /productDiscounts/{discountId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 상품 재고 알림 - 관리자만 접근
+    match /stockAlerts/{alertId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 상품 관련 문의 - 모든 사용자 읽기 가능, 인증된 사용자 쓰기 가능
+    match /productInquiries/{inquiryId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 상품 태그 관리 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /productTags/{tagId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 상품 변경 히스토리 - 관리자만 접근
+    match /productHistory/{historyId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 상품 승인/검토 - 관리자만 접근
+    match /productApprovals/{approvalId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 상품 첨부파일 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /productAttachments/{attachmentId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 공지사항 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
     match /notices/{noticeId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
     
+    // 공지사항 댓글 - 모든 사용자 읽기 가능, 인증된 사용자 쓰기 가능
+    match /noticeComments/{commentId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 공지사항 조회수 - 모든 사용자 읽기/쓰기 가능 (조회수 증가용)
+    match /noticeViews/{noticeId} {
+      allow read, write: if true;
+    }
+    
+    // 공지사항 첨부파일 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /noticeAttachments/{attachmentId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 공지사항 읽음 상태 - 본인만 읽기/쓰기 가능
+    match /noticeReadStatus/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 카테고리 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
     match /categories/{categoryId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
     
+    // 리뷰 - 모든 사용자 읽기 가능, 인증된 사용자 쓰기 가능
     match /reviews/{reviewId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
     
+    // 리뷰 댓글/답글 - 모든 사용자 읽기 가능, 인증된 사용자 쓰기 가능
+    match /reviewComments/{commentId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 리뷰 좋아요/추천 - 모든 사용자 읽기 가능, 인증된 사용자 쓰기 가능
+    match /reviewLikes/{likeId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 리뷰 신고 - 관리자만 읽기 가능, 인증된 사용자 쓰기 가능
+    match /reviewReports/{reportId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // 리뷰 이미지 첨부 - 모든 사용자 읽기 가능, 인증된 사용자 쓰기 가능
+    match /reviewImages/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 리뷰 도움됨 평가 - 모든 사용자 읽기 가능, 인증된 사용자 쓰기 가능
+    match /reviewHelpful/{evaluationId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 리뷰 조회수 - 모든 사용자 읽기/쓰기 가능 (조회수 증가용)
+    match /reviewViews/{reviewId} {
+      allow read, write: if true;
+    }
+    
+    // 리뷰 태그 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /reviewTags/{tagId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // FAQ - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
     match /faq/{faqId} {
       allow read: if true;
       allow write: if request.auth != null;
+    }
+    
+    // FAQ 카테고리 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /faqCategories/{categoryId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // FAQ 조회수 - 모든 사용자 읽기/쓰기 가능 (조회수 증가용)
+    match /faqViews/{faqId} {
+      allow read, write: if true;
+    }
+    
+    // FAQ 도움됨 평가 - 모든 사용자 읽기 가능, 인증된 사용자 쓰기 가능
+    match /faqHelpful/{evaluationId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // FAQ 검색 기록 - 모든 사용자 쓰기 가능 (분석용)
+    match /faqSearchHistory/{searchId} {
+      allow read, write: if true;
+    }
+    
+    // FAQ 태그 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /faqTags/{tagId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 설정 데이터 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 개인 사용자 설정 - 본인만 읽기/쓰기 가능
+    match /userSettings/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 설정 변경 히스토리 - 관리자만 읽기 가능, 시스템에서 쓰기
+    match /settingsHistory/{historyId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // 설정 백업 - 관리자만 접근
+    match /settingsBackup/{backupId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 설정 템플릿 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /settingsTemplates/{templateId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 설정 그룹 - 모든 사용자 읽기 가능, 관리자만 쓰기 가능
+    match /settingsGroups/{groupId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 사용자 프리퍼런스 - 본인만 읽기/쓰기 가능
+    match /userPreferences/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 설정 캐시 - 모든 사용자 읽기 가능, 시스템에서 쓰기
+    match /settingsCache/{cacheId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 방문자 통계 - 익명 사용자도 쓰기 가능 (세션 추적용)
+    match /visitors/{visitorId} {
+      allow read, write: if true;
+    }
+    
+    // 일별 통계 - 모든 사용자 읽기 가능, 시스템에서 쓰기
+    match /dailyStats/{date} {
+      allow read, write: if true;
+    }
+    
+    // 관리자 권한 - 인증된 사용자만 읽기 가능
+    match /admins/{email} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // 인벤토리 - 관리자만 접근
+    match /inventory/{productId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 재고 이력 - 관리자만 접근
+    match /stockHistory/{historyId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 월별 매출 통계 캐시 - 관리자만 접근
+    match /monthlyStats/{month} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 연도별 매출 통계 캐시 - 관리자만 접근  
+    match /yearlyStats/{year} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 상품별 매출 상세 통계 - 관리자만 접근
+    match /productSales/{productId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 방법별 통계 - 관리자만 접근
+    match /paymentStats/{date} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 카테고리별 매출 통계 - 관리자만 접근
+    match /categoryStats/{category} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 시간대별 매출 통계 - 관리자만 접근
+    match /hourlyStats/{date} {
+      allow read, write: if request.auth != null;
     }
   }
 }

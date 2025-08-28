@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import ProductList from '@/components/ProductList';
 import { getProductsForPage } from '@/lib/products';
+import { formatPrice } from '@/utils/priceUtils';
 import { Product } from '@/types';
 
 export default function Utilities() {

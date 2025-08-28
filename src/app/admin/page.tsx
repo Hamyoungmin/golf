@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { getInventoryStats } from '@/lib/inventory';
 import { getProducts } from '@/lib/products';
 import { calculateSalesAnalytics } from '@/lib/analytics';
+import { formatPrice } from '@/utils/priceUtils';
 
 // 실제 주문 통계 함수
 const getOrderStats = async () => {
@@ -174,6 +175,9 @@ export default function AdminDashboard() {
   }
 
   const formatCurrency = (amount: number) => {
+    if (isNaN(amount) || amount === null || amount === undefined) {
+      return '₩0';
+    }
     return new Intl.NumberFormat('ko-KR', {
       style: 'currency',
       currency: 'KRW',
@@ -394,7 +398,7 @@ export default function AdminDashboard() {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <p style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '3px' }}>
-                        {formatCurrency(Number(product.price))}
+                        {formatPrice(product.price)}
                       </p>
                       <p style={{ fontSize: '12px', color: '#666' }}>
                         재고: {product.stock}개

@@ -24,8 +24,7 @@ export {
   Timestamp,
   writeBatch,
   onSnapshot,
-  DocumentSnapshot,
-  WhereFilterOp
+  DocumentSnapshot
 } from 'firebase/firestore';
 
 export {

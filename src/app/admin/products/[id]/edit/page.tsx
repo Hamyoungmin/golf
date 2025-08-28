@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getProduct, updateProduct } from '@/lib/products';
 import { uploadMultipleProductImages, formatFileSize, isValidImageFile } from '@/lib/imageUpload';
+import { unformatPrice } from '@/utils/priceUtils';
 import { Category, Brand, Product } from '@/types';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
@@ -310,7 +311,7 @@ export default function AdminProductEditPage() {
     try {
       await updateProduct(productId, {
         name: formData.name,
-        price: formData.price,
+        price: unformatPrice(formData.price) || '0',
         brand: formData.brand as Brand,
         description: formData.description,
         detailedDescription: formData.detailedDescription,

@@ -66,10 +66,15 @@ export default function Register() {
     });
   };
 
-  // 임시 파일 업로드 함수 (Firebase Storage 구매 전)
+  // Firebase Storage에 파일 업로드
   const uploadFile = async (file: File, path: string): Promise<string> => {
-    // Firebase Storage 구매 전까지 임시 처리
-    return `https://placeholder-image.com/${path}`;
+    try {
+      const { uploadImage } = await import('@/lib/imageUpload');
+      return await uploadImage(file, path);
+    } catch (error) {
+      console.error('파일 업로드 실패:', error);
+      throw new Error('파일 업로드에 실패했습니다.');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

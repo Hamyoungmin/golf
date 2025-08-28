@@ -2,11 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  UsersIcon, 
-  CheckIcon, 
-  XMarkIcon,
-  EyeIcon,
-  ClockIcon 
+  UsersIcon 
 } from '@heroicons/react/24/outline';
 import { 
   db,
@@ -14,10 +10,10 @@ import {
   query, 
   where, 
   getDocs, 
-  doc, 
-  updateDoc, 
-  orderBy,
-  serverTimestamp 
+  doc,
+  updateDoc,
+  serverTimestamp,
+  orderBy
 } from '@/lib/firebase';
 import { User } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -87,7 +83,7 @@ export default function UsersManagement() {
     }
   };
 
-  // 사용자 승인
+  // 사용자 승인 (API 사용)
   const approveUser = async (uid: string) => {
     if (!currentUser) {
       alert('로그인이 필요합니다.');
@@ -100,27 +96,35 @@ export default function UsersManagement() {
     
     try {
       console.log('승인 시작:', uid, '관리자:', currentUser.uid);
-      const userRef = doc(db, 'users', uid);
-      const updateData = {
-        status: 'approved',
-        approvedAt: serverTimestamp(),
-        approvedBy: currentUser.uid,
-        updatedAt: serverTimestamp()
-      };
       
-      console.log('업데이트 데이터:', updateData);
-      await updateDoc(userRef, updateData);
-      
-      alert('사용자가 승인되었습니다.');
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: uid,
+          action: 'approve',
+          adminUid: currentUser.uid
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '승인 처리에 실패했습니다.');
+      }
+
+      const result = await response.json();
+      alert(result.message);
       fetchUsers(); // 목록 새로고침
       fetchCounts(); // 카운트 새로고침
     } catch (error) {
       console.error('사용자 승인 실패:', error);
-      alert(`승인 처리 중 오류가 발생했습니다: ${error}`);
+      alert(`승인 처리 중 오류가 발생했습니다: ${error instanceof Error ? error.message : error}`);
     }
   };
 
-  // 사용자 거부
+  // 사용자 거부 (직접 Firebase 접근)
   const rejectUser = async (uid: string, reason?: string) => {
     if (!currentUser) {
       alert('로그인이 필요합니다.');

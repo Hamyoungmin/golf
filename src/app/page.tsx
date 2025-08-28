@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import ImageSlider from '@/components/ImageSlider';
-import SettingsDisplay from '@/components/SettingsDisplay';
 
 export default function Home() {
   const { user, isAdmin, loading } = useAuth();
@@ -13,13 +12,7 @@ export default function Home() {
   const router = useRouter();
   const [forceUpdate, setForceUpdate] = useState(0);
 
-  useEffect(() => {
-    // 로그인한 관리자라면 관리자 페이지로 자동 리다이렉트
-    if (!loading && user && isAdmin) {
-      console.log('🔄 관리자 계정 감지 - 관리자 페이지로 리다이렉트');
-      router.push('/admin');
-    }
-  }, [user, isAdmin, loading, router]);
+  // 관리자 자동 리다이렉트 제거 - 홈페이지도 볼 수 있게 함
 
   // 페이지 타이틀을 설정값으로 동적 업데이트
   useEffect(() => {
@@ -55,20 +48,11 @@ export default function Home() {
     };
   }, []);
 
-  // 관리자라면 빈 화면 표시 (리다이렉트 중)
-  if (!loading && user && isAdmin) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
-      </div>
-    );
-  }
+  // 관리자도 홈페이지를 볼 수 있도록 로딩 화면 제거
 
   return (
     <div>
       <ImageSlider />
-      {/* 관리자에게만 설정 표시 위젯 보이기 */}
-      {isAdmin && <SettingsDisplay />}
     </div>
   );
 }

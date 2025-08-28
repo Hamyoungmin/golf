@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import ProductList from '@/components/ProductList';
 import { getProductsForPage } from '@/lib/products';
+import { formatPrice } from '@/utils/priceUtils';
 import { Product } from '@/types';
 
 export default function TitleistWoods() {
@@ -28,8 +29,8 @@ export default function TitleistWoods() {
   const formattedProducts = products.map(product => ({
     id: product.id,
     name: product.name,
-    price: `₩${Number(product.price).toLocaleString()}`,
-    image: product.images?.[0] || '/placeholder.jpg'
+    price: formatPrice(product.price),
+    image: product.images?.[0] || '/placeholder-wood.jpg'
   }));
 
   if (loading) {

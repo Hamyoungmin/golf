@@ -12,8 +12,7 @@ import {
   orderBy, 
   limit as firestoreLimit,
   startAfter,
-  DocumentSnapshot,
-  WhereFilterOp
+  DocumentSnapshot
 } from './firebase';
 import { Product, ProductFilter, ProductSort } from '@/types';
 

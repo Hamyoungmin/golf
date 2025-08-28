@@ -1,33 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { auth, db } from '@/lib/firebase';
+import { auth, db, doc, getDoc, setDoc } from '@/lib/firebase';
+import { onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
 import { User as UserType } from '@/types';
-
-// Firebase 함수들을 안전하게 import
-let FirebaseUser: any = null;
-let onAuthStateChanged: any = null;
-let firebaseSignOut: any = null;
-let doc: any = null;
-let getDoc: any = null;
-let setDoc: any = null;
-
-// Firebase가 사용 가능할 때만 함수들을 import
-if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-  try {
-    const firebaseAuth = require('firebase/auth');
-    const firestore = require('firebase/firestore');
-    
-    FirebaseUser = firebaseAuth.User;
-    onAuthStateChanged = firebaseAuth.onAuthStateChanged;
-    firebaseSignOut = firebaseAuth.signOut;
-    doc = firestore.doc;
-    getDoc = firestore.getDoc;
-    setDoc = firestore.setDoc;
-  } catch (error) {
-    console.warn('Firebase 함수 import 실패:', error);
-  }
-}
 
 interface AuthContextType {
   user: any | null;
@@ -61,8 +37,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // 사용자 데이터 가져오기
   const fetchUserData = async (uid: string) => {
-    if (!getDoc || !doc || !db) return null;
-    
     try {
       const userDoc = await getDoc(doc(db, 'users', uid));
       if (userDoc.exists()) {
@@ -76,25 +50,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return null;
   };
 
-  // Firebase 관리자 컬렉션에서 관리자 권한 확인
+  // 관리자 권한 확인 - 특정 이메일만 관리자로 인정
   const checkAdminRole = async (email: string) => {
-    if (!getDoc || !doc || !db) return false;
-    
-    try {
-      const adminDoc = await getDoc(doc(db, 'admins', email));
-      if (adminDoc.exists()) {
-        const adminData = adminDoc.data();
-        return adminData.role === 'admin';
-      }
-    } catch (error) {
-      console.error('관리자 권한 확인 실패:', error);
-    }
-    return false;
+    // dudals7334@naver.com만 관리자로 설정
+    return email === 'dudals7334@naver.com';
   };
 
   // 사용자 데이터 업데이트
   const updateUserData = async (data: Partial<UserType>) => {
-    if (!user || !setDoc || !doc || !db) return;
+    if (!user) return;
     
     try {
       const userRef = doc(db, 'users', user.uid);
@@ -112,13 +76,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // 로그아웃
   const signOut = async () => {
-    if (!firebaseSignOut || !auth) {
-      setUser(null);
-      setUserData(null);
-      setIsAdmin(false);
-      return;
-    }
-    
     try {
       await firebaseSignOut(auth);
       setUser(null);
@@ -132,11 +89,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Auth 상태 변화 감지
   useEffect(() => {
-    if (!onAuthStateChanged || !auth) {
-      setLoading(false);
-      return;
-    }
-    
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: any) => {
       setUser(firebaseUser);
       
