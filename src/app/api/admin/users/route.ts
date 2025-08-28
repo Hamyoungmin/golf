@@ -17,6 +17,14 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Firebase 초기화 확인
+    if (!db) {
+      return NextResponse.json(
+        { error: 'Firebase가 초기화되지 않았습니다.' },
+        { status: 500, headers: corsHeaders }
+      );
+    }
+
     const { userId, action, reason, adminUid } = await request.json();
     
     // 필수 파라미터 확인

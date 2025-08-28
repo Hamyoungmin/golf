@@ -41,10 +41,19 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 };
 
-// Firebase 초기화
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+// Firebase 초기화 (환경변수가 있을 때만)
+let app: any = null;
+let auth: any = null;
+let db: any = null;
+let storage: any = null;
+
+if (firebaseConfig.apiKey && firebaseConfig.projectId) {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
+}
+
+export { auth, db, storage };
 
 export default app;
