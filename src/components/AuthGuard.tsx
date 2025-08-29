@@ -36,7 +36,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // 관리자 이메일 목록
   const ADMIN_EMAILS = [
     'dudals7334@naver.com',
-    'rentalgolf@gmail.com'
+    'rentalgolf7@naver.com'
   ];
 
   // 관리자 페이지 접근 시 권한 체크

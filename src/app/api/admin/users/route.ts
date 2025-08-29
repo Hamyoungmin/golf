@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 관리자 권한 확인 (dudals7334@naver.com, rentalgolf@gmail.com 허용)
+    // 관리자 권한 확인 (dudals7334@naver.com, rentalgolf7@naver.com 허용)
     // 실제로는 adminUid로 사용자 정보를 조회해서 이메일 확인해야 하지만
     // 현재는 클라이언트 사이드에서 권한 체크하고 있음
     

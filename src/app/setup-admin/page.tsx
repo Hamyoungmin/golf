@@ -404,7 +404,7 @@ export default function SetupAdminPage() {
                       type="email"
                       value={otherUserEmail}
                       onChange={(e) => setOtherUserEmail(e.target.value)}
-                      placeholder="예: dudals7334@naver.com 또는 rentalgolf@gmail.com"
+                      placeholder="예: dudals7334@naver.com 또는 rentalgolf7@naver.com"
                       style={{
                         width: '100%',
                         padding: '10px',
