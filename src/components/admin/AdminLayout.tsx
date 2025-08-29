@@ -20,8 +20,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     );
   }
 
-  // 관리자 권한 체크 (dudals7334@naver.com만 허용)
-  if (!user || !isAdmin || user.email !== 'dudals7334@naver.com') {
+  // 관리자 이메일 목록
+  const ADMIN_EMAILS = [
+    'dudals7334@naver.com',
+    'rentalgolf@gmail.com'
+  ];
+
+  // 관리자 권한 체크
+  if (!user || !isAdmin || !user.email || !ADMIN_EMAILS.includes(user.email)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

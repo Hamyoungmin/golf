@@ -33,9 +33,15 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     return <>{children}</>;
   }
 
-  // 관리자 페이지 접근 시 권한 체크 (dudals7334@naver.com만 허용)
+  // 관리자 이메일 목록
+  const ADMIN_EMAILS = [
+    'dudals7334@naver.com',
+    'rentalgolf@gmail.com'
+  ];
+
+  // 관리자 페이지 접근 시 권한 체크
   if (pathname.startsWith('/admin')) {
-    if (!isAdmin || user?.email !== 'dudals7334@naver.com') {
+    if (!isAdmin || !user?.email || !ADMIN_EMAILS.includes(user.email)) {
       // 관리자가 아닌 경우 메인 페이지로 리다이렉트
       if (typeof window !== 'undefined') {
         window.location.href = '/';

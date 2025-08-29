@@ -55,10 +55,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return null;
   };
 
-  // 관리자 권한 확인 - 특정 이메일만 관리자로 인정
+  // 관리자 이메일 목록
+  const ADMIN_EMAILS = [
+    'dudals7334@naver.com',
+    'rentalgolf@gmail.com'  // 새로 추가된 관리자
+  ];
+
+  // 관리자 권한 확인 - 특정 이메일 목록만 관리자로 인정
   const checkAdminRole = async (email: string) => {
-    // dudals7334@naver.com만 관리자로 설정
-    return email === 'dudals7334@naver.com';
+    return ADMIN_EMAILS.includes(email);
   };
 
   // 사용자 데이터 업데이트
