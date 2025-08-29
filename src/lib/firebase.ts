@@ -47,11 +47,15 @@ let auth: any = null;
 let db: any = null;
 let storage: any = null;
 
-if (firebaseConfig.apiKey && firebaseConfig.projectId) {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
+try {
+  if (firebaseConfig.apiKey && firebaseConfig.projectId) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    storage = getStorage(app);
+  }
+} catch (error) {
+  console.error('Firebase 초기화 실패:', error);
 }
 
 export { auth, db, storage };

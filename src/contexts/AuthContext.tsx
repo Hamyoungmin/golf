@@ -37,6 +37,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // 사용자 데이터 가져오기
   const fetchUserData = async (uid: string) => {
+    if (!db) {
+      console.error('Firestore가 초기화되지 않았습니다.');
+      return null;
+    }
+    
     try {
       const userDoc = await getDoc(doc(db, 'users', uid));
       if (userDoc.exists()) {
@@ -58,7 +63,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // 사용자 데이터 업데이트
   const updateUserData = async (data: Partial<UserType>) => {
-    if (!user) return;
+    if (!user || !db) {
+      console.error('사용자가 없거나 Firestore가 초기화되지 않았습니다.');
+      return;
+    }
     
     try {
       const userRef = doc(db, 'users', user.uid);
@@ -76,6 +84,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // 로그아웃
   const signOut = async () => {
+    if (!auth) {
+      console.error('Firebase Auth가 초기화되지 않았습니다.');
+      return;
+    }
+    
     try {
       await firebaseSignOut(auth);
       setUser(null);
@@ -89,6 +102,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Auth 상태 변화 감지
   useEffect(() => {
+    if (!auth) {
+      console.error('Firebase Auth가 초기화되지 않았습니다.');
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: any) => {
       setUser(firebaseUser);
       
