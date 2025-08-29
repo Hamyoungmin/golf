@@ -90,7 +90,9 @@ export default function UsersManagement() {
       return;
     }
     
-    if (!confirm('정말로 이 사용자를 승인하시겠습니까?')) {
+    const { customConfirm } = await import('@/utils/alertUtils');
+    const confirmed = await customConfirm('정말로 이 사용자를 승인하시겠습니까?', '사용자 승인');
+    if (!confirmed) {
       return;
     }
     
@@ -115,12 +117,14 @@ export default function UsersManagement() {
       }
 
       const result = await response.json();
-      alert(result.message);
+      const { triggerCustomAlert } = await import('@/utils/alertUtils');
+      triggerCustomAlert(result.message, result.success ? 'success' : 'error');
       fetchUsers(); // 목록 새로고침
       fetchCounts(); // 카운트 새로고침
     } catch (error) {
       console.error('사용자 승인 실패:', error);
-      alert(`승인 처리 중 오류가 발생했습니다: ${error instanceof Error ? error.message : error}`);
+      const { triggerCustomAlert } = await import('@/utils/alertUtils');
+      triggerCustomAlert(`승인 처리 중 오류가 발생했습니다: ${error instanceof Error ? error.message : error}`, 'error');
     }
   };
 
@@ -131,10 +135,16 @@ export default function UsersManagement() {
       return;
     }
     
-    const rejectionReason = reason || prompt('거부 사유를 입력해주세요:');
-    if (!rejectionReason) return;
+    if (!reason) {
+      const { customPrompt } = await import('@/utils/alertUtils');
+      reason = await customPrompt('거부 사유를 입력해주세요:', '', '거부 사유');
+      if (!reason) return;
+    }
+    const rejectionReason = reason;
     
-    if (!confirm('정말로 이 사용자를 거부하시겠습니까?')) {
+    const { customConfirm } = await import('@/utils/alertUtils');
+    const confirmed = await customConfirm('정말로 이 사용자를 거부하시겠습니까?', '사용자 거부');
+    if (!confirmed) {
       return;
     }
     
@@ -152,12 +162,14 @@ export default function UsersManagement() {
       console.log('업데이트 데이터:', updateData);
       await updateDoc(userRef, updateData);
       
-      alert('사용자가 거부되었습니다.');
+      const { triggerCustomAlert } = await import('@/utils/alertUtils');
+      triggerCustomAlert('사용자가 거부되었습니다.', 'success');
       fetchUsers(); // 목록 새로고침
       fetchCounts(); // 카운트 새로고침
     } catch (error) {
       console.error('사용자 거부 실패:', error);
-      alert(`거부 처리 중 오류가 발생했습니다: ${error}`);
+      const { triggerCustomAlert } = await import('@/utils/alertUtils');
+      triggerCustomAlert(`거부 처리 중 오류가 발생했습니다: ${error}`, 'error');
     }
   };
 

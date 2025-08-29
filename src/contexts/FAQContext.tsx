@@ -10,7 +10,9 @@ import {
   batchDeleteFAQs,
   batchUpdateFAQVisibility,
   updateFAQOrder,
-  seedInitialFAQData
+  seedInitialFAQData,
+  resetAllFAQViews,
+  setFAQViews
 } from '@/lib/faq';
 
 export interface FAQItem {
@@ -29,7 +31,7 @@ export interface FAQItem {
 interface FAQContextType {
   faqs: FAQItem[];
   loading: boolean;
-  addFaq: (faq: Omit<FAQItem, 'id' | 'views' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  addFaq: (faq: Omit<FAQItem, 'id' | 'createdAt' | 'updatedAt'> & { views?: number }) => Promise<void>;
   updateFaq: (id: string, faq: Partial<FAQItem>) => Promise<void>;
   deleteFaq: (id: string) => Promise<void>;
   toggleVisibility: (id: string) => Promise<void>;
@@ -37,6 +39,8 @@ interface FAQContextType {
   incrementViews: (id: string) => Promise<void>;
   batchDeleteFaqs: (ids: string[]) => Promise<void>;
   batchUpdateVisibility: (ids: string[], isVisible: boolean) => Promise<void>;
+  resetAllViews: () => Promise<void>;
+  setViews: (id: string, views: number) => Promise<void>;
 }
 
 const FAQContext = createContext<FAQContextType | undefined>(undefined);
@@ -86,7 +90,7 @@ export function FAQProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // FAQ 추가
-  const handleAddFaq = async (newFaq: Omit<FAQItem, 'id' | 'views' | 'createdAt' | 'updatedAt'>) => {
+  const handleAddFaq = async (newFaq: Omit<FAQItem, 'id' | 'createdAt' | 'updatedAt'> & { views?: number }) => {
     try {
       await addFAQ(newFaq);
     } catch (error) {
@@ -181,6 +185,28 @@ export function FAQProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // 모든 조회수 초기화
+  const handleResetAllViews = async () => {
+    try {
+      await resetAllFAQViews();
+    } catch (error) {
+      console.error('조회수 초기화 오류:', error);
+      throw error;
+    }
+  };
+
+  // 특정 FAQ 조회수 설정
+  const handleSetViews = async (id: string, views: number) => {
+    try {
+      await setFAQViews(id, views);
+    } catch (error) {
+      console.error('조회수 설정 오류:', error);
+      throw error;
+    }
+  };
+
+
+
   return (
     <FAQContext.Provider value={{
       faqs,
@@ -192,7 +218,9 @@ export function FAQProvider({ children }: { children: ReactNode }) {
       moveFaq: handleMoveFaq,
       incrementViews: handleIncrementViews,
       batchDeleteFaqs: handleBatchDeleteFaqs,
-      batchUpdateVisibility: handleBatchUpdateVisibility
+      batchUpdateVisibility: handleBatchUpdateVisibility,
+      resetAllViews: handleResetAllViews,
+      setViews: handleSetViews
     }}>
       {children}
     </FAQContext.Provider>

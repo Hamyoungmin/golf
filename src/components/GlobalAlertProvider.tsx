@@ -8,11 +8,13 @@ interface AlertState {
   isOpen: boolean;
   title?: string;
   message: string;
-  type: 'success' | 'error' | 'warning' | 'info' | 'confirm';
-  onConfirm?: () => void;
+  type: 'success' | 'error' | 'warning' | 'info' | 'confirm' | 'prompt';
+  onConfirm?: (value?: string) => void;
   onCancel?: () => void;
   confirmText?: string;
   cancelText?: string;
+  placeholder?: string;
+  defaultValue?: string;
 }
 
 export default function GlobalAlertProvider({ children }: { children: React.ReactNode }) {
@@ -41,6 +43,8 @@ export default function GlobalAlertProvider({ children }: { children: React.Reac
         title: options?.title,
         confirmText: options?.confirmText,
         cancelText: options?.cancelText,
+        placeholder: options?.placeholder,
+        defaultValue: options?.defaultValue,
         onConfirm: options?.onConfirm,
         onCancel: options?.onCancel
       });
@@ -53,9 +57,9 @@ export default function GlobalAlertProvider({ children }: { children: React.Reac
     };
   }, []);
 
-  const handleConfirm = () => {
+  const handleConfirm = (value?: string) => {
     if (alertState.onConfirm) {
-      alertState.onConfirm();
+      alertState.onConfirm(value);
     }
     setAlertState(prev => ({ ...prev, isOpen: false }));
   };
@@ -81,6 +85,8 @@ export default function GlobalAlertProvider({ children }: { children: React.Reac
         type={alertState.type}
         confirmText={alertState.confirmText}
         cancelText={alertState.cancelText}
+        placeholder={alertState.placeholder}
+        defaultValue={alertState.defaultValue}
         onConfirm={handleConfirm}
         onCancel={alertState.onCancel ? handleCancel : undefined}
       />

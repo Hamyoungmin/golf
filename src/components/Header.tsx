@@ -160,31 +160,12 @@ const Header = () => {
         </Link>
           <div className="auth-buttons">
             {/* 장바구니 아이콘 */}
-            <Link href="/cart" className="auth-button" style={{ position: 'relative' }}>
+            <Link href="/cart" className="auth-button">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="9" cy="21" r="1"></circle>
                 <circle cx="20" cy="21" r="1"></circle>
                 <path d="m1 1 4 4 1 6 8 0 9-10H6"></path>
               </svg>
-              {cartItemCount > 0 && (
-                <span style={{
-                  position: 'absolute',
-                  top: '-8px',
-                  right: '-8px',
-                  background: '#ff6b35',
-                  color: 'white',
-                  borderRadius: '50%',
-                  width: '20px',
-                  height: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '12px',
-                  fontWeight: 'bold'
-                }}>
-                  {cartItemCount > 99 ? '99+' : cartItemCount}
-                </span>
-              )}
             </Link>
             
             {loading ? (

@@ -17,6 +17,7 @@ export interface StoreSettings {
   address: string;
   phone: string;
   email: string;
+  inquiryInfo: string;
 }
 
 export interface ShippingSettings {
@@ -99,7 +100,13 @@ const defaultSettings: AllSettings = {
     representative: '권혁규',
     address: '경기도 수원시 권선구 세지로28번길 15-30 104호',
     phone: '010-7236-8400',
-    email: 'crover.kk@gmail.com'
+    email: 'crover.kk@gmail.com',
+    inquiryInfo: `📞 문의 전화: 010-7236-8400
+📧 이메일: crover.kk@gmail.com
+🕒 상담 시간: 24시간 연중무휴
+
+상품에 대한 문의사항이 있으시면 언제든지 연락 주세요.
+빠르고 친절한 상담으로 도움드리겠습니다.`
   },
   shipping: {
     baseShippingCost: 3000,

@@ -12,7 +12,7 @@ import {
 import { useFAQ, FAQItem } from '@/contexts/FAQContext';
 
 export default function FAQPage() {
-  const { faqs, loading, addFaq, updateFaq, deleteFaq, toggleVisibility, moveFaq, batchDeleteFaqs, batchUpdateVisibility } = useFAQ();
+  const { faqs, loading, addFaq, updateFaq, deleteFaq, toggleVisibility, moveFaq, batchDeleteFaqs, batchUpdateVisibility, resetAllViews, setViews } = useFAQ();
   
   const [showForm, setShowForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -23,12 +23,16 @@ export default function FAQPage() {
   const [selectedFaqs, setSelectedFaqs] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'order' | 'views' | 'createdAt' | 'updatedAt' | 'category'>('order');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [showViewsModal, setShowViewsModal] = useState(false);
+  const [editingViewsFaqId, setEditingViewsFaqId] = useState<string | null>(null);
+  const [newViewsCount, setNewViewsCount] = useState('');
   const [formData, setFormData] = useState({
     category: '주문/결제',
     question: '',
     answer: '',
     order: 1,
-    isVisible: true
+    isVisible: true,
+    views: 0
   });
 
   // 이미지 업로드 처리 함수
@@ -56,7 +60,8 @@ export default function FAQPage() {
       question: '',
       answer: '',
       order: 1,
-      isVisible: true
+      isVisible: true,
+      views: 0
     });
     setSelectedImage(null);
     setImagePreview(null);
@@ -72,6 +77,7 @@ export default function FAQPage() {
       answer: formData.answer,
       isVisible: formData.isVisible,
       order: formData.order,
+      views: formData.views,
       imageUrl: imagePreview || null
     });
     resetForm();
@@ -89,7 +95,8 @@ export default function FAQPage() {
       question: faq.question,
       answer: faq.answer,
       order: faq.order,
-      isVisible: faq.isVisible
+      isVisible: faq.isVisible,
+      views: faq.views
     });
     if (faq.imageUrl) {
       setImagePreview(faq.imageUrl);
@@ -97,16 +104,17 @@ export default function FAQPage() {
     setShowForm(true);
   };
 
-  const handleUpdateFaq = async () => {
+    const handleUpdateFaq = async () => {
     if (!editingFaq) return;
     
     try {
-      await updateFaq(editingFaq.id, {
+    await updateFaq(editingFaq.id, {
       category: formData.category,
       question: formData.question,
       answer: formData.answer,
       order: formData.order,
       isVisible: formData.isVisible,
+      views: formData.views,
       imageUrl: imagePreview
     });
     resetForm();
@@ -180,6 +188,51 @@ export default function FAQPage() {
       console.error('일괄 가시성 변경 오류:', error);
       alert('FAQ 일괄 가시성 변경 중 오류가 발생했습니다.');
     }
+  };
+
+  // 조회수 전체 초기화
+  const handleResetAllViews = async () => {
+    const { customConfirm } = await import('@/utils/alertUtils');
+    const confirmed = await customConfirm('모든 FAQ의 조회수를 0으로 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.', '조회수 초기화');
+    if (!confirmed) {
+      return;
+    }
+    
+    try {
+      await resetAllViews();
+      const { triggerCustomAlert } = await import('@/utils/alertUtils');
+      triggerCustomAlert('모든 FAQ의 조회수가 0으로 초기화되었습니다.', 'success');
+    } catch (error) {
+      console.error('조회수 초기화 오류:', error);
+      const { triggerCustomAlert } = await import('@/utils/alertUtils');
+      triggerCustomAlert('조회수 초기화 중 오류가 발생했습니다.', 'error');
+    }
+  };
+
+  // 개별 조회수 수정
+  const handleSetViews = async (id: string, views: number) => {
+    try {
+      await setViews(id, views);
+      const { triggerCustomAlert } = await import('@/utils/alertUtils');
+      triggerCustomAlert(`조회수가 ${views.toLocaleString()}회로 설정되었습니다.`, 'success');
+      setShowViewsModal(false);
+      setEditingViewsFaqId(null);
+      setNewViewsCount('');
+    } catch (error) {
+      console.error('조회수 설정 오류:', error);
+      const { triggerCustomAlert } = await import('@/utils/alertUtils');
+      triggerCustomAlert('조회수 설정 중 오류가 발생했습니다.', 'error');
+    }
+  };
+
+
+
+  // 조회수 수정 모달 열기
+  const openViewsModal = (faqId: string) => {
+    const faq = faqs.find(f => f.id === faqId);
+    setEditingViewsFaqId(faqId);
+    setNewViewsCount(faq?.views.toString() || '0');
+    setShowViewsModal(true);
   };
 
   // 데이터 내보내기/가져오기 함수들
@@ -822,7 +875,7 @@ export default function FAQPage() {
                   )}
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
                 <div>
                   <label style={{ 
                     display: 'block', 
@@ -844,6 +897,51 @@ export default function FAQPage() {
                       fontSize: '14px'
                     }}
                   />
+                </div>
+                <div>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '5px',
+                    fontWeight: '500',
+                    fontSize: '14px'
+                  }}>
+                    조회수
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.views}
+                    onChange={(e) => setFormData({...formData, views: parseInt(e.target.value) || 0})}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      marginBottom: '8px'
+                    }}
+                    placeholder="0"
+                  />
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                    {[0, 100, 500, 1000, 5000].map(preset => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setFormData({...formData, views: preset})}
+                        style={{
+                          padding: '2px 6px',
+                          fontSize: '11px',
+                          backgroundColor: formData.views === preset ? '#007bff' : '#f8f9fa',
+                          color: formData.views === preset ? 'white' : '#666',
+                          border: '1px solid #ddd',
+                          borderRadius: '3px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {preset.toLocaleString()}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', paddingTop: '25px' }}>
                   <label style={{ display: 'flex', alignItems: 'center' }}>
@@ -1187,6 +1285,27 @@ export default function FAQPage() {
                   </button>
                 </>
               )}
+              
+              {/* 조회수 관리 버튼들 */}
+              <div style={{ display: 'flex', gap: '8px', marginLeft: '10px' }}>
+                <button
+                  onClick={handleResetAllViews}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '12px',
+                    backgroundColor: '#fd7e14',
+                    color: 'white',
+                    border: '1px solid #fd7e14',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                  title="모든 FAQ의 조회수를 0으로 초기화합니다"
+                >
+                  🔄 조회수 초기화
+                </button>
+                
+
+              </div>
             </div>
           )}
         </div>
@@ -1284,8 +1403,28 @@ export default function FAQPage() {
                   }}>
                     {faq.isVisible ? '게시중' : '비공개'}
                   </span>
-                  <span style={{ fontSize: '12px', color: '#666' }}>
-                    👁 {faq.views}
+                  <span 
+                    style={{ 
+                      fontSize: '12px', 
+                      color: '#007bff', 
+                      cursor: 'pointer',
+                      padding: '2px 4px',
+                      borderRadius: '3px',
+                      border: '1px solid transparent',
+                      transition: 'all 0.2s'
+                    }}
+                    onClick={() => openViewsModal(faq.id)}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#e7f3ff';
+                      e.currentTarget.style.borderColor = '#007bff';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.borderColor = 'transparent';
+                    }}
+                    title="클릭하여 조회수 수정"
+                  >
+                    👁 {faq.views.toLocaleString()}
                   </span>
                   <span style={{ fontSize: '12px', color: '#666' }}>
                     📅 {new Date(faq.createdAt || '').toLocaleDateString('ko-KR')}
@@ -1408,6 +1547,143 @@ export default function FAQPage() {
         )}
       </div>
       </div>
+
+      {/* 조회수 수정 모달 */}
+      {showViewsModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            padding: '30px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
+          }}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: 'bold',
+              marginBottom: '20px',
+              textAlign: 'center'
+            }}>
+              조회수 수정
+            </h3>
+            
+            <div style={{ marginBottom: '15px', textAlign: 'center' }}>
+              <p style={{ fontSize: '14px', color: '#666' }}>
+                {faqs.find(f => f.id === editingViewsFaqId)?.question}
+              </p>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}>
+                새로운 조회수
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={newViewsCount}
+                onChange={(e) => setNewViewsCount(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
+                }}
+                placeholder="0"
+                autoFocus
+              />
+            </div>
+
+            {/* 빠른 설정 버튼들 */}
+            <div style={{ marginBottom: '20px' }}>
+              <p style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>빠른 설정:</p>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {[0, 100, 500, 1000, 5000, 10000].map(preset => (
+                  <button
+                    key={preset}
+                    onClick={() => setNewViewsCount(preset.toString())}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      backgroundColor: newViewsCount === preset.toString() ? '#007bff' : '#f8f9fa',
+                      color: newViewsCount === preset.toString() ? 'white' : '#666',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {preset.toLocaleString()}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              gap: '10px',
+              justifyContent: 'center'
+            }}>
+              <button
+                onClick={() => {
+                  setShowViewsModal(false);
+                  setEditingViewsFaqId(null);
+                  setNewViewsCount('');
+                }}
+                style={{
+                  padding: '12px 24px',
+                  border: '1px solid #ddd',
+                  borderRadius: '6px',
+                  backgroundColor: '#fff',
+                  color: '#666',
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                취소
+              </button>
+              
+              <button
+                onClick={() => {
+                  const views = parseInt(newViewsCount) || 0;
+                  if (editingViewsFaqId) {
+                    handleSetViews(editingViewsFaqId, views);
+                  }
+                }}
+                disabled={!newViewsCount || parseInt(newViewsCount) < 0}
+                style={{
+                  padding: '12px 24px',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: (!newViewsCount || parseInt(newViewsCount) < 0) ? '#ccc' : '#007bff',
+                  color: '#fff',
+                  fontSize: '14px',
+                  cursor: (!newViewsCount || parseInt(newViewsCount) < 0) ? 'not-allowed' : 'pointer'
+                }}
+              >
+                수정
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

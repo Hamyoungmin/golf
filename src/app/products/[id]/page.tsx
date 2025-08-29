@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useCart } from '../../../contexts/CartContext';
 import { useWishlist } from '../../../contexts/WishlistContext';
+import { useSettings } from '../../../contexts/SettingsContext';
 import { useCustomAlert } from '../../../hooks/useCustomAlert';
 import { getProductById } from '../../../lib/products';
-import { addReview, getProductReviews } from '../../../lib/reviews';
+import { createReview, getProductReviews } from '../../../lib/reviews';
 import { Product, Review } from '../../../types';
 
 export default function ProductPage() {
@@ -17,6 +18,7 @@ export default function ProductPage() {
   const { user } = useAuth();
   const { addToCart } = useCart();
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const { settings } = useSettings();
   const { AlertComponent, showAlert } = useCustomAlert();
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -108,10 +110,11 @@ export default function ProductPage() {
 
     setSubmittingReview(true);
     try {
-      await addReview({
+      await createReview({
         productId: product.id,
+        productName: product.name, // productName 추가
         userId: user.uid,
-        userName: user.displayName || user.email,
+        userName: user.displayName || user.email || 'Anonymous',
         rating: reviewForm.rating,
         title: reviewForm.title.trim(),
         content: reviewForm.content.trim()
@@ -124,7 +127,7 @@ export default function ProductPage() {
       // 폼 초기화
       setReviewForm({ rating: 5, title: '', content: '' });
       setShowReviewForm(false);
-      showAlert('리뷰가 성공적으로 등록되었습니다.', 'success');
+      showAlert('리뷰가 성공적으로 등록되어 바로 반영되었습니다!', 'success');
     } catch (error) {
       console.error('리뷰 등록 실패:', error);
       showAlert('리뷰 등록 중 오류가 발생했습니다.', 'error');
@@ -367,7 +370,7 @@ export default function ProductPage() {
             {[
               { id: 'description', label: '상품설명' },
               { id: 'details', label: '상세정보' },
-              { id: 'reviews', label: `후기 (${reviews.filter(r => r.status === 'approved').length})` },
+              { id: 'reviews', label: `후기 (${reviews.length})` },
               { id: 'qna', label: '문의' }
             ].map((tab) => (
               <button
@@ -502,10 +505,121 @@ export default function ProductPage() {
                 </button>
               </div>
 
+              {/* 리뷰 작성 폼 */}
+              {showReviewForm && (
+                <div style={{
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  padding: '30px',
+                  marginBottom: '30px',
+                  backgroundColor: '#f8f9fa'
+                }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px' }}>
+                    리뷰 작성
+                  </h3>
+
+                  {/* 평점 선택 */}
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                      평점:
+                    </label>
+                    <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            fontSize: '24px',
+                            cursor: 'pointer',
+                            color: star <= reviewForm.rating ? '#ffc107' : '#ddd',
+                            padding: '2px',
+                            transition: 'color 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
+                          onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                        >
+                          ★
+                        </button>
+                      ))}
+                      <span style={{ marginLeft: '10px', fontSize: '14px', color: '#666' }}>
+                        {reviewForm.rating}점
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 제목 입력 */}
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                      제목:
+                    </label>
+                    <input
+                      type="text"
+                      value={reviewForm.title}
+                      onChange={(e) => setReviewForm({ ...reviewForm, title: e.target.value })}
+                      placeholder="리뷰 제목을 입력해주세요"
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  {/* 내용 입력 */}
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                      내용:
+                    </label>
+                    <textarea
+                      value={reviewForm.content}
+                      onChange={(e) => setReviewForm({ ...reviewForm, content: e.target.value })}
+                      placeholder="상품에 대한 후기를 작성해주세요"
+                      rows={4}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        resize: 'vertical',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  {/* 작성 버튼 */}
+                  <div style={{ textAlign: 'right' }}>
+                    <button
+                      onClick={handleSubmitReview}
+                      disabled={submittingReview || !reviewForm.title.trim() || !reviewForm.content.trim()}
+                      style={{
+                        padding: '12px 24px',
+                        backgroundColor: submittingReview || !reviewForm.title.trim() || !reviewForm.content.trim() 
+                          ? '#6c757d' : '#28a745',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: submittingReview || !reviewForm.title.trim() || !reviewForm.content.trim() 
+                          ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {submittingReview ? '등록 중...' : '리뷰 등록'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* 리뷰 목록 */}
               <div>
-                {reviews.filter(r => r.status === 'approved').length > 0 ? (
-                  reviews.filter(r => r.status === 'approved').map((review) => (
+                {reviews.length > 0 ? (
+                  reviews.map((review) => (
                     <div key={review.id} style={{
                       border: '1px solid #e0e0e0',
                       borderRadius: '8px',
@@ -514,9 +628,44 @@ export default function ProductPage() {
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                         <div>
-                          <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{review.title}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{review.title}</span>
+                            {review.status === 'pending' && (
+                              <span style={{
+                                fontSize: '12px',
+                                backgroundColor: '#ffc107',
+                                color: '#fff',
+                                padding: '2px 6px',
+                                borderRadius: '4px'
+                              }}>
+                                승인대기
+                              </span>
+                            )}
+                            {review.status === 'approved' && (
+                              <span style={{
+                                fontSize: '12px',
+                                backgroundColor: '#28a745',
+                                color: '#fff',
+                                padding: '2px 6px',
+                                borderRadius: '4px'
+                              }}>
+                                승인완료
+                              </span>
+                            )}
+                            {review.status === 'rejected' && (
+                              <span style={{
+                                fontSize: '12px',
+                                backgroundColor: '#dc3545',
+                                color: '#fff',
+                                padding: '2px 6px',
+                                borderRadius: '4px'
+                              }}>
+                                승인거부
+                              </span>
+                            )}
+                          </div>
                           <div style={{ color: '#ffc107', fontSize: '14px', marginTop: '4px' }}>
-                            {'⭐'.repeat(review.rating)}
+                            {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
                           </div>
                         </div>
                         <div style={{ textAlign: 'right', fontSize: '12px', color: '#666' }}>
@@ -547,25 +696,18 @@ export default function ProductPage() {
 
                          {/* 문의 섹션 */}
              <div id="qna" style={{ marginBottom: '60px' }}>
-               {product.inquiry ? (
-                 <div style={{
-                   fontSize: '16px', 
-                   lineHeight: '1.8', 
-                   color: '#333',
-                   whiteSpace: 'pre-line',
-                   padding: '20px 0'
-                 }}>
-                   {product.inquiry}
-                 </div>
-               ) : (
-                 <div style={{
-                   textAlign: 'center',
-                   padding: '60px 20px',
-                   color: '#999'
-                 }}>
-                   관리자가 문의 정보를 등록하지 않았습니다.
-                 </div>
-               )}
+               <div style={{
+                 fontSize: '16px', 
+                 lineHeight: '1.8', 
+                 color: '#333',
+                 whiteSpace: 'pre-line',
+                 padding: '20px',
+                 backgroundColor: '#f8f9fa',
+                 border: '1px solid #e9ecef',
+                 borderRadius: '8px'
+               }}>
+                 {settings.store.inquiryInfo}
+               </div>
              </div>
           </div>
         </div>
@@ -616,7 +758,7 @@ export default function ProductPage() {
               <button
                 onClick={() => {
                   setShowContactModal(false);
-                  window.location.href = 'tel:02-1234-5678';
+                  window.location.href = `tel:${settings.store.phone}`;
                 }}
                 style={{
                   padding: '8px 16px',

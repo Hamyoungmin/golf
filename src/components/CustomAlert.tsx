@@ -1,16 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface CustomAlertProps {
   isOpen: boolean;
   title?: string;
   message: string;
-  onConfirm: () => void;
+  onConfirm: (value?: string) => void;
   onCancel?: () => void;
   confirmText?: string;
   cancelText?: string;
-  type?: 'success' | 'error' | 'warning' | 'info' | 'confirm';
+  type?: 'success' | 'error' | 'warning' | 'info' | 'confirm' | 'prompt';
+  placeholder?: string;
+  defaultValue?: string;
 }
 
 export default function CustomAlert({
@@ -21,8 +23,16 @@ export default function CustomAlert({
   onCancel,
   confirmText = '확인',
   cancelText = '취소',
-  type = 'info'
+  type = 'info',
+  placeholder = '',
+  defaultValue = ''
 }: CustomAlertProps) {
+  const [inputValue, setInputValue] = useState(defaultValue);
+
+  useEffect(() => {
+    setInputValue(defaultValue);
+  }, [defaultValue, isOpen]);
+
   if (!isOpen) return null;
 
   const getIconAndColor = () => {
@@ -35,12 +45,22 @@ export default function CustomAlert({
         return { icon: '⚠️', color: '#ffc107' };
       case 'confirm':
         return { icon: '❓', color: '#17a2b8' };
+      case 'prompt':
+        return { icon: '✏️', color: '#007bff' };
       default:
         return { icon: 'ℹ️', color: '#007bff' };
     }
   };
 
   const { icon, color } = getIconAndColor();
+
+  const handleConfirm = () => {
+    if (type === 'prompt') {
+      onConfirm(inputValue);
+    } else {
+      onConfirm();
+    }
+  };
 
   return (
     <div style={{
@@ -90,11 +110,40 @@ export default function CustomAlert({
           fontSize: '16px',
           color: '#666',
           lineHeight: '1.5',
-          marginBottom: '25px',
-          margin: '0 0 25px 0'
+          marginBottom: type === 'prompt' ? '20px' : '25px',
+          margin: `0 0 ${type === 'prompt' ? '20px' : '25px'} 0`
         }}>
           {message}
         </p>
+
+        {/* 입력 필드 (prompt 타입일 때만) */}
+        {type === 'prompt' && (
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder={placeholder}
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              border: '1px solid #ddd',
+              borderRadius: '6px',
+              fontSize: '14px',
+              marginBottom: '20px',
+              boxSizing: 'border-box',
+              outline: 'none',
+              transition: 'border-color 0.2s ease'
+            }}
+            onFocus={(e) => e.currentTarget.style.borderColor = color}
+            onBlur={(e) => e.currentTarget.style.borderColor = '#ddd'}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleConfirm();
+              }
+            }}
+            autoFocus
+          />
+        )}
 
         {/* 버튼 영역 */}
         <div style={{
@@ -124,7 +173,7 @@ export default function CustomAlert({
           )}
           
           <button
-            onClick={onConfirm}
+            onClick={handleConfirm}
             style={{
               padding: '12px 24px',
               border: 'none',

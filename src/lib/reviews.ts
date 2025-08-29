@@ -484,7 +484,7 @@ export async function addReview(reviewData: any): Promise<void> {
     await addDoc(collection(db, 'reviews'), {
       ...reviewData,
       createdAt: new Date(),
-      status: 'pending'
+      status: 'approved' // 즉시 승인 상태로 변경
     });
   } catch (error) {
     console.error('리뷰 추가 오류:', error);

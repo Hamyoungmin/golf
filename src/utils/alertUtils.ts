@@ -24,19 +24,49 @@ declare global {
 // CustomAlert를 위한 이벤트 기반 시스템
 export const triggerCustomAlert = (
   message: string, 
-  type: 'success' | 'error' | 'warning' | 'info' | 'confirm' = 'info',
+  type: 'success' | 'error' | 'warning' | 'info' | 'confirm' | 'prompt' = 'info',
   options?: {
     title?: string;
     confirmText?: string;
     cancelText?: string;
-    onConfirm?: () => void;
+    onConfirm?: (value?: string) => void;
     onCancel?: () => void;
+    placeholder?: string;
+    defaultValue?: string;
   }
 ) => {
   const event = new CustomEvent('showCustomAlert', {
     detail: { message, type, options }
   });
   window.dispatchEvent(event);
+};
+
+// Promise 기반의 confirm 함수
+export const customConfirm = (message: string, title?: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    triggerCustomAlert(message, 'confirm', {
+      title: title || '확인',
+      confirmText: '확인',
+      cancelText: '취소',
+      onConfirm: () => resolve(true),
+      onCancel: () => resolve(false)
+    });
+  });
+};
+
+// Promise 기반의 prompt 함수
+export const customPrompt = (message: string, defaultValue?: string, title?: string): Promise<string | null> => {
+  return new Promise((resolve) => {
+    triggerCustomAlert(message, 'prompt', {
+      title: title || '입력',
+      confirmText: '확인',
+      cancelText: '취소',
+      defaultValue: defaultValue || '',
+      placeholder: defaultValue || '',
+      onConfirm: (value) => resolve(value || ''),
+      onCancel: () => resolve(null)
+    });
+  });
 };
 
 // 로그인 페이지로 이동하는 함수 (중복 방지)
@@ -78,6 +108,8 @@ const redirectToLogin = () => {
 export const overrideAlert = () => {
   if (typeof window !== 'undefined') {
     const originalAlert = window.alert;
+    const originalConfirm = window.confirm;
+    const originalPrompt = window.prompt;
     
     window.alert = (message: string | any) => {
       const msg = typeof message === 'string' ? message : String(message);
@@ -115,8 +147,8 @@ export const overrideAlert = () => {
       }
     };
 
-    // confirm은 동기적이어야 하므로 일단 기존 방식 유지
-    // 나중에 필요시 개별적으로 triggerCustomAlert 사용 가능
+    // confirm과 prompt는 기존 함수 유지 (동기 처리 필요)
+    // 개별적으로 customConfirm, customPrompt 사용 권장
   }
 };
 

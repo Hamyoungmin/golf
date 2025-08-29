@@ -82,7 +82,7 @@ export interface FirestoreFAQItem {
 }
 
 // FAQ 추가
-export async function addFAQ(faqData: Omit<FAQItem, 'id' | 'createdAt' | 'updatedAt' | 'views'>) {
+export async function addFAQ(faqData: Omit<FAQItem, 'id' | 'createdAt' | 'updatedAt'> & { views?: number }) {
   try {
     if (!checkFirebaseInitialized()) {
       // 로컬 스토리지 fallback
@@ -91,7 +91,7 @@ export async function addFAQ(faqData: Omit<FAQItem, 'id' | 'createdAt' | 'update
       const newFaq: FAQItem = {
         ...faqData,
         id: generateId(),
-        views: 0,
+        views: faqData.views ?? 0,
         createdAt: now,
         updatedAt: now
       };
@@ -107,7 +107,7 @@ export async function addFAQ(faqData: Omit<FAQItem, 'id' | 'createdAt' | 'update
     const faqCollection = getFaqCollection();
     const docRef = await addDoc(faqCollection, {
       ...faqData,
-      views: 0,
+      views: faqData.views ?? 0,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
@@ -503,6 +503,78 @@ export async function updateFAQOrder(id: string, newOrder: number) {
   }
 }
 
+// 모든 FAQ 조회수 초기화
+export async function resetAllFAQViews() {
+  try {
+    if (!checkFirebaseInitialized()) {
+      // 로컬 스토리지 fallback
+      const faqs = getLocalFAQs();
+      const updatedFaqs = faqs.map(faq => ({
+        ...faq,
+        views: 0,
+        updatedAt: new Date().toISOString()
+      }));
+      saveLocalFAQs(updatedFaqs);
+      notifyLocalStorageListeners();
+      console.log('모든 FAQ 조회수 로컬 스토리지에서 초기화 완료');
+      return;
+    }
+    
+    const faqCollection = getFaqCollection();
+    const querySnapshot = await getDocs(faqCollection);
+    const batch = writeBatch(db);
+    
+    querySnapshot.docs.forEach(doc => {
+      batch.update(doc.ref, { 
+        views: 0,
+        updatedAt: serverTimestamp()
+      });
+    });
+    
+    await batch.commit();
+    console.log('모든 FAQ 조회수 Firebase에서 초기화 완료');
+  } catch (error) {
+    console.error('FAQ 조회수 초기화 오류:', error);
+    throw error;
+  }
+}
+
+// 특정 FAQ 조회수 직접 설정
+export async function setFAQViews(id: string, views: number) {
+  try {
+    if (!checkFirebaseInitialized()) {
+      // 로컬 스토리지 fallback
+      const faqs = getLocalFAQs();
+      const index = faqs.findIndex(faq => faq.id === id);
+      
+      if (index !== -1) {
+        faqs[index] = {
+          ...faqs[index],
+          views: Math.max(0, views), // 음수 방지
+          updatedAt: new Date().toISOString()
+        };
+        saveLocalFAQs(faqs);
+        notifyLocalStorageListeners();
+        console.log('FAQ 조회수 로컬 저장소에서 설정됨:', id, views);
+      }
+      return;
+    }
+    
+    const docRef = doc(db, 'faqs', id);
+    await updateDoc(docRef, {
+      views: Math.max(0, views), // 음수 방지
+      updatedAt: serverTimestamp()
+    });
+    
+    console.log('FAQ 조회수 Firebase에서 설정됨:', id, views);
+  } catch (error) {
+    console.error('FAQ 조회수 설정 오류:', error);
+    throw error;
+  }
+}
+
+
+
 // 초기 FAQ 데이터 시드
 export async function seedInitialFAQData() {
   try {
@@ -531,7 +603,7 @@ export async function seedInitialFAQData() {
 로그인 후 주문하시면 더욱 편리합니다.`,
           isVisible: true,
           order: 1,
-          views: 1247
+          views: 0
         },
         {
           category: '주문/결제',
@@ -545,7 +617,7 @@ export async function seedInitialFAQData() {
 무통장 입금의 경우 입금 확인 후 배송이 시작됩니다.`,
           isVisible: true,
           order: 2,
-          views: 856
+          views: 0
         },
         {
           category: '배송',
@@ -558,7 +630,7 @@ export async function seedInitialFAQData() {
 제주도 및 도서산간 지역은 추가 배송비가 발생할 수 있습니다.`,
           isVisible: true,
           order: 3,
-          views: 678
+          views: 0
         }
       ];
       
@@ -598,7 +670,7 @@ export async function seedInitialFAQData() {
 로그인 후 주문하시면 더욱 편리합니다.`,
         isVisible: true,
         order: 1,
-        views: 1247
+        views: 0
       },
       {
         category: '주문/결제',
@@ -612,7 +684,7 @@ export async function seedInitialFAQData() {
 무통장 입금의 경우 입금 확인 후 배송이 시작됩니다.`,
         isVisible: true,
         order: 2,
-        views: 856
+        views: 0
       },
       {
         category: '배송',
@@ -625,7 +697,7 @@ export async function seedInitialFAQData() {
 제주도 및 도서산간 지역은 추가 배송비가 발생할 수 있습니다.`,
         isVisible: true,
         order: 3,
-        views: 678
+        views: 0
       },
       {
         category: '배송',
@@ -639,7 +711,7 @@ export async function seedInitialFAQData() {
 급하신 경우 고객센터로 연락주세요.`,
         isVisible: true,
         order: 4,
-        views: 234
+        views: 0
       },
       {
         category: '회원',
@@ -654,7 +726,7 @@ export async function seedInitialFAQData() {
 사업자 회원만 가입 가능합니다.`,
         isVisible: true,
         order: 5,
-        views: 134
+        views: 0
       }
     ];
 

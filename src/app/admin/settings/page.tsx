@@ -374,6 +374,35 @@ export default function SettingsPage() {
                     />
                   </div>
                 </div>
+                <div style={{ marginTop: '15px' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '5px',
+                    fontWeight: '500',
+                    fontSize: '14px'
+                  }}>
+                    상품 문의 정보
+                  </label>
+                  <textarea
+                    rows={6}
+                    value={settings.store.inquiryInfo}
+                    onChange={(e) => updateStoreSettings({ inquiryInfo: e.target.value })}
+                    placeholder="상품 페이지에 표시될 문의 정보를 입력하세요. (전화번호, 이메일, 상담시간 등)"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      resize: 'vertical',
+                      minHeight: '120px',
+                      fontFamily: 'inherit'
+                    }}
+                  />
+                  <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+                    💡 이 정보는 모든 상품 페이지의 "문의" 탭에 자동으로 표시됩니다.
+                  </div>
+                </div>
               </div>
             </div>
           </div>

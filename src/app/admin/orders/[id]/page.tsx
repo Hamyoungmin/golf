@@ -72,7 +72,9 @@ export default function AdminOrderDetailPage() {
   const handleStatusChange = async (newStatus: OrderStatus) => {
     if (!order) return;
 
-    if (!confirm(`주문 상태를 "${getOrderStatusText(newStatus)}"로 변경하시겠습니까?`)) {
+    const { customConfirm } = await import('@/utils/alertUtils');
+    const confirmed = await customConfirm(`주문 상태를 "${getOrderStatusText(newStatus)}"로 변경하시겠습니까?`, '주문 상태 변경');
+    if (!confirmed) {
       return;
     }
 
@@ -80,10 +82,12 @@ export default function AdminOrderDetailPage() {
     try {
       await updateOrderStatus(orderId, newStatus);
       setOrder({ ...order, status: newStatus });
-      alert('주문 상태가 변경되었습니다.');
+      const { triggerCustomAlert } = await import('@/utils/alertUtils');
+      triggerCustomAlert('주문 상태가 변경되었습니다.', 'success');
     } catch (error) {
       console.error('주문 상태 변경 실패:', error);
-      alert('주문 상태 변경에 실패했습니다.');
+      const { triggerCustomAlert } = await import('@/utils/alertUtils');
+      triggerCustomAlert('주문 상태 변경에 실패했습니다.', 'error');
     } finally {
       setUpdating(false);
     }
@@ -109,8 +113,15 @@ export default function AdminOrderDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        height: '300px',
+        fontSize: '16px',
+        color: '#666'
+      }}>
+        주문 정보를 불러오는 중...
       </div>
     );
   }
@@ -118,118 +129,195 @@ export default function AdminOrderDetailPage() {
   if (!order) return null;
 
   return (
-    <div>
-      <div className="mb-6">
-        <Link
-          href="/admin/orders"
-          className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-        >
-          <ArrowLeftIcon className="h-4 w-4 mr-1" />
-          주문 목록으로 돌아가기
-        </Link>
-      </div>
-
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">주문 상세</h1>
-              <p className="text-sm text-gray-500 mt-1">주문번호: {order.orderId}</p>
-            </div>
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getOrderStatusColor(order.status)}`}>
-              {getOrderStatusText(order.status)}
-            </span>
-          </div>
+    <div className="container" style={{ maxWidth: '1200px', margin: '50px auto', padding: '20px' }}>
+      <div style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '8px', 
+        padding: '30px',
+        backgroundColor: '#fff'
+      }}>
+        <div style={{ marginBottom: '20px' }}>
+          <Link
+            href="/admin/orders"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              fontSize: '14px',
+              color: '#666',
+              textDecoration: 'none'
+            }}
+          >
+            ← 주문 목록으로 돌아가기
+          </Link>
         </div>
 
-        <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* 왼쪽: 주문 정보 */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* 주문 상품 */}
-            <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">주문 상품</h2>
-              <div className="border rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상품</th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">수량</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">가격</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">소계</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {order.items.map((item, index) => {
-                      const product = products[item.productId];
-                      return (
-                        <tr key={index}>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center">
-                              {product && (
-                                <img
-                                  src={product.images[0] || '/placeholder.jpg'}
-                                  alt={item.productName}
-                                  className="h-10 w-10 rounded object-cover mr-3"
-                                />
-                              )}
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">{item.productName}</p>
-                                {product && (
-                                  <p className="text-xs text-gray-500">{product.category} / {product.brand}</p>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-center text-sm text-gray-900">{item.quantity}</td>
-                          <td className="px-6 py-4 text-right text-sm text-gray-900">{formatPrice(item.price)}</td>
-                          <td className="px-6 py-4 text-right text-sm font-medium text-gray-900">{formatPrice(item.totalPrice)}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                  <tfoot className="bg-gray-50">
-                    <tr>
-                      <td colSpan={3} className="px-6 py-4 text-right text-sm font-medium text-gray-900">총 결제금액</td>
-                      <td className="px-6 py-4 text-right text-lg font-bold text-gray-900">{formatPrice(order.totalAmount)}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '30px'
+        }}>
+          <div>
+            <h1 style={{ 
+              fontSize: '24px',
+              fontWeight: 'bold',
+              marginBottom: '5px'
+            }}>
+              주문 상세
+            </h1>
+            <p style={{ color: '#666', fontSize: '14px' }}>주문번호: {order.orderId}</p>
+          </div>
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getOrderStatusColor(order.status)}`}>
+            {getOrderStatusText(order.status)}
+          </span>
+        </div>
 
-            {/* 주문 상태 변경 */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+          {/* 주문 상품 */}
+          <div>
+            <h3 style={{ 
+              fontWeight: 'bold', 
+              marginBottom: '15px',
+              fontSize: '18px',
+              borderBottom: '1px solid #e0e0e0',
+              paddingBottom: '8px'
+            }}>
+              주문 상품
+            </h3>
+            <div style={{ border: '1px solid #ddd', borderRadius: '4px', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead style={{ backgroundColor: '#f8f9fa' }}>
+                  <tr>
+                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '500', color: '#666' }}>상품</th>
+                    <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '500', color: '#666' }}>수량</th>
+                    <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '500', color: '#666' }}>가격</th>
+                    <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '500', color: '#666' }}>소계</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {order.items.map((item, index) => {
+                    const product = products[item.productId];
+                    return (
+                      <tr key={index} style={{ borderBottom: index < order.items.length - 1 ? '1px solid #eee' : 'none' }}>
+                        <td style={{ padding: '15px 12px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {product && (
+                              <img
+                                src={product.images[0] || '/placeholder.jpg'}
+                                alt={item.productName}
+                                style={{
+                                  width: '40px',
+                                  height: '40px',
+                                  borderRadius: '4px',
+                                  objectFit: 'cover',
+                                  border: '1px solid #ddd'
+                                }}
+                              />
+                            )}
+                            <div>
+                              <p style={{ fontSize: '14px', fontWeight: '500', marginBottom: '2px' }}>{item.productName}</p>
+                              {product && (
+                                <p style={{ fontSize: '12px', color: '#666' }}>{product.category} / {product.brand}</p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '15px 12px', textAlign: 'center', fontSize: '14px' }}>{item.quantity}</td>
+                        <td style={{ padding: '15px 12px', textAlign: 'right', fontSize: '14px' }}>{formatPrice(item.price)}</td>
+                        <td style={{ padding: '15px 12px', textAlign: 'right', fontSize: '14px', fontWeight: '500' }}>{formatPrice(item.totalPrice)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot style={{ backgroundColor: '#f8f9fa' }}>
+                  <tr>
+                    <td colSpan={3} style={{ padding: '15px 12px', textAlign: 'right', fontSize: '16px', fontWeight: 'bold' }}>총 결제금액</td>
+                    <td style={{ padding: '15px 12px', textAlign: 'right', fontSize: '18px', fontWeight: 'bold', color: '#007bff' }}>{formatPrice(order.totalAmount)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          {/* 주문 관리 섹션 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '30px' }}>
+            {/* 왼쪽: 주문 관리 */}
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">주문 관리</h2>
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 style={{ 
+                fontWeight: 'bold', 
+                marginBottom: '15px',
+                fontSize: '18px',
+                borderBottom: '1px solid #e0e0e0',
+                paddingBottom: '8px'
+              }}>
+                주문 관리
+              </h3>
+              <div style={{ 
+                border: '1px solid #ddd', 
+                borderRadius: '4px', 
+                padding: '20px', 
+                backgroundColor: '#f8f9fa' 
+              }}>
                 {/* pending 상태일 때 주문 수락/거절 버튼 */}
                 {order.status === 'pending' && (
-                  <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <h3 className="text-sm font-medium text-yellow-800 mb-3">새로운 주문이 접수되었습니다</h3>
-                    <p className="text-sm text-yellow-700 mb-4">
+                  <div style={{ 
+                    marginBottom: '20px', 
+                    padding: '15px', 
+                    backgroundColor: '#fff3cd', 
+                    border: '1px solid #ffeaa7', 
+                    borderRadius: '4px' 
+                  }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: '500', marginBottom: '10px', color: '#856404' }}>
+                      새로운 주문이 접수되었습니다
+                    </h4>
+                    <p style={{ fontSize: '13px', color: '#6c757d', marginBottom: '15px', lineHeight: '1.4' }}>
                       주문 내용을 확인하신 후 수락 또는 거절해주세요. 수락하시면 고객에게 결제 안내가 발송됩니다.
                     </p>
-                    <div className="flex gap-3">
+                    <div style={{ display: 'flex', gap: '10px' }}>
                       <button
                         onClick={() => handleStatusChange('payment_pending')}
                         disabled={updating}
-                        className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+                        style={{
+                          padding: '8px 16px',
+                          backgroundColor: updating ? '#ccc' : '#28a745',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          cursor: updating ? 'not-allowed' : 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px'
+                        }}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg style={{ width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                         주문 수락
                       </button>
                       <button
-                        onClick={() => {
-                          const reason = prompt('주문 거절 사유를 입력해주세요:');
+                        onClick={async () => {
+                          const { customPrompt } = await import('@/utils/alertUtils');
+                          const reason = await customPrompt('주문 거절 사유를 입력해주세요:', '', '주문 거절');
                           if (reason) {
                             handleStatusChange('cancelled');
                           }
                         }}
                         disabled={updating}
-                        className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+                        style={{
+                          padding: '8px 16px',
+                          backgroundColor: updating ? '#ccc' : '#dc3545',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          cursor: updating ? 'not-allowed' : 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px'
+                        }}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg style={{ width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                         주문 거절
@@ -240,18 +328,26 @@ export default function AdminOrderDetailPage() {
 
                 {/* 일반 상태 변경 버튼들 */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">주문 상태 변경</h4>
-                  <div className="flex flex-wrap gap-2">
+                  <h4 style={{ fontSize: '14px', fontWeight: '500', marginBottom: '10px', color: '#495057' }}>
+                    주문 상태 변경
+                  </h4>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                     {(['pending', 'payment_pending', 'paid', 'shipped', 'delivered', 'cancelled'] as OrderStatus[]).map(status => (
                       <button
                         key={status}
                         onClick={() => handleStatusChange(status)}
                         disabled={order.status === status || updating}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                          order.status === status
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                        }`}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '4px',
+                          fontSize: '13px',
+                          fontWeight: '500',
+                          backgroundColor: order.status === status ? '#e9ecef' : '#fff',
+                          color: order.status === status ? '#6c757d' : '#495057',
+                          border: '1px solid #ced4da',
+                          cursor: order.status === status || updating ? 'not-allowed' : 'pointer',
+                          opacity: order.status === status || updating ? 0.6 : 1
+                        }}
                       >
                         {getOrderStatusText(status)}
                       </button>
@@ -261,44 +357,89 @@ export default function AdminOrderDetailPage() {
 
                 {/* 결제 확인 섹션 */}
                 {order.status === 'payment_pending' && (
-                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h4 className="text-sm font-medium text-blue-800 mb-3">결제 대기 중</h4>
-                    <p className="text-sm text-blue-700 mb-4">
-                      고객에게 결제 안내가 발송되었습니다. 입금 확인 후 &apos;결제 완료&apos;로 상태를 변경해주세요.
+                  <div style={{ 
+                    marginTop: '20px', 
+                    padding: '15px', 
+                    backgroundColor: '#d1ecf1', 
+                    border: '1px solid #bee5eb', 
+                    borderRadius: '4px' 
+                  }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: '500', marginBottom: '10px', color: '#0c5460' }}>
+                      결제 대기 중
+                    </h4>
+                    <p style={{ fontSize: '13px', color: '#0c5460', marginBottom: '15px', lineHeight: '1.4' }}>
+                      고객에게 결제 안내가 발송되었습니다. 입금 확인 후 '결제 완료'로 상태를 변경해주세요.
                     </p>
-                    <div className="bg-white p-3 rounded border">
-                      <p className="text-sm font-medium text-gray-700">계좌 정보</p>
-                      <p className="text-sm text-gray-600">신한은행 110-123-456789 (주)골프샵</p>
-                      <p className="text-sm text-gray-600">입금액: {formatPrice(order.totalAmount)}</p>
+                    <div style={{ 
+                      backgroundColor: '#fff', 
+                      padding: '10px', 
+                      borderRadius: '4px', 
+                      border: '1px solid #ced4da' 
+                    }}>
+                      <p style={{ fontSize: '13px', fontWeight: '500', marginBottom: '5px', color: '#495057' }}>계좌 정보</p>
+                      <p style={{ fontSize: '13px', color: '#6c757d', marginBottom: '3px' }}>신한은행 110-123-456789 (주)골프샵</p>
+                      <p style={{ fontSize: '13px', color: '#6c757d' }}>입금액: {formatPrice(order.totalAmount)}</p>
                     </div>
                   </div>
                 )}
 
                 {/* 배송 시작 섹션 */}
                 {order.status === 'paid' && (
-                  <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <h4 className="text-sm font-medium text-green-800 mb-3">배송 준비</h4>
-                    <p className="text-sm text-green-700 mb-4">
+                  <div style={{ 
+                    marginTop: '20px', 
+                    padding: '15px', 
+                    backgroundColor: '#d4edda', 
+                    border: '1px solid #c3e6cb', 
+                    borderRadius: '4px' 
+                  }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: '500', marginBottom: '10px', color: '#155724' }}>
+                      배송 준비
+                    </h4>
+                    <p style={{ fontSize: '13px', color: '#155724', marginBottom: '15px', lineHeight: '1.4' }}>
                       결제가 완료되었습니다. 상품을 포장하고 배송을 시작해주세요.
                     </p>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">송장번호</label>
-                    <div className="flex gap-2">
+                    <label style={{ 
+                      display: 'block', 
+                      fontSize: '13px', 
+                      fontWeight: '500', 
+                      marginBottom: '8px', 
+                      color: '#495057' 
+                    }}>
+                      송장번호
+                    </label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
                       <input
                         type="text"
                         value={trackingNumber}
                         onChange={(e) => setTrackingNumber(e.target.value)}
                         placeholder="송장번호를 입력하세요"
-                        className="flex-1 border border-gray-300 rounded-md px-3 py-2"
+                        style={{
+                          flex: 1,
+                          padding: '8px 12px',
+                          border: '1px solid #ced4da',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          boxSizing: 'border-box'
+                        }}
                       />
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           if (trackingNumber.trim()) {
                             handleStatusChange('shipped');
                           } else {
-                            alert('송장번호를 입력해주세요.');
+                            const { triggerCustomAlert } = await import('@/utils/alertUtils');
+                            triggerCustomAlert('송장번호를 입력해주세요.', 'warning');
                           }
                         }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        style={{
+                          padding: '8px 16px',
+                          backgroundColor: '#007bff',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          cursor: 'pointer'
+                        }}
                       >
                         배송 시작
                       </button>
@@ -308,14 +449,30 @@ export default function AdminOrderDetailPage() {
 
                 {/* 배송 완료 섹션 */}
                 {order.status === 'shipped' && (
-                  <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                    <h4 className="text-sm font-medium text-purple-800 mb-3">배송 중</h4>
-                    <p className="text-sm text-purple-700 mb-4">
-                      상품이 배송 중입니다. 고객이 상품을 받으면 &apos;배송 완료&apos;로 상태를 변경해주세요.
+                  <div style={{ 
+                    marginTop: '20px', 
+                    padding: '15px', 
+                    backgroundColor: '#e2e3ff', 
+                    border: '1px solid #c5c6f4', 
+                    borderRadius: '4px' 
+                  }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: '500', marginBottom: '10px', color: '#4c4ddb' }}>
+                      배송 중
+                    </h4>
+                    <p style={{ fontSize: '13px', color: '#4c4ddb', marginBottom: '15px', lineHeight: '1.4' }}>
+                      상품이 배송 중입니다. 고객이 상품을 받으면 '배송 완료'로 상태를 변경해주세요.
                     </p>
                     <button
                       onClick={() => handleStatusChange('delivered')}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                      style={{
+                        padding: '8px 16px',
+                        backgroundColor: '#6f42c1',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        cursor: 'pointer'
+                      }}
                     >
                       배송 완료 처리
                     </button>
@@ -324,93 +481,219 @@ export default function AdminOrderDetailPage() {
               </div>
             </div>
 
-            {/* 주문 메모 */}
+            {/* 오른쪽: 고객 및 기타 정보 */}
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">주문 메모</h2>
+              <h3 style={{ 
+                fontWeight: 'bold', 
+                marginBottom: '15px',
+                fontSize: '18px',
+                borderBottom: '1px solid #e0e0e0',
+                paddingBottom: '8px'
+              }}>
+                주문 정보
+              </h3>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* 고객 정보 */}
+                <div style={{ 
+                  border: '1px solid #ddd', 
+                  borderRadius: '4px', 
+                  padding: '15px', 
+                  backgroundColor: '#fff' 
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    marginBottom: '12px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#333'
+                  }}>
+                    <UserIcon style={{ width: '16px', height: '16px', marginRight: '6px' }} />
+                    고객 정보
+                  </div>
+                  {user ? (
+                    <div style={{ fontSize: '13px', lineHeight: '1.5' }}>
+                      <p style={{ marginBottom: '5px' }}>
+                        <span style={{ fontWeight: '500' }}>이름:</span> {user.name}
+                      </p>
+                      <p style={{ marginBottom: '5px' }}>
+                        <span style={{ fontWeight: '500' }}>이메일:</span> {user.email}
+                      </p>
+                      {user.phone && (
+                        <p style={{ marginBottom: '8px' }}>
+                          <span style={{ fontWeight: '500' }}>전화번호:</span> {user.phone}
+                        </p>
+                      )}
+                      <Link
+                        href={`/admin/customers/${user.uid}`}
+                        style={{
+                          color: '#007bff',
+                          textDecoration: 'none',
+                          fontSize: '12px',
+                          borderTop: '1px solid #eee',
+                          paddingTop: '8px',
+                          display: 'block'
+                        }}
+                      >
+                        고객 상세정보 보기 →
+                      </Link>
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '13px', color: '#6c757d' }}>고객 정보를 불러올 수 없습니다.</p>
+                  )}
+                </div>
+
+                {/* 배송 정보 */}
+                <div style={{ 
+                  border: '1px solid #ddd', 
+                  borderRadius: '4px', 
+                  padding: '15px', 
+                  backgroundColor: '#fff' 
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    marginBottom: '12px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#333'
+                  }}>
+                    <MapPinIcon style={{ width: '16px', height: '16px', marginRight: '6px' }} />
+                    배송 정보
+                  </div>
+                  <div style={{ fontSize: '13px', lineHeight: '1.5' }}>
+                    <p style={{ marginBottom: '3px' }}>{order.shippingAddress.street}</p>
+                    <p style={{ marginBottom: '3px' }}>{order.shippingAddress.city} {order.shippingAddress.state}</p>
+                    <p>{order.shippingAddress.zipCode}</p>
+                  </div>
+                </div>
+
+                {/* 결제 정보 */}
+                <div style={{ 
+                  border: '1px solid #ddd', 
+                  borderRadius: '4px', 
+                  padding: '15px', 
+                  backgroundColor: '#fff' 
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    marginBottom: '12px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#333'
+                  }}>
+                    <CreditCardIcon style={{ width: '16px', height: '16px', marginRight: '6px' }} />
+                    결제 정보
+                  </div>
+                  <div style={{ fontSize: '13px', lineHeight: '1.5' }}>
+                    <p style={{ marginBottom: '5px' }}>
+                      <span style={{ fontWeight: '500' }}>결제 방법:</span> 무통장입금
+                    </p>
+                    <p style={{ marginBottom: '8px' }}>
+                      <span style={{ fontWeight: '500' }}>결제 금액:</span> {formatPrice(order.totalAmount)}
+                    </p>
+                    {order.status === 'payment_pending' && (
+                      <div style={{
+                        padding: '8px',
+                        backgroundColor: '#fff3cd',
+                        border: '1px solid #ffeaa7',
+                        borderRadius: '4px',
+                        fontSize: '12px'
+                      }}>
+                        <p style={{ fontWeight: '500', color: '#856404', marginBottom: '2px' }}>결제 대기 중</p>
+                        <p style={{ color: '#6c757d' }}>고객이 입금할 때까지 대기</p>
+                      </div>
+                    )}
+                    {order.status === 'paid' && (
+                      <div style={{
+                        padding: '8px',
+                        backgroundColor: '#d4edda',
+                        border: '1px solid #c3e6cb',
+                        borderRadius: '4px',
+                        fontSize: '12px'
+                      }}>
+                        <p style={{ fontWeight: '500', color: '#155724' }}>결제 완료</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 주문 시간 정보 */}
+                <div style={{ 
+                  border: '1px solid #ddd', 
+                  borderRadius: '4px', 
+                  padding: '15px', 
+                  backgroundColor: '#fff' 
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    marginBottom: '12px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#333'
+                  }}>
+                    <ClockIcon style={{ width: '16px', height: '16px', marginRight: '6px' }} />
+                    주문 시간 정보
+                  </div>
+                  <div style={{ fontSize: '13px', lineHeight: '1.5' }}>
+                    <p style={{ marginBottom: '8px' }}>
+                      <span style={{ fontWeight: '500' }}>주문일시:</span><br />
+                      <span style={{ color: '#6c757d' }}>{formatDate(order.createdAt)}</span>
+                    </p>
+                    <p>
+                      <span style={{ fontWeight: '500' }}>최종수정:</span><br />
+                      <span style={{ color: '#6c757d' }}>{formatDate(order.updatedAt)}</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 주문 메모 */}
+          <div>
+            <h3 style={{ 
+              fontWeight: 'bold', 
+              marginBottom: '15px',
+              fontSize: '18px',
+              borderBottom: '1px solid #e0e0e0',
+              paddingBottom: '8px'
+            }}>
+              주문 메모
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <textarea
                 value={orderNote}
                 onChange={(e) => setOrderNote(e.target.value)}
                 rows={4}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  resize: 'vertical',
+                  boxSizing: 'border-box'
+                }}
                 placeholder="주문에 대한 메모를 남기세요..."
               />
-              <button className="mt-2 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
+              <button 
+                style={{
+                  alignSelf: 'flex-start',
+                  padding: '8px 16px',
+                  backgroundColor: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
                 메모 저장
               </button>
-            </div>
-          </div>
-
-          {/* 오른쪽: 고객 및 배송 정보 */}
-          <div className="space-y-6">
-            {/* 고객 정보 */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
-                <UserIcon className="h-5 w-5 mr-2" />
-                고객 정보
-              </h3>
-              {user ? (
-                <div className="space-y-2 text-sm">
-                  <p><span className="font-medium">이름:</span> {user.name}</p>
-                  <p><span className="font-medium">이메일:</span> {user.email}</p>
-                  {user.phone && <p><span className="font-medium">전화번호:</span> {user.phone}</p>}
-                  <Link
-                    href={`/admin/customers/${user.uid}`}
-                    className="text-green-600 hover:text-green-700 text-xs"
-                  >
-                    고객 상세정보 보기 →
-                  </Link>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">고객 정보를 불러올 수 없습니다.</p>
-              )}
-            </div>
-
-            {/* 배송 정보 */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
-                <MapPinIcon className="h-5 w-5 mr-2" />
-                배송 정보
-              </h3>
-              <div className="space-y-2 text-sm">
-                <p>{order.shippingAddress.street}</p>
-                <p>{order.shippingAddress.city} {order.shippingAddress.state}</p>
-                <p>{order.shippingAddress.zipCode}</p>
-              </div>
-            </div>
-
-            {/* 결제 정보 */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
-                <CreditCardIcon className="h-5 w-5 mr-2" />
-                결제 정보
-              </h3>
-              <div className="space-y-2 text-sm">
-                <p><span className="font-medium">결제 방법:</span> 무통장입금</p>
-                <p><span className="font-medium">결제 금액:</span> {formatPrice(order.totalAmount)}</p>
-                {order.status === 'payment_pending' && (
-                  <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                    <p className="text-xs text-yellow-700 font-medium">결제 대기 중</p>
-                    <p className="text-xs text-yellow-600">고객이 입금할 때까지 대기</p>
-                  </div>
-                )}
-                {order.status === 'paid' && (
-                  <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded">
-                    <p className="text-xs text-green-700 font-medium">결제 완료</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 주문 시간 정보 */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
-                <ClockIcon className="h-5 w-5 mr-2" />
-                주문 시간 정보
-              </h3>
-              <div className="space-y-2 text-sm">
-                <p><span className="font-medium">주문일시:</span><br />{formatDate(order.createdAt)}</p>
-                <p><span className="font-medium">최종수정:</span><br />{formatDate(order.updatedAt)}</p>
-              </div>
             </div>
           </div>
         </div>

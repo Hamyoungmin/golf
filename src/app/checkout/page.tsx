@@ -55,6 +55,9 @@ export default function CheckoutPage() {
     age: false,
   });
 
+  // 전체 동의 상태 계산
+  const allAgreed = agreements.terms && agreements.privacy && agreements.age;
+
   const [cartItemsWithProducts, setCartItemsWithProducts] = useState<(CartItem & { product: Product })[]>([]);
 
   // 로그인 체크
@@ -181,6 +184,16 @@ export default function CheckoutPage() {
     }));
   };
 
+  // 전체 동의 핸들러
+  const handleAllAgreementChange = () => {
+    const newValue = !allAgreed;
+    setAgreements({
+      terms: newValue,
+      privacy: newValue,
+      age: newValue,
+    });
+  };
+
   const validateForm = () => {
     if (!shippingInfo.street || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode) {
       showAlert('배송지 정보를 모두 입력해주세요.', 'warning');
@@ -262,8 +275,8 @@ export default function CheckoutPage() {
 
   if (userDataLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">사용자 정보를 불러오는 중...</div>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+        <div style={{ textAlign: 'center', fontSize: '16px', color: '#666' }}>사용자 정보를 불러오는 중...</div>
       </div>
     );
   }
@@ -271,320 +284,524 @@ export default function CheckoutPage() {
   return (
     <>
       <AlertComponent />
-      <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">주문/결제</h1>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '30px', textAlign: 'center' }}>주문/결제</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* 주문 정보 입력 */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* 주문자 정보 */}
-          <div className="bg-white border rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">주문자 정보</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">이메일</label>
-                <input
-                  type="email"
-                  value={user?.email || ''}
-                  disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-                />
+        <div style={{ 
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '30px'
+        }}>
+          {/* 주문 정보 입력 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', flex: '2' }}>
+            {/* 주문자 정보 */}
+            <div style={{ 
+              backgroundColor: '#fff', 
+              border: '1px solid #e0e0e0', 
+              borderRadius: '8px', 
+              padding: '25px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
+              <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px', color: '#333' }}>주문자 정보</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
+                <div>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    marginBottom: '8px',
+                    color: '#555'
+                  }}>이메일</label>
+                  <input
+                    type="email"
+                    value={user?.email || ''}
+                    disabled
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '6px',
+                      backgroundColor: '#f8f9fa',
+                      fontSize: '14px',
+                      color: '#666'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    marginBottom: '8px',
+                    color: '#555'
+                  }}>이름</label>
+                  <input
+                    type="text"
+                    value={userData?.name || ''}
+                    disabled
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '6px',
+                      backgroundColor: '#f8f9fa',
+                      fontSize: '14px',
+                      color: '#666'
+                    }}
+                  />
+                </div>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    marginBottom: '8px',
+                    color: '#555'
+                  }}>연락처</label>
+                  <input
+                    type="tel"
+                    value={userData?.phone || ''}
+                    disabled
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '6px',
+                      backgroundColor: '#f8f9fa',
+                      fontSize: '14px',
+                      color: '#666'
+                    }}
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">이름</label>
-                <input
-                  type="text"
-                  value={userData?.name || ''}
-                  disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-                />
+            </div>
+
+            {/* 배송지 정보 */}
+            <div style={{ 
+              backgroundColor: '#fff', 
+              border: '1px solid #e0e0e0', 
+              borderRadius: '8px', 
+              padding: '25px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
+              <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px', color: '#333' }}>배송지 정보</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    marginBottom: '8px',
+                    color: '#555'
+                  }}>우편번호 *</label>
+                  <input
+                    type="text"
+                    value={shippingInfo.zipCode}
+                    onChange={(e) => handleShippingInfoChange('zipCode', e.target.value)}
+                    placeholder="우편번호를 입력하세요"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'border-color 0.2s'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#007bff'}
+                    onBlur={(e) => e.target.style.borderColor = '#ddd'}
+                  />
+                </div>
+                <div>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    marginBottom: '8px',
+                    color: '#555'
+                  }}>시/도 *</label>
+                  <input
+                    type="text"
+                    value={shippingInfo.state}
+                    onChange={(e) => handleShippingInfoChange('state', e.target.value)}
+                    placeholder="시/도를 입력하세요"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'border-color 0.2s'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#007bff'}
+                    onBlur={(e) => e.target.style.borderColor = '#ddd'}
+                  />
+                </div>
+                <div>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    marginBottom: '8px',
+                    color: '#555'
+                  }}>시/군/구 *</label>
+                  <input
+                    type="text"
+                    value={shippingInfo.city}
+                    onChange={(e) => handleShippingInfoChange('city', e.target.value)}
+                    placeholder="시/군/구를 입력하세요"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'border-color 0.2s'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#007bff'}
+                    onBlur={(e) => e.target.style.borderColor = '#ddd'}
+                  />
+                </div>
+                <div>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    marginBottom: '8px',
+                    color: '#555'
+                  }}>상세주소 *</label>
+                  <input
+                    type="text"
+                    value={shippingInfo.street}
+                    onChange={(e) => handleShippingInfoChange('street', e.target.value)}
+                    placeholder="상세주소를 입력하세요"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'border-color 0.2s'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#007bff'}
+                    onBlur={(e) => e.target.style.borderColor = '#ddd'}
+                  />
+                </div>
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-2">연락처</label>
-                <input
-                  type="tel"
-                  value={userData?.phone || ''}
-                  disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-                />
+            </div>
+
+            {/* 결제 방법 */}
+            <div style={{ 
+              backgroundColor: '#fff', 
+              border: '1px solid #e0e0e0', 
+              borderRadius: '8px', 
+              padding: '25px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
+              <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px', color: '#333' }}>결제 방법</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* 계좌이체 */}
+                {settings.payment.enabledMethods.transfer && (
+                  <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="bank_transfer"
+                      checked={paymentMethod === 'bank_transfer'}
+                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                      style={{ marginRight: '12px', transform: 'scale(1.2)' }}
+                    />
+                    <span style={{ fontSize: '14px', color: '#333' }}>무통장 입금</span>
+                  </label>
+                )}
+                
+
+                {/* 휴대폰 결제 */}
+                {settings.payment.enabledMethods.phone && (
+                  <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="phone"
+                      checked={paymentMethod === 'phone'}
+                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                      style={{ marginRight: '12px', transform: 'scale(1.2)' }}
+                    />
+                    <span style={{ fontSize: '14px', color: '#333' }}>휴대폰 결제</span>
+                  </label>
+                )}
+                
+                {/* 카카오페이 */}
+                {settings.payment.enabledMethods.kakaopay && (
+                  <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="kakaopay"
+                      checked={paymentMethod === 'kakaopay'}
+                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                      style={{ marginRight: '12px', transform: 'scale(1.2)' }}
+                    />
+                    <span style={{ fontSize: '14px', color: '#333' }}>카카오페이</span>
+                  </label>
+                )}
+                
+                {/* 네이버페이 */}
+                {settings.payment.enabledMethods.naverpay && (
+                  <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="naverpay"
+                      checked={paymentMethod === 'naverpay'}
+                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                      style={{ marginRight: '12px', transform: 'scale(1.2)' }}
+                    />
+                    <span style={{ fontSize: '14px', color: '#333' }}>네이버페이</span>
+                  </label>
+                )}
+              </div>
+              
+              {/* 계좌이체 선택 시 계좌 정보 표시 */}
+              {paymentMethod === 'bank_transfer' && (
+                <div style={{ 
+                  marginTop: '25px', 
+                  padding: '20px', 
+                  backgroundColor: '#f8f9fa', 
+                  border: '1px solid #e0e0e0', 
+                  borderRadius: '8px' 
+                }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '15px', color: '#007bff' }}>입금 계좌 정보</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {COMPANY_BANK_ACCOUNTS.map((account, index) => (
+                      <div key={index} style={{ 
+                        backgroundColor: '#fff', 
+                        padding: '15px', 
+                        borderRadius: '6px', 
+                        border: '1px solid #ddd' 
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '14px', fontWeight: '500', color: '#007bff' }}>{account.bankName}</span>
+                          <span style={{ fontSize: '12px', color: '#666' }}>예금주: {account.accountHolder}</span>
+                        </div>
+                        <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#333' }}>
+                          {account.accountNumber}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ marginTop: '20px', fontSize: '13px', color: '#666' }}>
+                    <p style={{ fontWeight: '600', marginBottom: '8px', color: '#333' }}>입금 시 주의사항:</p>
+                    <ul style={{ paddingLeft: '20px', lineHeight: '1.5' }}>
+                      <li>주문 완료 후 3일 이내에 입금해주세요.</li>
+                      <li>입금자명을 주문자명과 동일하게 입력해주세요.</li>
+                      <li>입금 확인 후 배송이 시작됩니다.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 약관 동의 */}
+            <div style={{ 
+              backgroundColor: '#fff', 
+              border: '1px solid #e0e0e0', 
+              borderRadius: '8px', 
+              padding: '25px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
+              <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px', color: '#333' }}>약관 동의</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* 전체 동의 */}
+                <label style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  cursor: 'pointer',
+                  padding: '12px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '6px',
+                  border: '1px solid #e9ecef'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={allAgreed}
+                    onChange={handleAllAgreementChange}
+                    style={{ marginRight: '12px', transform: 'scale(1.3)' }}
+                  />
+                  <span style={{ fontSize: '15px', fontWeight: '600', color: '#333' }}>모든 약관에 동의합니다</span>
+                </label>
+                
+                {/* 구분선 */}
+                <hr style={{ border: 'none', borderTop: '1px solid #e9ecef', margin: '8px 0' }} />
+                
+                {/* 개별 약관들 */}
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', paddingLeft: '12px' }}>
+                  <input
+                    type="checkbox"
+                    checked={agreements.terms}
+                    onChange={() => handleAgreementChange('terms')}
+                    style={{ marginRight: '12px', transform: 'scale(1.2)' }}
+                  />
+                  <span style={{ fontSize: '14px', color: '#333' }}>이용약관에 동의합니다 (필수)</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', paddingLeft: '12px' }}>
+                  <input
+                    type="checkbox"
+                    checked={agreements.privacy}
+                    onChange={() => handleAgreementChange('privacy')}
+                    style={{ marginRight: '12px', transform: 'scale(1.2)' }}
+                  />
+                  <span style={{ fontSize: '14px', color: '#333' }}>개인정보 처리방침에 동의합니다 (필수)</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', paddingLeft: '12px' }}>
+                  <input
+                    type="checkbox"
+                    checked={agreements.age}
+                    onChange={() => handleAgreementChange('age')}
+                    style={{ marginRight: '12px', transform: 'scale(1.2)' }}
+                  />
+                  <span style={{ fontSize: '14px', color: '#333' }}>만 14세 이상입니다 (필수)</span>
+                </label>
               </div>
             </div>
           </div>
 
-          {/* 배송지 정보 */}
-          <div className="bg-white border rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">배송지 정보</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">우편번호 *</label>
-                <input
-                  type="text"
-                  value={shippingInfo.zipCode}
-                  onChange={(e) => handleShippingInfoChange('zipCode', e.target.value)}
-                  placeholder="우편번호를 입력하세요"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">시/도 *</label>
-                <input
-                  type="text"
-                  value={shippingInfo.state}
-                  onChange={(e) => handleShippingInfoChange('state', e.target.value)}
-                  placeholder="시/도를 입력하세요"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">시/군/구 *</label>
-                <input
-                  type="text"
-                  value={shippingInfo.city}
-                  onChange={(e) => handleShippingInfoChange('city', e.target.value)}
-                  placeholder="시/군/구를 입력하세요"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">상세주소 *</label>
-                <input
-                  type="text"
-                  value={shippingInfo.street}
-                  onChange={(e) => handleShippingInfoChange('street', e.target.value)}
-                  placeholder="상세주소를 입력하세요"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 결제 방법 */}
-          <div className="bg-white border rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">결제 방법</h2>
-            <div className="space-y-3">
-              {/* 계좌이체 */}
-              {settings.payment.enabledMethods.transfer && (
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="bank_transfer"
-                    checked={paymentMethod === 'bank_transfer'}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="mr-3"
-                  />
-                  <span>무통장 입금</span>
-                </label>
-              )}
+          {/* 주문 요약 */}
+          <div style={{ flex: '1', minWidth: '300px' }}>
+            <div style={{ 
+              backgroundColor: '#f8f9fa', 
+              borderRadius: '8px', 
+              padding: '25px', 
+              position: 'sticky', 
+              top: '20px',
+              border: '1px solid #e0e0e0',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px', color: '#333' }}>주문 상품</h3>
               
-              {/* 신용카드 */}
-              {settings.payment.enabledMethods.card && (
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="card"
-                    checked={paymentMethod === 'card'}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="mr-3"
-                  />
-                  <span>신용카드/체크카드</span>
-                </label>
-              )}
-              
-              {/* 가상계좌 */}
-              {settings.payment.enabledMethods.vbank && (
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="vbank"
-                    checked={paymentMethod === 'vbank'}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="mr-3"
-                  />
-                  <span>가상계좌</span>
-                </label>
-              )}
-              
-              {/* 휴대폰 결제 */}
-              {settings.payment.enabledMethods.phone && (
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="phone"
-                    checked={paymentMethod === 'phone'}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="mr-3"
-                  />
-                  <span>휴대폰 결제</span>
-                </label>
-              )}
-              
-              {/* 카카오페이 */}
-              {settings.payment.enabledMethods.kakaopay && (
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="kakaopay"
-                    checked={paymentMethod === 'kakaopay'}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="mr-3"
-                  />
-                  <span>카카오페이</span>
-                </label>
-              )}
-              
-              {/* 네이버페이 */}
-              {settings.payment.enabledMethods.naverpay && (
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="naverpay"
-                    checked={paymentMethod === 'naverpay'}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="mr-3"
-                  />
-                  <span>네이버페이</span>
-                </label>
-              )}
-            </div>
-            
-            {/* 계좌이체 선택 시 계좌 정보 표시 */}
-            {paymentMethod === 'bank_transfer' && (
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h3 className="text-lg font-semibold mb-3 text-blue-800">입금 계좌 정보</h3>
-                <div className="space-y-3">
-                  {COMPANY_BANK_ACCOUNTS.map((account, index) => (
-                    <div key={index} className="bg-white p-3 rounded border">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-blue-800">{account.bankName}</span>
-                        <span className="text-sm text-gray-600">예금주: {account.accountHolder}</span>
-                      </div>
-                      <div className="text-lg font-bold text-blue-900 mt-1">
-                        {account.accountNumber}
-                      </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '25px' }}>
+                {cartItemsWithProducts.map((item) => (
+                  <div key={item.productId} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ 
+                      width: '50px', 
+                      height: '50px', 
+                      backgroundColor: '#e9ecef', 
+                      borderRadius: '6px', 
+                      overflow: 'hidden',
+                      flexShrink: 0
+                    }}>
+                      {item.product.images[0] ? (
+                        <img
+                          src={item.product.images[0]}
+                          alt={item.product.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div style={{ 
+                          width: '100%', 
+                          height: '100%', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          color: '#adb5bd', 
+                          fontSize: '11px' 
+                        }}>
+                          이미지
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-                <div className="mt-4 text-sm text-blue-700">
-                  <p className="font-semibold">입금 시 주의사항:</p>
-                  <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>주문 완료 후 3일 이내에 입금해주세요.</li>
-                    <li>입금자명을 주문자명과 동일하게 입력해주세요.</li>
-                    <li>입금 확인 후 배송이 시작됩니다.</li>
-                  </ul>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 약관 동의 */}
-          <div className="bg-white border rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">약관 동의</h2>
-            <div className="space-y-3">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={agreements.terms}
-                  onChange={() => handleAgreementChange('terms')}
-                  className="mr-3"
-                />
-                <span>이용약관에 동의합니다 (필수)</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={agreements.privacy}
-                  onChange={() => handleAgreementChange('privacy')}
-                  className="mr-3"
-                />
-                <span>개인정보 처리방침에 동의합니다 (필수)</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={agreements.age}
-                  onChange={() => handleAgreementChange('age')}
-                  className="mr-3"
-                />
-                <span>만 14세 이상입니다 (필수)</span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* 주문 요약 */}
-        <div className="lg:col-span-1">
-          <div className="bg-gray-50 rounded-lg p-6 sticky top-4">
-            <h3 className="text-lg font-semibold mb-4">주문 상품</h3>
-            
-            <div className="space-y-3 mb-6">
-              {cartItemsWithProducts.map((item) => (
-                <div key={item.productId} className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden flex-shrink-0">
-                    {item.product.images[0] ? (
-                      <img
-                        src={item.product.images[0]}
-                        alt={item.product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                        이미지
-                      </div>
-                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {item.product.name}
+                      </p>
+                      <p style={{ fontSize: '12px', color: '#666' }}>
+                        {formatPrice(item.price)} × {item.quantity}
+                      </p>
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>
+                      {formatPrice(item.price * item.quantity)}
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{item.product.name}</p>
-                    <p className="text-xs text-gray-600">
-                      {formatPrice(item.price)} × {item.quantity}
-                    </p>
-                  </div>
-                  <div className="text-sm font-semibold">
-                    {formatPrice(item.price * item.quantity)}
-                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '25px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                  <span style={{ color: '#666' }}>상품 총액</span>
+                  <span style={{ color: '#333', fontWeight: '500' }}>{formatPrice(cartTotal)}</span>
                 </div>
-              ))}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                  <span style={{ color: '#666' }}>배송비</span>
+                  <span style={{ color: '#333', fontWeight: '500' }}>{shippingCost === 0 ? '무료' : formatPrice(shippingCost)}</span>
+                </div>
+                <hr style={{ border: 'none', borderTop: '1px solid #ddd', margin: '8px 0' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: '600' }}>
+                  <span style={{ color: '#333' }}>총 결제금액</span>
+                  <span style={{ color: '#007bff' }}>{formatPrice(totalAmount)}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={handleOrder}
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  backgroundColor: loading ? '#ced4da' : '#007bff',
+                  color: '#fff',
+                  padding: '15px 0',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  border: 'none',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  transition: 'background-color 0.2s',
+                  marginBottom: '12px'
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.target.style.backgroundColor = '#0056b3';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
+                    e.target.style.backgroundColor = '#007bff';
+                  }
+                }}
+              >
+                {loading ? '주문 처리 중...' : '결제하기'}
+              </button>
+
+              <Link
+                href="/cart"
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  textAlign: 'center',
+                  border: '1px solid #ddd',
+                  padding: '15px 0',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  color: '#666',
+                  textDecoration: 'none',
+                  backgroundColor: '#fff',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#f8f9fa';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = '#fff';
+                }}
+              >
+                장바구니로 돌아가기
+              </Link>
             </div>
-
-            <div className="space-y-3 mb-6">
-              <div className="flex justify-between">
-                <span>상품 총액</span>
-                <span>{formatPrice(cartTotal)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>배송비</span>
-                <span>{shippingCost === 0 ? '무료' : formatPrice(shippingCost)}</span>
-              </div>
-              <hr />
-              <div className="flex justify-between text-lg font-semibold">
-                <span>총 결제금액</span>
-                <span className="text-blue-600">{formatPrice(totalAmount)}</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleOrder}
-              disabled={loading}
-              className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-            >
-              {loading ? '주문 처리 중...' : '결제하기'}
-            </button>
-
-            <Link
-              href="/cart"
-              className="block w-full text-center border border-gray-300 py-3 rounded-lg mt-3 hover:bg-gray-50 transition-colors"
-            >
-              장바구니로 돌아가기
-            </Link>
           </div>
         </div>
       </div>
-    </div>
     </>
   );
 }
