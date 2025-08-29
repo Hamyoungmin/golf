@@ -21,7 +21,7 @@ export async function getInventoryStats(): Promise<InventoryStats> {
     const products = await getProducts();
     
     const totalProducts = products.length;
-    const lowStockProducts = products.filter(p => p.stock > 0 && p.stock < 10).length;
+    const lowStockProducts = products.filter(p => p.stock <= 0).length;
     const outOfStockProducts = products.filter(p => p.stock === 0).length;
     const totalValue = products.reduce((sum, product) => {
       return sum + (parseInt(product.price) * product.stock);
@@ -52,8 +52,8 @@ export async function getInventoryProducts(): Promise<Product[]> {
       // 품절 상품을 맨 아래로, 그 다음 재고 부족 상품, 마지막에 정상 재고 상품
       if (a.stock === 0 && b.stock > 0) return 1;
       if (a.stock > 0 && b.stock === 0) return -1;
-      if (a.stock < 10 && b.stock >= 10) return -1;
-      if (a.stock >= 10 && b.stock < 10) return 1;
+      if (a.stock <= 0 && b.stock > 0) return -1;
+      if (a.stock > 0 && b.stock <= 0) return 1;
       return a.name.localeCompare(b.name);
     });
   } catch (error) {
@@ -186,14 +186,14 @@ export async function getAllStockHistory(limit: number = 100): Promise<StockHist
 // 재고 상태 텍스트 반환
 export function getStockStatusText(stock: number): string {
   if (stock === 0) return '품절';
-  if (stock < 10) return '부족';
+  if (stock < 0) return '부족';
   return '정상';
 }
 
 // 재고 상태 색상 반환
 export function getStockStatusColor(stock: number): string {
   if (stock === 0) return '#e74c3c'; // 빨간색
-  if (stock < 10) return '#f39c12'; // 주황색
+  if (stock < 0) return '#f39c12'; // 주황색
   return '#27ae60'; // 초록색
 }
 
@@ -201,7 +201,7 @@ export function getStockStatusColor(stock: number): string {
 export async function checkLowStockProducts(): Promise<Product[]> {
   try {
     const products = await getProducts();
-    return products.filter(product => product.stock > 0 && product.stock < 10);
+    return products.filter(product => product.stock < 0);
   } catch (error) {
     console.error('재고 부족 상품 확인 오류:', error);
     return [];

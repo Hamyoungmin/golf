@@ -29,7 +29,6 @@ export default function InventoryPage() {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [stockHistory, setStockHistory] = useState<StockHistory[]>([]);
   const [adjustmentForm, setAdjustmentForm] = useState({
-    type: 'increase' as 'increase' | 'decrease' | 'set',
     quantity: '',
     reason: ''
   });
@@ -68,7 +67,7 @@ export default function InventoryPage() {
 
   const filteredProducts = products.filter(product => {
     if (selectedCategory !== 'all' && product.category !== selectedCategory) return false;
-    if (showLowStock && product.stock >= 10) return false;
+    if (showLowStock && product.stock >= 0) return false;
     return true;
   });
 
@@ -78,10 +77,25 @@ export default function InventoryPage() {
       return;
     }
 
+    const quantityChange = parseInt(adjustmentForm.quantity);
+    let adjustmentType: 'increase' | 'decrease' | 'set';
+    let adjustmentQuantity: number;
+
+    if (quantityChange > 0) {
+      adjustmentType = 'increase';
+      adjustmentQuantity = quantityChange;
+    } else if (quantityChange < 0) {
+      adjustmentType = 'decrease';
+      adjustmentQuantity = Math.abs(quantityChange);
+    } else {
+      alert('0이 아닌 숫자를 입력해주세요.');
+      return;
+    }
+
     const adjustment: StockAdjustment = {
       productId: selectedProduct.id,
-      quantity: parseInt(adjustmentForm.quantity),
-      type: adjustmentForm.type,
+      quantity: adjustmentQuantity,
+      type: adjustmentType,
       reason: adjustmentForm.reason
     };
 
@@ -89,7 +103,7 @@ export default function InventoryPage() {
     if (success) {
       alert('재고가 성공적으로 조정되었습니다.');
       setShowAdjustModal(false);
-      setAdjustmentForm({ type: 'increase', quantity: '', reason: '' });
+      setAdjustmentForm({ quantity: '', reason: '' });
       loadInventoryData(); // 데이터 새로고침
     } else {
       alert('재고 조정에 실패했습니다.');
@@ -189,7 +203,7 @@ export default function InventoryPage() {
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
                 {inventoryStats.lowStockProducts.toLocaleString()}개
               </div>
-              <div style={{ fontSize: '14px', color: '#666' }}>재고 부족</div>
+              <div style={{ fontSize: '14px', color: '#666' }}>재고 부족(0개 미만)</div>
             </div>
             
             <div style={{ 
@@ -246,7 +260,7 @@ export default function InventoryPage() {
                   key={category}
                   onClick={() => setSelectedCategory(category)}
                   style={{
-                    padding: '8px 16px',
+                    padding: '10px 20px',
                     border: '1px solid #ddd',
                     borderRadius: '4px',
                     fontSize: '14px',
@@ -440,7 +454,8 @@ export default function InventoryPage() {
             backgroundColor: 'rgba(0,0,0,0.5)',
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
+            alignItems: 'flex-start',
+            paddingTop: '120px',
             zIndex: 1000
           }}>
             <div style={{
@@ -449,7 +464,7 @@ export default function InventoryPage() {
               padding: '30px',
               maxWidth: '500px',
               width: '90%',
-              maxHeight: '90%',
+              maxHeight: '80vh',
               overflow: 'auto'
             }}>
               <h3 style={{ 
@@ -467,33 +482,11 @@ export default function InventoryPage() {
                 </p>
               </div>
 
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                  조정 유형
-                </label>
-                <select
-                  value={adjustmentForm.type}
-                  onChange={(e) => setAdjustmentForm({
-                    ...adjustmentForm, 
-                    type: e.target.value as 'increase' | 'decrease' | 'set'
-                  })}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    fontSize: '14px'
-                  }}
-                >
-                  <option value="increase">입고 (재고 증가)</option>
-                  <option value="decrease">출고 (재고 감소)</option>
-                  <option value="set">재고 설정 (정확한 수량으로 설정)</option>
-                </select>
-              </div>
+
 
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                  수량
+                  재고 변경량
                 </label>
                 <input
                   type="number"
@@ -502,7 +495,7 @@ export default function InventoryPage() {
                     ...adjustmentForm, 
                     quantity: e.target.value
                   })}
-                  placeholder={adjustmentForm.type === 'set' ? '설정할 재고 수량' : '조정할 수량'}
+                  placeholder="양수는 증가, 음수는 감소 (예: 5, -3)"
                   style={{
                     width: '100%',
                     padding: '10px',
@@ -511,6 +504,9 @@ export default function InventoryPage() {
                     fontSize: '14px'
                   }}
                 />
+                <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+                  💡 양수를 입력하면 재고가 증가하고, 음수를 입력하면 재고가 감소합니다.
+                </p>
               </div>
 
               <div style={{ marginBottom: '20px' }}>
@@ -540,7 +536,7 @@ export default function InventoryPage() {
                 <button
                   onClick={() => {
                     setShowAdjustModal(false);
-                    setAdjustmentForm({ type: 'increase', quantity: '', reason: '' });
+                    setAdjustmentForm({ quantity: '', reason: '' });
                   }}
                   style={{
                     padding: '10px 20px',
@@ -586,7 +582,8 @@ export default function InventoryPage() {
             backgroundColor: 'rgba(0,0,0,0.5)',
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
+            alignItems: 'flex-start',
+            paddingTop: '120px',
             zIndex: 1000
           }}>
             <div style={{
@@ -595,7 +592,7 @@ export default function InventoryPage() {
               padding: '30px',
               maxWidth: '800px',
               width: '90%',
-              maxHeight: '90%',
+              maxHeight: '80vh',
               overflow: 'auto'
             }}>
               <div style={{ 

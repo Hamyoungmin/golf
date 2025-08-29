@@ -312,7 +312,7 @@ export default function AdminDashboard() {
                 fontWeight: '500',
                 fontSize: '14px'
               }}>
-                재고 부족 (10개 미만)
+                재고 부족 (0개 미만)
               </label>
               <div style={{
                 width: '100%',

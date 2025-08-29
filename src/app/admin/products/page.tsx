@@ -87,7 +87,7 @@ export default function AdminProductsPage() {
   const getStockStatus = (stock: number) => {
     if (stock === 0) {
       return <span className="text-red-600 font-medium">품절</span>;
-    } else if (stock < 10) {
+    } else if (stock < 0) {
       return <span className="text-yellow-600 font-medium">부족 ({stock})</span>;
     }
     return <span className="text-green-600">{stock}</span>;

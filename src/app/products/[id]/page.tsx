@@ -428,50 +428,67 @@ export default function ProductPage() {
 
             {/* 상세정보 섹션 */}
             <div id="details" style={{ marginBottom: '60px' }}>
-             {product.specifications && Object.keys(product.specifications).length > 0 ? (
-               <div style={{
-                 display: 'grid',
-                 gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                 gap: '20px'
-               }}>
-                 <div style={{
-                   border: '1px solid #e0e0e0',
-                   borderRadius: '8px',
-                   overflow: 'hidden'
-                 }}>
-                   <div style={{
-                     backgroundColor: '#f8f9fa',
-                     padding: '15px',
-                     fontWeight: 'bold',
-                     fontSize: '16px'
-                   }}>
-                     제품 사양
-                   </div>
-                   <div style={{ padding: '0' }}>
-                     {Object.entries(product.specifications).map(([key, value], index) => (
-                       <div
-                         key={key}
-                         style={{
-                           display: 'flex',
-                           padding: '12px 15px',
-                           borderBottom: index < Object.entries(product.specifications).length - 1 ? '1px solid #f0f0f0' : 'none',
-                           backgroundColor: index % 2 === 0 ? '#fff' : '#fafafa'
-                         }}
-                       >
-                         <div style={{ 
-                           minWidth: '120px', 
-                           fontWeight: '500', 
-                           color: '#666' 
-                         }}>
-                           {key}:
+             {(product.detailedDescription && product.detailedDescription.trim()) || (product.specifications && Object.keys(product.specifications).length > 0) ? (
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                 
+                 {/* 상세 설명 */}
+                 {product.detailedDescription && product.detailedDescription.trim() && (
+                   <div 
+                     style={{
+                       fontSize: '16px',
+                       lineHeight: '1.8',
+                       color: '#333',
+                       whiteSpace: 'pre-line',
+                       padding: '20px 0'
+                     }}
+                     dangerouslySetInnerHTML={{ __html: product.detailedDescription }}
+                   />
+                 )}
+
+                 {/* 제품 사양 */}
+                 {product.specifications && Object.keys(product.specifications).length > 0 && (
+                   <div style={{ padding: '20px 0' }}>
+                     <h4 style={{ 
+                       fontSize: '18px',
+                       fontWeight: 'bold',
+                       color: '#333',
+                       marginBottom: '15px'
+                     }}>
+                       제품 사양
+                     </h4>
+                     <div style={{
+                       display: 'grid',
+                       gap: '8px'
+                     }}>
+                       {Object.entries(product.specifications).map(([key, value]) => (
+                         <div
+                           key={key}
+                           style={{
+                             display: 'grid',
+                             gridTemplateColumns: '1fr 2fr',
+                             gap: '15px',
+                             padding: '8px 0',
+                             borderBottom: '1px solid #f0f0f0'
+                           }}
+                         >
+                           <span style={{ 
+                             fontWeight: '500', 
+                             color: '#666',
+                             fontSize: '16px'
+                           }}>
+                             {key}
+                           </span>
+                           <span style={{ 
+                             color: '#333',
+                             fontSize: '16px'
+                           }}>
+                             {value}
+                           </span>
                          </div>
-                         <div style={{ color: '#333' }}>
-                           {value}
-                         </div>
-                       </div>
-                     ))}
+                       ))}
+                     </div>
                    </div>
-                 </div>
+                 )}
                </div>
              ) : (
                <div style={{
