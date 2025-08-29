@@ -13,17 +13,17 @@ import {
 } from './firebase';
 import { PaymentInfo, BankAccount } from '@/types';
 
-// 회사 계좌 정보
+// 회사 계좌 정보 (실제 계좌)
 export const COMPANY_BANK_ACCOUNTS: BankAccount[] = [
   {
     bankName: '국민은행',
-    accountNumber: '123456-78-901234',
-    accountHolder: '골프상회'
+    accountNumber: '279801-04-257481',
+    accountHolder: '권혁규'
   },
   {
-    bankName: '신한은행', 
-    accountNumber: '234567-89-012345',
-    accountHolder: '골프상회'
+    bankName: '신협', 
+    accountNumber: '010-7236-8400',
+    accountHolder: '권혁규'
   }
 ];
 

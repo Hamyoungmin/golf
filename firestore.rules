@@ -396,5 +396,107 @@ service cloud.firestore {
     match /hourlyStats/{date} {
       allow read, write: if request.auth != null;
     }
+    
+    // ============== 결제/입금 관리 규칙 ==============
+    
+    // 결제 정보 - 인증된 사용자 모두 접근 가능 (관리자용 입금 관리)
+    match /payments/{paymentId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 상태 변경 히스토리 - 인증된 사용자 접근 가능 (관리자용)
+    match /paymentHistory/{historyId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 계좌이체 상세 정보 - 인증된 사용자 접근 가능
+    match /bankTransfers/{transferId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 영수증/증빙서류 - 인증된 사용자 접근 가능
+    match /paymentReceipts/{receiptId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 분쟁/차지백 - 인증된 사용자 접근 가능
+    match /paymentDisputes/{disputeId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 환불 요청 - 인증된 사용자 접근 가능
+    match /paymentRefunds/{refundId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 알림 설정 - 본인만 접근
+    match /paymentNotifications/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 결제 방법 관리 - 본인만 접근
+    match /paymentMethods/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 결제 설정 (수수료, 한도 등) - 인증된 사용자 접근 가능
+    match /paymentSettings/{settingId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 가상계좌 정보 - 인증된 사용자 접근 가능
+    match /virtualAccounts/{accountId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 게이트웨이 로그 - 인증된 사용자 접근 가능
+    match /paymentGatewayLogs/{logId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 보안 로그 - 인증된 사용자 접근 가능
+    match /paymentSecurityLogs/{logId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 웹훅 로그 - 인증된 사용자 접근 가능
+    match /paymentWebhooks/{webhookId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 캐시/임시 데이터 - 인증된 사용자 접근 가능
+    match /paymentCache/{cacheId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 통계 (일별/월별) - 인증된 사용자 접근 가능
+    match /paymentAnalytics/{analyticsId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 실패 로그 - 인증된 사용자 접근 가능
+    match /paymentFailures/{failureId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 수수료 정산 - 인증된 사용자 접근 가능
+    match /paymentFees/{feeId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 일괄 결제 처리 - 인증된 사용자 접근 가능
+    match /batchPayments/{batchId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 결제 승인/거부 로그 - 인증된 사용자 접근 가능
+    match /paymentApprovalLogs/{logId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 정기 결제/구독 - 인증된 사용자 접근 가능
+    match /subscriptionPayments/{subscriptionId} {
+      allow read, write: if request.auth != null;
+    }
   }
 }

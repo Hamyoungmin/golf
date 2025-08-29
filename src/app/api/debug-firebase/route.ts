@@ -18,8 +18,10 @@ export async function GET() {
     
     // Storage 객체 확인
     const storageInfo = {
-      app: storage.app.name,
-      bucket: storage.app.options.storageBucket
+      app: storage?.app?.name || 'undefined',
+      bucket: storage?.app?.options?.storageBucket || 'undefined',
+      storageExists: !!storage,
+      configBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
     };
     
     console.log('🔍 Storage 정보:', storageInfo);

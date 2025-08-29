@@ -183,3 +183,8 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
     return false;
   }
 }
+
+// 주문 ID로 주문 정보 가져오기 (별칭 함수)
+export async function getOrderByOrderId(orderId: string): Promise<Order | null> {
+  return await getOrder(orderId);
+}

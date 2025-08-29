@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { addProduct } from '@/lib/products';
@@ -33,6 +33,27 @@ export default function AdminProductCreatePage() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, fileName: '' });
+
+  // Firebase 디버그 테스트 (임시)
+  useEffect(() => {
+    const debugFirebase = async () => {
+      try {
+        console.log('🔍 Firebase 디버그 API 호출 중...');
+        const response = await fetch('/api/debug-firebase');
+        const data = await response.json();
+        console.log('🔍 Firebase 디버그 결과:', JSON.stringify(data, null, 2));
+        
+        // 추가로 test-firebase도 호출
+        const testResponse = await fetch('/api/test-firebase');
+        const testData = await testResponse.json();
+        console.log('🔍 Firebase 테스트 결과:', JSON.stringify(testData, null, 2));
+      } catch (error) {
+        console.error('🔍 디버그 실패:', error);
+      }
+    };
+    
+    debugFirebase();
+  }, []);
 
   // 모달 상태 관리
   const [modalState, setModalState] = useState({

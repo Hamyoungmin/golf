@@ -181,41 +181,88 @@ function CheckoutSuccessContent() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto">
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* 성공 메시지 */}
-        <div className="text-center mb-8">
-          <div className="mb-4">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mx-auto text-green-500">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <path d="M22 4L12 14.01l-3-3"/>
-            </svg>
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              margin: '0 auto',
+              backgroundColor: '#28a745',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '40px',
+              color: 'white'
+            }}>
+              ✓
+            </div>
           </div>
-          <h1 className="text-3xl font-bold mb-4 text-gray-800">주문이 완료되었습니다!</h1>
-          <p className="text-gray-600 mb-6">
-            주문번호: <span className="font-semibold text-blue-600">{order.orderId}</span>
+          <h1 style={{ 
+            fontSize: '28px', 
+            fontWeight: 'bold', 
+            marginBottom: '16px', 
+            color: '#333'
+          }}>
+            주문이 완료되었습니다!
+          </h1>
+          <p style={{ 
+            color: '#666', 
+            marginBottom: '24px',
+            fontSize: '16px'
+          }}>
+            주문번호: <span style={{ fontWeight: '600', color: '#007bff' }}>{order.orderId}</span>
           </p>
-          <p className="text-sm text-gray-500">
+          <p style={{ 
+            fontSize: '14px', 
+            color: '#999'
+          }}>
             주문 확인 및 배송 준비까지 1-2일 정도 소요됩니다.
           </p>
         </div>
 
         {/* 주문 정보 */}
-        <div className="bg-white border rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">주문 정보</h2>
+        <div style={{ 
+          backgroundColor: '#fff', 
+          border: '1px solid #e0e0e0', 
+          borderRadius: '8px', 
+          padding: '30px',
+          marginBottom: '25px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+          <h2 style={{ 
+            fontSize: '18px', 
+            fontWeight: '600', 
+            marginBottom: '20px',
+            color: '#333',
+            borderBottom: '1px solid #e0e0e0',
+            paddingBottom: '8px'
+          }}>
+            주문 정보
+          </h2>
           
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">주문일시</span>
-              <span>{formatDate(order.createdAt)}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', fontSize: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#666' }}>주문일시</span>
+              <span style={{ color: '#333', fontWeight: '500' }}>{formatDate(order.createdAt)}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">결제방법</span>
-              <span>{getPaymentMethodText(order.paymentMethod)}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#666' }}>결제방법</span>
+              <span style={{ color: '#333', fontWeight: '500' }}>{getPaymentMethodText(order.paymentMethod)}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">주문상태</span>
-              <span className="px-2 py-1 rounded text-xs bg-yellow-100 text-yellow-600">
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#666' }}>주문상태</span>
+              <span style={{ 
+                padding: '4px 8px', 
+                borderRadius: '4px', 
+                fontSize: '12px',
+                backgroundColor: '#fff3cd',
+                color: '#856404',
+                fontWeight: '500'
+              }}>
                 주문 접수
               </span>
             </div>
@@ -223,20 +270,42 @@ function CheckoutSuccessContent() {
         </div>
 
         {/* 주문 상품 */}
-        <div className="bg-white border rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">주문 상품</h2>
+        <div style={{ 
+          backgroundColor: '#fff', 
+          border: '1px solid #e0e0e0', 
+          borderRadius: '8px', 
+          padding: '30px',
+          marginBottom: '25px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+          <h2 style={{ 
+            fontSize: '18px', 
+            fontWeight: '600', 
+            marginBottom: '20px',
+            color: '#333',
+            borderBottom: '1px solid #e0e0e0',
+            paddingBottom: '8px'
+          }}>
+            주문 상품
+          </h2>
           
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {order.items.map((item, index) => (
-              <div key={index} className="flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0">
+              <div key={index} style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                padding: '15px 0',
+                borderBottom: index < order.items.length - 1 ? '1px solid #f0f0f0' : 'none'
+              }}>
                 <div>
-                  <h3 className="font-medium">{item.productName}</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 style={{ fontWeight: '500', marginBottom: '8px', color: '#333' }}>{item.productName}</h3>
+                  <p style={{ fontSize: '14px', color: '#666' }}>
                     {formatPrice(item.price)} × {item.quantity}개
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold">{formatPrice(item.totalPrice)}</p>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontWeight: '600', fontSize: '16px', color: '#333' }}>{formatPrice(item.totalPrice)}</p>
                 </div>
               </div>
             ))}
@@ -244,59 +313,144 @@ function CheckoutSuccessContent() {
         </div>
 
         {/* 결제 정보 */}
-        <div className="bg-white border rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">결제 정보</h2>
+        <div style={{ 
+          backgroundColor: '#fff', 
+          border: '1px solid #e0e0e0', 
+          borderRadius: '8px', 
+          padding: '30px',
+          marginBottom: '25px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+          <h2 style={{ 
+            fontSize: '18px', 
+            fontWeight: '600', 
+            marginBottom: '20px',
+            color: '#333',
+            borderBottom: '1px solid #e0e0e0',
+            paddingBottom: '8px'
+          }}>
+            결제 정보
+          </h2>
           
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span>상품 총액</span>
-              <span>{formatPrice(order.totalAmount - (order.totalAmount >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.baseShippingCost))}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+              <span style={{ color: '#666' }}>상품 총액</span>
+              <span style={{ color: '#333', fontWeight: '500' }}>{formatPrice(order.totalAmount - (order.totalAmount >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.baseShippingCost))}</span>
             </div>
-            <div className="flex justify-between">
-              <span>배송비</span>
-              <span>{order.totalAmount >= settings.shipping.freeShippingThreshold ? '무료' : formatPrice(settings.shipping.baseShippingCost)}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+              <span style={{ color: '#666' }}>배송비</span>
+              <span style={{ color: '#333', fontWeight: '500' }}>{order.totalAmount >= settings.shipping.freeShippingThreshold ? '무료' : formatPrice(settings.shipping.baseShippingCost)}</span>
             </div>
-            <hr />
-            <div className="flex justify-between text-lg font-semibold">
-              <span>총 결제금액</span>
-              <span className="text-blue-600">{formatPrice(order.totalAmount)}</span>
+            <hr style={{ border: 'none', borderTop: '1px solid #ddd', margin: '8px 0' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: '600' }}>
+              <span style={{ color: '#333' }}>총 결제금액</span>
+              <span style={{ color: '#007bff' }}>{formatPrice(order.totalAmount)}</span>
             </div>
           </div>
         </div>
 
         {/* 배송지 정보 */}
-        <div className="bg-white border rounded-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">배송지 정보</h2>
+        <div style={{ 
+          backgroundColor: '#fff', 
+          border: '1px solid #e0e0e0', 
+          borderRadius: '8px', 
+          padding: '30px',
+          marginBottom: '30px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+          <h2 style={{ 
+            fontSize: '18px', 
+            fontWeight: '600', 
+            marginBottom: '20px',
+            color: '#333',
+            borderBottom: '1px solid #e0e0e0',
+            paddingBottom: '8px'
+          }}>
+            배송지 정보
+          </h2>
           
-          <div className="space-y-2 text-sm">
-            <p><span className="text-gray-600">우편번호:</span> {order.shippingAddress.zipCode}</p>
-            <p><span className="text-gray-600">주소:</span> {order.shippingAddress.state} {order.shippingAddress.city}</p>
-            <p><span className="text-gray-600">상세주소:</span> {order.shippingAddress.street}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px' }}>
+            <p><span style={{ color: '#666' }}>우편번호:</span> <span style={{ color: '#333', fontWeight: '500' }}>{order.shippingAddress.zipCode}</span></p>
+            <p><span style={{ color: '#666' }}>주소:</span> <span style={{ color: '#333', fontWeight: '500' }}>{order.shippingAddress.state} {order.shippingAddress.city}</span></p>
+            <p><span style={{ color: '#666' }}>상세주소:</span> <span style={{ color: '#333', fontWeight: '500' }}>{order.shippingAddress.street}</span></p>
           </div>
         </div>
 
         {/* 계좌이체 관련 정보 */}
         {order.paymentMethod === 'bank_transfer' && (
-          <div className="space-y-6 mb-8">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', marginBottom: '30px' }}>
             {/* 입금 안내 */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-3 text-blue-800">입금 안내</h3>
-              <div className="space-y-3">
+            <div style={{ 
+              backgroundColor: '#e8f4fd', 
+              border: '1px solid #bee5eb', 
+              borderRadius: '8px', 
+              padding: '25px'
+            }}>
+              <h3 style={{ 
+                fontSize: '18px', 
+                fontWeight: '600', 
+                marginBottom: '15px', 
+                color: '#0c5460'
+              }}>
+                💰 입금 안내
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 {COMPANY_BANK_ACCOUNTS.map((account, index) => (
-                  <div key={index} className="bg-white p-3 rounded border">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium text-blue-800">{account.bankName}</span>
-                      <span className="text-sm text-gray-600">예금주: {account.accountHolder}</span>
+                  <div key={index} style={{ 
+                    backgroundColor: '#fff', 
+                    padding: '20px', 
+                    borderRadius: '6px', 
+                    border: '1px solid #ddd',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                  }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      marginBottom: '8px'
+                    }}>
+                      <span style={{ 
+                        fontWeight: '600', 
+                        color: '#007bff',
+                        fontSize: '16px'
+                      }}>
+                        {account.bankName}
+                      </span>
+                      <span style={{ 
+                        fontSize: '14px', 
+                        color: '#666'
+                      }}>
+                        예금주: {account.accountHolder}
+                      </span>
                     </div>
-                    <div className="text-lg font-bold text-blue-900 mt-1">
+                    <div style={{ 
+                      fontSize: '18px', 
+                      fontWeight: 'bold', 
+                      color: '#333',
+                      fontFamily: 'monospace',
+                      backgroundColor: '#f8f9fa',
+                      padding: '8px',
+                      borderRadius: '4px'
+                    }}>
                       {account.accountNumber}
                     </div>
                   </div>
                 ))}
-                <div className="text-sm text-blue-700 mt-4">
-                  <p><strong>입금 금액:</strong> {formatPrice(order.totalAmount)}</p>
-                  <p><strong>입금자명:</strong> 주문시 입력한 이름으로 입금해주세요</p>
-                  <p className="mt-2 text-blue-600">
+                <div style={{ 
+                  fontSize: '14px', 
+                  color: '#0c5460', 
+                  marginTop: '15px',
+                  padding: '15px',
+                  backgroundColor: '#d1ecf1',
+                  borderRadius: '6px'
+                }}>
+                  <p style={{ marginBottom: '8px' }}><strong>💵 입금 금액:</strong> {formatPrice(order.totalAmount)}</p>
+                  <p style={{ marginBottom: '8px' }}><strong>👤 입금자명:</strong> 주문시 입력한 이름으로 입금해주세요</p>
+                  <p style={{ 
+                    marginTop: '12px', 
+                    color: '#007bff',
+                    fontWeight: '500'
+                  }}>
                     ※ 입금 확인 후 배송 준비가 시작됩니다. (영업일 기준 1-2일)
                   </p>
                 </div>
@@ -305,9 +459,27 @@ function CheckoutSuccessContent() {
 
             {/* 입금 확인 상태 */}
             {paymentInfo && paymentInfo.bankTransferInfo ? (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-3 text-green-800">입금 정보 등록됨</h3>
-                <div className="text-sm text-green-700 space-y-2">
+              <div style={{ 
+                backgroundColor: '#d4edda', 
+                border: '1px solid #c3e6cb', 
+                borderRadius: '8px', 
+                padding: '25px'
+              }}>
+                <h3 style={{ 
+                  fontSize: '18px', 
+                  fontWeight: '600', 
+                  marginBottom: '15px', 
+                  color: '#155724'
+                }}>
+                  ✅ 입금 정보 등록됨
+                </h3>
+                <div style={{ 
+                  fontSize: '14px', 
+                  color: '#155724', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '8px'
+                }}>
                   <p><strong>입금자명:</strong> {paymentInfo.bankTransferInfo.depositorName}</p>
                   <p><strong>입금 금액:</strong> {formatPrice(paymentInfo.bankTransferInfo.transferAmount)}</p>
                   <p><strong>입금 은행:</strong> {paymentInfo.bankTransferInfo.bankName}</p>
@@ -317,55 +489,136 @@ function CheckoutSuccessContent() {
                   {paymentInfo.bankTransferInfo.transferNote && (
                     <p><strong>참고사항:</strong> {paymentInfo.bankTransferInfo.transferNote}</p>
                   )}
-                  <p className="mt-3 text-green-600">
+                  <p style={{ 
+                    marginTop: '12px', 
+                    color: '#28a745',
+                    fontWeight: '500'
+                  }}>
                     ※ 관리자 확인 후 주문이 처리됩니다.
                   </p>
                 </div>
               </div>
             ) : (
               /* 입금 확인 폼 */
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-yellow-800">입금 완료 신고</h3>
+              <div style={{ 
+                backgroundColor: '#fff3cd', 
+                border: '1px solid #ffeeba', 
+                borderRadius: '8px', 
+                padding: '25px'
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  marginBottom: '20px'
+                }}>
+                  <h3 style={{ 
+                    fontSize: '18px', 
+                    fontWeight: '600', 
+                    color: '#856404'
+                  }}>
+                    📝 입금 완료 신고
+                  </h3>
                   <button
                     onClick={() => setShowTransferForm(!showTransferForm)}
-                    className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#ffc107',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.target as HTMLButtonElement).style.backgroundColor = '#e0a800';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.target as HTMLButtonElement).style.backgroundColor = '#ffc107';
+                    }}
                   >
                     {showTransferForm ? '폼 닫기' : '입금 완료 신고하기'}
                   </button>
                 </div>
                 
                 {showTransferForm && (
-                  <form onSubmit={handleTransferSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <form onSubmit={handleTransferSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
                       <div>
-                        <label className="block text-sm font-medium mb-2 text-yellow-800">입금자명 *</label>
+                        <label style={{ 
+                          display: 'block', 
+                          fontSize: '14px', 
+                          fontWeight: '500', 
+                          marginBottom: '8px', 
+                          color: '#856404'
+                        }}>
+                          입금자명 *
+                        </label>
                         <input
                           type="text"
                           value={transferData.depositorName}
                           onChange={(e) => setTransferData(prev => ({ ...prev, depositorName: e.target.value }))}
                           placeholder="실제 입금하신 분의 성함"
-                          className="w-full px-3 py-2 border border-yellow-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            border: '1px solid #ffeeba',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            outline: 'none'
+                          }}
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2 text-yellow-800">입금 금액 *</label>
+                        <label style={{ 
+                          display: 'block', 
+                          fontSize: '14px', 
+                          fontWeight: '500', 
+                          marginBottom: '8px', 
+                          color: '#856404'
+                        }}>
+                          입금 금액 *
+                        </label>
                         <input
                           type="text"
                           value={transferData.transferAmount}
                           onChange={(e) => setTransferData(prev => ({ ...prev, transferAmount: e.target.value }))}
                           placeholder="입금하신 금액"
-                          className="w-full px-3 py-2 border border-yellow-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            border: '1px solid #ffeeba',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            outline: 'none'
+                          }}
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2 text-yellow-800">입금 은행 *</label>
+                        <label style={{ 
+                          display: 'block', 
+                          fontSize: '14px', 
+                          fontWeight: '500', 
+                          marginBottom: '8px', 
+                          color: '#856404'
+                        }}>
+                          입금 은행 *
+                        </label>
                         <select
                           value={transferData.bankName}
                           onChange={(e) => setTransferData(prev => ({ ...prev, bankName: e.target.value }))}
-                          className="w-full px-3 py-2 border border-yellow-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            border: '1px solid #ffeeba',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            outline: 'none'
+                          }}
                           required
                         >
                           <option value="">입금하신 은행을 선택하세요</option>
@@ -377,28 +630,76 @@ function CheckoutSuccessContent() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2 text-yellow-800">참고사항</label>
+                        <label style={{ 
+                          display: 'block', 
+                          fontSize: '14px', 
+                          fontWeight: '500', 
+                          marginBottom: '8px', 
+                          color: '#856404'
+                        }}>
+                          참고사항
+                        </label>
                         <input
                           type="text"
                           value={transferData.transferNote}
                           onChange={(e) => setTransferData(prev => ({ ...prev, transferNote: e.target.value }))}
                           placeholder="기타 참고사항 (선택사항)"
-                          className="w-full px-3 py-2 border border-yellow-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            border: '1px solid #ffeeba',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            outline: 'none'
+                          }}
                         />
                       </div>
                     </div>
-                    <div className="flex justify-end space-x-3">
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                       <button
                         type="button"
                         onClick={() => setShowTransferForm(false)}
-                        className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                        style={{
+                          padding: '8px 16px',
+                          border: '1px solid #ddd',
+                          borderRadius: '6px',
+                          backgroundColor: '#fff',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.target as HTMLButtonElement).style.backgroundColor = '#f8f9fa';
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.target as HTMLButtonElement).style.backgroundColor = '#fff';
+                        }}
                       >
                         취소
                       </button>
                       <button
                         type="submit"
                         disabled={submitting}
-                        className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        style={{
+                          padding: '8px 16px',
+                          backgroundColor: submitting ? '#6c757d' : '#ffc107',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: submitting ? 'not-allowed' : 'pointer',
+                          fontSize: '14px',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!submitting) {
+                            (e.target as HTMLButtonElement).style.backgroundColor = '#e0a800';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!submitting) {
+                            (e.target as HTMLButtonElement).style.backgroundColor = '#ffc107';
+                          }
+                        }}
                       >
                         {submitting ? '등록 중...' : '입금 완료 신고'}
                       </button>
@@ -406,8 +707,15 @@ function CheckoutSuccessContent() {
                   </form>
                 )}
                 
-                <div className="mt-4 text-sm text-yellow-700">
-                  <p>※ 입금 완료 후 위 폼을 작성해주시면 더 빠른 주문 처리가 가능합니다.</p>
+                <div style={{ 
+                  marginTop: '20px', 
+                  fontSize: '14px', 
+                  color: '#856404',
+                  padding: '15px',
+                  backgroundColor: '#f8f4e3',
+                  borderRadius: '6px'
+                }}>
+                  <p style={{ marginBottom: '5px' }}>※ 입금 완료 후 위 폼을 작성해주시면 더 빠른 주문 처리가 가능합니다.</p>
                   <p>※ 입금 정보는 관리자 확인 후 처리됩니다.</p>
                 </div>
               </div>
@@ -416,25 +724,75 @@ function CheckoutSuccessContent() {
         )}
 
         {/* 액션 버튼들 */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '15px',
+          marginBottom: '30px'
+        }}>
           <Link
             href={`/mypage/orders/${order.orderId}`}
-            className="flex-1 bg-blue-500 text-white text-center py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+            style={{
+              display: 'block',
+              backgroundColor: '#007bff',
+              color: 'white',
+              textAlign: 'center',
+              padding: '15px',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              textDecoration: 'none',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLAnchorElement).style.backgroundColor = '#0056b3';
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLAnchorElement).style.backgroundColor = '#007bff';
+            }}
           >
-            주문 상세보기
+            📋 주문 상세보기
           </Link>
           <Link
             href="/"
-            className="flex-1 border border-gray-300 text-center py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+            style={{
+              display: 'block',
+              border: '1px solid #ddd',
+              color: '#333',
+              textAlign: 'center',
+              padding: '15px',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              textDecoration: 'none',
+              backgroundColor: '#fff',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLAnchorElement).style.backgroundColor = '#f8f9fa';
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLAnchorElement).style.backgroundColor = '#fff';
+            }}
           >
-            쇼핑 계속하기
+            🛍️ 쇼핑 계속하기
           </Link>
         </div>
 
         {/* 고객센터 안내 */}
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p>주문 관련 문의사항이 있으시면</p>
-          <p>고객센터(전화)로 연락해주세요.</p>
+        <div style={{ 
+          marginTop: '30px', 
+          textAlign: 'center', 
+          fontSize: '14px', 
+          color: '#666',
+          padding: '20px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px',
+          border: '1px solid #e9ecef'
+        }}>
+          <div style={{ fontSize: '20px', marginBottom: '10px' }}>📞</div>
+          <p style={{ marginBottom: '5px' }}>주문 관련 문의사항이 있으시면</p>
+          <p><strong>고객센터</strong>로 연락해주세요.</p>
         </div>
       </div>
     </div>

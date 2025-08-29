@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
@@ -17,11 +17,17 @@ import { getProduct } from '@/lib/products';
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const { cartItems, cartTotal, clearCart } = useCart();
   const { settings } = useSettings();
   const { showAlert, AlertComponent } = useCustomAlert();
   const [forceUpdate, setForceUpdate] = useState(0);
+
+  // 직접 구매 파라미터
+  const productId = searchParams.get('productId');
+  const quantity = parseInt(searchParams.get('quantity') || '1');
+  const [directPurchaseProduct, setDirectPurchaseProduct] = useState<Product | null>(null);
 
   const [userData, setUserData] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(false);
@@ -38,12 +44,8 @@ export default function CheckoutPage() {
   // 결제 방법 - 활성화된 첫 번째 결제 수단을 기본값으로 설정
   const getDefaultPaymentMethod = (): PaymentMethod => {
     if (settings.payment.enabledMethods.transfer) return 'bank_transfer';
-    if (settings.payment.enabledMethods.card) return 'card';
-    if (settings.payment.enabledMethods.vbank) return 'vbank';
-    if (settings.payment.enabledMethods.kakaopay) return 'kakaopay';
-    if (settings.payment.enabledMethods.naverpay) return 'naverpay';
-    if (settings.payment.enabledMethods.phone) return 'phone';
-    return 'bank_transfer'; // fallback
+    // 토스페이먼츠는 항상 테스트 모드에서 활성화
+    return 'toss_payments';
   };
   
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(getDefaultPaymentMethod());
@@ -70,15 +72,41 @@ export default function CheckoutPage() {
     }
   }, [user, router, showAlert]);
 
-  // 장바구니 체크
+  // 직접 구매 상품 로드
   useEffect(() => {
-    if (cartItems.length === 0) {
+    const loadDirectPurchaseProduct = async () => {
+      if (productId) {
+        try {
+          const product = await getProduct(productId);
+          if (product) {
+            setDirectPurchaseProduct(product);
+          } else {
+            showAlert('상품을 찾을 수 없습니다.', 'warning', {
+              onConfirm: () => router.push('/')
+            });
+          }
+        } catch (error) {
+          console.error('직접 구매 상품 로드 오류:', error);
+          showAlert('상품 정보를 불러오는 중 오류가 발생했습니다.', 'error', {
+            onConfirm: () => router.push('/')
+          });
+        }
+      }
+    };
+
+    loadDirectPurchaseProduct();
+  }, [productId, router, showAlert]);
+
+  // 장바구니 또는 직접 구매 체크
+  useEffect(() => {
+    // 직접 구매가 아니고 장바구니도 비어있는 경우
+    if (!productId && cartItems.length === 0) {
       showAlert('주문할 상품이 없습니다.', 'warning', {
         onConfirm: () => router.push('/cart')
       });
       return;
     }
-  }, [cartItems, router, showAlert]);
+  }, [productId, cartItems, router, showAlert]);
 
   // 사용자 정보 로드
   useEffect(() => {
@@ -106,6 +134,19 @@ export default function CheckoutPage() {
   // 장바구니 아이템에 상품 정보 매핑 (실제 Firebase에서 가져오기)
   useEffect(() => {
     const loadCartProducts = async () => {
+      // 직접 구매인 경우
+      if (productId && directPurchaseProduct) {
+        const priceNumber = parseInt(directPurchaseProduct.price.replace(/[^0-9]/g, '')) || 0;
+        setCartItemsWithProducts([{
+          productId: directPurchaseProduct.id,
+          quantity: quantity,
+          price: priceNumber,
+          product: directPurchaseProduct
+        }]);
+        return;
+      }
+
+      // 장바구니 구매인 경우
       const itemsWithProducts = await Promise.all(
         cartItems.map(async (cartItem) => {
           const product = await getProduct(cartItem.productId);
@@ -133,12 +174,14 @@ export default function CheckoutPage() {
       setCartItemsWithProducts(itemsWithProducts);
     };
 
-    if (cartItems.length > 0) {
+    if (productId && directPurchaseProduct) {
+      loadCartProducts();
+    } else if (cartItems.length > 0) {
       loadCartProducts();
     } else {
       setCartItemsWithProducts([]);
     }
-  }, [cartItems]);
+  }, [cartItems, productId, directPurchaseProduct, quantity]);
 
   // 설정 업데이트 이벤트 리스너
   useEffect(() => {
@@ -146,20 +189,12 @@ export default function CheckoutPage() {
       console.log('🔄 CheckoutPage: 설정 업데이트 감지 (결제수단 재설정)', event.detail);
       setForceUpdate(prev => prev + 1);
       
-      // 결제 방법 재설정 - 활성화된 첫 번째 결제 수단으로
+      // 결제 방법 재설정 - 토스페이먼츠를 기본으로
       const newSettings = event.detail.settings;
       if (newSettings.payment.enabledMethods.transfer) {
         setPaymentMethod('bank_transfer');
-      } else if (newSettings.payment.enabledMethods.card) {
-        setPaymentMethod('card');
-      } else if (newSettings.payment.enabledMethods.vbank) {
-        setPaymentMethod('vbank');
-      } else if (newSettings.payment.enabledMethods.kakaopay) {
-        setPaymentMethod('kakaopay');
-      } else if (newSettings.payment.enabledMethods.naverpay) {
-        setPaymentMethod('naverpay');
-      } else if (newSettings.payment.enabledMethods.phone) {
-        setPaymentMethod('phone');
+      } else {
+        setPaymentMethod('toss_payments');
       }
     };
 
@@ -224,8 +259,11 @@ export default function CheckoutPage() {
       }));
 
       // 배송비 계산 (설정값 사용)
-      const shippingCost = cartTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.baseShippingCost;
-      const totalAmount = cartTotal + shippingCost;
+      const currentTotal = productId && directPurchaseProduct ? 
+        parseInt(directPurchaseProduct.price.replace(/[^0-9]/g, '')) * quantity : 
+        cartTotal;
+      const shippingCost = currentTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.baseShippingCost;
+      const totalAmount = currentTotal + shippingCost;
 
       // 주문 생성
       const orderId = await createOrder({
@@ -251,10 +289,19 @@ export default function CheckoutPage() {
           amount: totalAmount,
           status: 'pending',
         });
+      } else if (paymentMethod === 'toss_payments') {
+        // 토스페이먼츠는 별도 처리
+        console.log('토스페이먼츠 결제:', {
+          orderId,
+          amount: totalAmount,
+          paymentMethod
+        });
       }
 
-      // 장바구니 비우기
-      await clearCart();
+      // 장바구니 구매인 경우에만 장바구니 비우기
+      if (!productId) {
+        await clearCart();
+      }
 
       // 주문 완료 페이지로 이동
       router.push(`/checkout/success?orderId=${orderId}`);
@@ -270,8 +317,11 @@ export default function CheckoutPage() {
     return new Intl.NumberFormat('ko-KR').format(price) + '원';
   };
 
-  const shippingCost = cartTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.baseShippingCost;
-  const totalAmount = cartTotal + shippingCost;
+  const currentTotal = productId && directPurchaseProduct ? 
+    parseInt(directPurchaseProduct.price.replace(/[^0-9]/g, '')) * quantity : 
+    cartTotal;
+  const shippingCost = currentTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.baseShippingCost;
+  const totalAmount = currentTotal + shippingCost;
 
   if (userDataLoading) {
     return (
@@ -517,7 +567,19 @@ export default function CheckoutPage() {
                     <span style={{ fontSize: '14px', color: '#333' }}>무통장 입금</span>
                   </label>
                 )}
-                
+
+                {/* 토스페이먼츠 */}
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="toss_payments"
+                    checked={paymentMethod === 'toss_payments'}
+                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                    style={{ marginRight: '12px', transform: 'scale(1.2)' }}
+                  />
+                  <span style={{ fontSize: '14px', color: '#333' }}>토스페이먼츠</span>
+                </label>
 
                 {/* 휴대폰 결제 */}
                 {settings.payment.enabledMethods.phone && (
@@ -534,21 +596,7 @@ export default function CheckoutPage() {
                   </label>
                 )}
                 
-                {/* 카카오페이 */}
-                {settings.payment.enabledMethods.kakaopay && (
-                  <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="kakaopay"
-                      checked={paymentMethod === 'kakaopay'}
-                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                      style={{ marginRight: '12px', transform: 'scale(1.2)' }}
-                    />
-                    <span style={{ fontSize: '14px', color: '#333' }}>카카오페이</span>
-                  </label>
-                )}
-                
+
                 {/* 네이버페이 */}
                 {settings.payment.enabledMethods.naverpay && (
                   <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
@@ -600,6 +648,50 @@ export default function CheckoutPage() {
                       <li>입금자명을 주문자명과 동일하게 입력해주세요.</li>
                       <li>입금 확인 후 배송이 시작됩니다.</li>
                     </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* 토스페이먼츠 선택 시 안내 정보 표시 */}
+              {paymentMethod === 'toss_payments' && (
+                <div style={{ 
+                  marginTop: '25px', 
+                  padding: '20px', 
+                  backgroundColor: '#e8f4fd', 
+                  border: '1px solid #bee5eb', 
+                  borderRadius: '8px' 
+                }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '15px', color: '#0c5460' }}>
+                    🎯 토스페이먼츠
+                  </h3>
+                  <div style={{ fontSize: '14px', color: '#0c5460', lineHeight: '1.6' }}>
+                    <div style={{ 
+                      backgroundColor: '#fff', 
+                      padding: '15px', 
+                      borderRadius: '6px', 
+                      border: '1px solid #ddd',
+                      marginBottom: '15px'
+                    }}>
+                      <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '10px', color: '#007bff' }}>사용 가능한 결제 수단:</h4>
+                      <ul style={{ paddingLeft: '20px', lineHeight: '1.5' }}>
+                        <li>💳 신용카드/체크카드</li>
+                        <li>🏦 계좌이체</li>
+                        <li>📱 네이버페이</li>
+                        <li>📱 토스페이</li>
+                        <li>💰 가상계좌</li>
+                      </ul>
+                    </div>
+                    <div style={{ 
+                      backgroundColor: '#d1ecf1', 
+                      padding: '12px', 
+                      borderRadius: '6px', 
+                      fontSize: '13px'
+                    }}>
+                      <p style={{ marginBottom: '5px', fontWeight: '600' }}>💡 결제 안내:</p>
+                      <p style={{ marginBottom: '5px' }}>• 안전하고 빠른 결제 서비스</p>
+                      <p style={{ marginBottom: '5px' }}>• 다양한 결제 수단 지원</p>
+                      <p>• 주문 완료 후 결제 완료 페이지로 이동합니다</p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -731,7 +823,7 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '25px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
                   <span style={{ color: '#666' }}>상품 총액</span>
-                  <span style={{ color: '#333', fontWeight: '500' }}>{formatPrice(cartTotal)}</span>
+                  <span style={{ color: '#333', fontWeight: '500' }}>{formatPrice(currentTotal)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
                   <span style={{ color: '#666' }}>배송비</span>
@@ -774,30 +866,57 @@ export default function CheckoutPage() {
                 {loading ? '주문 처리 중...' : '결제하기'}
               </button>
 
-              <Link
-                href="/cart"
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  textAlign: 'center',
-                  border: '1px solid #ddd',
-                  padding: '15px 0',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  color: '#666',
-                  textDecoration: 'none',
-                  backgroundColor: '#fff',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#f8f9fa';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = '#fff';
-                }}
-              >
-                장바구니로 돌아가기
-              </Link>
+{productId ? (
+                <Link
+                  href={`/products/${productId}`}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'center',
+                    border: '1px solid #ddd',
+                    padding: '15px 0',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    color: '#666',
+                    textDecoration: 'none',
+                    backgroundColor: '#fff',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = '#f8f9fa';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = '#fff';
+                  }}
+                >
+                  상품으로 돌아가기
+                </Link>
+              ) : (
+                <Link
+                  href="/cart"
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'center',
+                    border: '1px solid #ddd',
+                    padding: '15px 0',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    color: '#666',
+                    textDecoration: 'none',
+                    backgroundColor: '#fff',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = '#f8f9fa';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = '#fff';
+                  }}
+                >
+                  장바구니로 돌아가기
+                </Link>
+              )}
             </div>
           </div>
         </div>

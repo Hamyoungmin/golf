@@ -87,7 +87,7 @@ export interface OrderItem {
 export type OrderStatus = 'pending' | 'payment_pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
 
 // 결제 관련 타입 정의
-export type PaymentMethod = 'bank_transfer' | 'card' | 'cash' | 'vbank' | 'kakaopay' | 'naverpay' | 'phone';
+export type PaymentMethod = 'bank_transfer' | 'card' | 'cash' | 'vbank' | 'kakaopay' | 'naverpay' | 'phone' | 'toss_payments';
 
 export interface BankTransferInfo {
   bankName: string;

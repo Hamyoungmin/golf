@@ -41,6 +41,13 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 };
 
+// 디버깅용 로그
+console.log('🔥 Firebase 초기화 설정:', {
+  ...firebaseConfig,
+  apiKey: firebaseConfig.apiKey ? '***' : 'undefined',
+  storageBucket: firebaseConfig.storageBucket
+});
+
 // Firebase 초기화 (환경변수가 있을 때만)
 let app: any = null;
 let auth: any = null;
