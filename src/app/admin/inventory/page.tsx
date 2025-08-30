@@ -5,11 +5,10 @@ import {
   getInventoryStats,
   getInventoryProducts,
   adjustStock,
-  getProductStockHistory,
   getStockStatusText,
   getStockStatusColor
 } from '@/lib/inventory';
-import { Product, InventoryStats, StockHistory, StockAdjustment } from '@/types';
+import { Product, InventoryStats, StockAdjustment } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function InventoryPage() {
@@ -26,8 +25,7 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true);
   const [showAdjustModal, setShowAdjustModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [stockHistory, setStockHistory] = useState<StockHistory[]>([]);
+
   const [adjustmentForm, setAdjustmentForm] = useState({
     quantity: '',
     reason: ''
@@ -110,20 +108,7 @@ export default function InventoryPage() {
     }
   };
 
-  const handleShowHistory = async (product: Product) => {
-    setSelectedProduct(product);
-    setLoading(true);
-    try {
-      const history = await getProductStockHistory(product.id);
-      setStockHistory(history);
-      setShowHistoryModal(true);
-    } catch (error) {
-      console.error('재고 이력 조회 오류:', error);
-      alert('재고 이력 조회에 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const openAdjustModal = (product: Product) => {
     setSelectedProduct(product);
@@ -404,20 +389,7 @@ export default function InventoryPage() {
                         >
                       조정
                     </button>
-                        <button 
-                          onClick={() => handleShowHistory(product)}
-                          style={{
-                            padding: '4px 8px',
-                            fontSize: '12px',
-                            color: '#666',
-                            backgroundColor: 'transparent',
-                            border: '1px solid #666',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                          }}
-                        >
-                      이력
-                    </button>
+
                       </div>
                   </td>
                 </tr>
@@ -571,120 +543,7 @@ export default function InventoryPage() {
           </div>
         )}
 
-        {/* 재고 이력 모달 */}
-        {showHistoryModal && selectedProduct && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'flex-start',
-            paddingTop: '120px',
-            zIndex: 1000
-          }}>
-            <div style={{
-              backgroundColor: '#fff',
-              borderRadius: '8px',
-              padding: '30px',
-              maxWidth: '800px',
-              width: '90%',
-              maxHeight: '80vh',
-              overflow: 'auto'
-            }}>
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                marginBottom: '20px'
-              }}>
-                <h3 style={{ 
-                  fontSize: '20px', 
-                  fontWeight: 'bold', 
-                  margin: 0
-                }}>
-                  재고 이력 - {selectedProduct.name}
-                </h3>
-                <button
-                  onClick={() => setShowHistoryModal(false)}
-                  style={{
-                    padding: '8px 12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    backgroundColor: '#f9f9f9'
-                  }}
-                >
-                  닫기
-                </button>
-              </div>
 
-              {stockHistory.length === 0 ? (
-                <div style={{ 
-                  textAlign: 'center', 
-                  padding: '40px', 
-                  color: '#666' 
-                }}>
-                  <div style={{ fontSize: '48px', marginBottom: '15px' }}>📋</div>
-                  <p>재고 이력이 없습니다.</p>
-                </div>
-              ) : (
-                <div style={{ maxHeight: '400px', overflow: 'auto' }}>
-                  {stockHistory.map((history, index) => (
-                    <div 
-                      key={history.id} 
-                      style={{
-                        padding: '15px',
-                        border: '1px solid #e0e0e0',
-                        borderRadius: '4px',
-                        marginBottom: '10px',
-                        backgroundColor: '#f9f9f9'
-                      }}
-                    >
-                      <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: '8px'
-                      }}>
-                        <span style={{ 
-                          fontSize: '14px', 
-                          fontWeight: '500',
-                          color: '#007bff'
-                        }}>
-                          {history.type === 'adjustment' ? '재고 조정' : 
-                           history.type === 'restock' ? '입고' :
-                           history.type === 'sale' ? '판매' : '반품'}
-                        </span>
-                        <span style={{ fontSize: '12px', color: '#666' }}>
-                          {history.createdAt.toLocaleDateString('ko-KR')} {history.createdAt.toLocaleTimeString('ko-KR')}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '14px', marginBottom: '5px' }}>
-                        <strong>{history.previousStock}개</strong> → <strong>{history.newStock}개</strong>
-                        <span style={{ 
-                          color: history.newStock > history.previousStock ? '#28a745' : '#dc3545',
-                          marginLeft: '8px'
-                        }}>
-                          ({history.newStock > history.previousStock ? '+' : ''}{history.newStock - history.previousStock}개)
-                        </span>
-                      </div>
-                      {history.reason && (
-                        <div style={{ fontSize: '13px', color: '#666' }}>
-                          사유: {history.reason}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
