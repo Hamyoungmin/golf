@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import ProductReservationBadge from './ProductReservationBadge';
 
 interface Product {
   id: number | string;
@@ -24,6 +25,9 @@ const ProductCard = ({ product, category }: ProductCardProps) => {
   const categoryPath = getCategoryPath();
   return (
     <div className="product-card" style={{ position: 'relative', cursor: 'pointer' }}>
+      {/* 예약 상태 뱃지 */}
+      <ProductReservationBadge productId={String(product.id)} />
+      
       <Link href={`/${categoryPath}/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
         <div className="product-image">
           {product.image ? (

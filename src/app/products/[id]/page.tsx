@@ -11,6 +11,8 @@ import { useCustomAlert } from '../../../hooks/useCustomAlert';
 import { getProductById } from '../../../lib/products';
 import { createReview, getProductReviews } from '../../../lib/reviews';
 import { Product, Review } from '../../../types';
+import ProductReservationStatus, { ReservationAwareAddToCartButton } from '../../../components/ProductReservationStatus';
+import { ProductReservationInfo } from '../../../components/ProductReservationBadge';
 
 export default function ProductPage() {
   const params = useParams();
@@ -26,7 +28,7 @@ export default function ProductPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState('description');
+  const [activeTab, setActiveTab] = useState('reviews');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, title: '', content: '' });
@@ -40,6 +42,8 @@ export default function ProductPage() {
           const productData = await getProductById(params.id);
           if (productData) {
             setProduct(productData);
+            // 재고에 따른 수량 초기화
+            setQuantity(productData.stock > 0 ? 1 : 0);
             // 리뷰도 함께 가져오기
             const reviewsData = await getProductReviews(params.id);
             setReviews(reviewsData);
@@ -77,6 +81,19 @@ export default function ProductPage() {
       setShowContactModal(true);
       return;
     }
+
+    // 재고 검증
+    if (quantity > product.stock) {
+      showAlert(`재고가 ${product.stock}개만 남아있습니다. 수량을 확인해 주세요.`, 'error');
+      setQuantity(Math.min(quantity, product.stock)); // 수량을 재고로 자동 조정
+      return;
+    }
+
+    if (quantity <= 0) {
+      showAlert('구매 수량을 1개 이상 선택해 주세요.', 'error');
+      return;
+    }
+
     // 구매 로직 구현
     router.push(`/checkout?productId=${product.id}&quantity=${quantity}`);
   };
@@ -86,6 +103,18 @@ export default function ProductPage() {
     
     if (product.price === '가격문의') {
       setShowContactModal(true);
+      return;
+    }
+
+    // 재고 검증
+    if (quantity > product.stock) {
+      showAlert(`재고가 ${product.stock}개만 남아있습니다. 수량을 확인해 주세요.`, 'error');
+      setQuantity(Math.min(quantity, product.stock)); // 수량을 재고로 자동 조정
+      return;
+    }
+
+    if (quantity <= 0) {
+      showAlert('구매 수량을 1개 이상 선택해 주세요.', 'error');
       return;
     }
 
@@ -215,8 +244,73 @@ export default function ProductPage() {
           <div>
             <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '16px' }}>{product.name}</h1>
             <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#007bff', marginBottom: '20px' }}>
-              {product.price}
+              {product.price === '가격문의' ? product.price : 
+                new Intl.NumberFormat('ko-KR').format(parseInt(product.price.replace(/[^0-9]/g, ''))) + '원'}
             </p>
+
+            {/* 상품 설명 */}
+            {product.description && (
+              <div style={{ 
+                marginBottom: '20px',
+                padding: '15px',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '8px',
+                border: '1px solid #e9ecef'
+              }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px' }}>상품 설명</h3>
+                <div style={{ 
+                  fontSize: '14px', 
+                  lineHeight: '1.6', 
+                  color: '#333',
+                  whiteSpace: 'pre-line'
+                }}>
+                  {product.description}
+                </div>
+              </div>
+            )}
+
+            {/* 상세정보 */}
+            {((product.detailedDescription && product.detailedDescription.trim()) || 
+              (product.specifications && Object.keys(product.specifications).length > 0)) && (
+              <div style={{ 
+                marginBottom: '20px',
+                padding: '15px',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '8px',
+                border: '1px solid #e9ecef'
+              }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px' }}>상세정보</h3>
+                
+                {/* 상세 설명 */}
+                {product.detailedDescription && product.detailedDescription.trim() && (
+                  <div style={{ 
+                    fontSize: '14px', 
+                    lineHeight: '1.6', 
+                    color: '#333',
+                    marginBottom: '15px'
+                  }}>
+                    <div dangerouslySetInnerHTML={{ __html: product.detailedDescription }} />
+                  </div>
+                )}
+
+                {/* 제품 사양 */}
+                {product.specifications && Object.keys(product.specifications).length > 0 && (
+                  <div style={{ fontSize: '14px', color: '#333' }}>
+                    {Object.entries(product.specifications).map(([key, value]) => (
+                      <div key={key} style={{ 
+                        display: 'flex', 
+                        marginBottom: '8px',
+                        paddingBottom: '8px',
+                        borderBottom: '1px solid #eee'
+                      }}>
+                        <span style={{ fontWeight: '600', width: '120px', minWidth: '120px' }}>{key}:</span>
+                        <span style={{ color: '#666' }}>{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* 재고 정보 */}
             <div style={{ marginBottom: '20px' }}>
@@ -228,7 +322,11 @@ export default function ProductPage() {
             {/* 수량 선택 */}
             {product.price !== '가격문의' && product.stock > 0 && (
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>수량:</label>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                  수량: <span style={{ color: '#666', fontSize: '14px', fontWeight: '400' }}>
+                    (최대 {product.stock}개까지 구매 가능)
+                  </span>
+                </label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -238,7 +336,8 @@ export default function ProductPage() {
                       border: '1px solid #ddd',
                       backgroundColor: quantity <= 1 ? '#f8f9fa' : '#fff',
                       cursor: quantity <= 1 ? 'not-allowed' : 'pointer',
-                      borderRadius: '4px'
+                      borderRadius: '4px',
+                      opacity: quantity <= 1 ? 0.5 : 1
                     }}
                   >
                     -
@@ -248,7 +347,8 @@ export default function ProductPage() {
                     border: '1px solid #ddd', 
                     borderRadius: '4px',
                     minWidth: '60px',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    backgroundColor: '#fff'
                   }}>
                     {quantity}
                   </span>
@@ -260,12 +360,28 @@ export default function ProductPage() {
                       border: '1px solid #ddd',
                       backgroundColor: quantity >= product.stock ? '#f8f9fa' : '#fff',
                       cursor: quantity >= product.stock ? 'not-allowed' : 'pointer',
-                      borderRadius: '4px'
+                      borderRadius: '4px',
+                      opacity: quantity >= product.stock ? 0.5 : 1
                     }}
                   >
                     +
                   </button>
                 </div>
+                
+                {/* 재고 제한 안내 */}
+                {quantity >= product.stock && (
+                  <div style={{
+                    fontSize: '12px',
+                    color: '#dc3545',
+                    marginTop: '5px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    <span>⚠️</span>
+                    <span>재고가 {product.stock}개만 남아있어 더 이상 선택할 수 없습니다.</span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -288,6 +404,19 @@ export default function ProductPage() {
                 {isInWishlist(product.id) ? '♥ 관심상품에서 제거' : '♡ 관심상품에 추가'}
               </button>
             </div>
+
+            {/* 예약 상태 표시 */}
+            {product.price !== '가격문의' && (
+              <div style={{ marginBottom: '15px' }}>
+                <ProductReservationInfo 
+                  productId={product.id}
+                  showDetails={true}
+                />
+                <ProductReservationStatus 
+                  productId={product.id}
+                />
+              </div>
+            )}
 
             {/* 구매 버튼들 */}
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -321,34 +450,29 @@ export default function ProductPage() {
                       flex: 1,
                       padding: '16px',
                       backgroundColor: product.stock === 0 ? '#9ca3af' : '#007bff',
-                      color: 'white',
+                      color: '#fff',
                       border: 'none',
                       borderRadius: '8px',
                       fontSize: '16px',
                       fontWeight: '600',
-                      cursor: product.stock === 0 ? 'not-allowed' : 'pointer'
+                      cursor: product.stock === 0 ? 'not-allowed' : 'pointer',
+                      opacity: product.stock === 0 ? 0.6 : 1,
+                      transition: 'all 0.2s ease'
                     }}
                   >
                     바로 구매
                   </button>
                   
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={product.stock === 0}
-                    style={{
-                      flex: 1,
-                      padding: '16px',
-                      backgroundColor: product.stock === 0 ? '#9ca3af' : '#28a745',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      cursor: product.stock === 0 ? 'not-allowed' : 'pointer'
-                    }}
-                  >
-                    장바구니
-                  </button>
+                  <div style={{ flex: 1 }}>
+                    <ReservationAwareAddToCartButton
+                      productId={product.id}
+                      price={parseInt(product.price.replace(/[^0-9]/g, '')) || 0}
+                      onAddToCart={handleAddToCart}
+                      disabled={product.stock === 0}
+                    >
+                      장바구니
+                    </ReservationAwareAddToCartButton>
+                  </div>
                 </>
               )}
             </div>
@@ -368,8 +492,6 @@ export default function ProductPage() {
             backgroundColor: '#ffffff'
           }}>
             {[
-              { id: 'description', label: '상품설명' },
-              { id: 'details', label: '상세정보' },
               { id: 'reviews', label: `후기 (${reviews.length})` },
               { id: 'qna', label: '문의' }
             ].map((tab) => (
@@ -403,103 +525,7 @@ export default function ProductPage() {
             padding: '50px',
             backgroundColor: '#ffffff'
           }}>
-            {/* 상품설명 섹션 */}
-            <div id="description" style={{ marginBottom: '60px' }}>
-               {product.description ? (
-                 <div style={{ 
-                   fontSize: '16px', 
-                   lineHeight: '1.8', 
-                   color: '#333',
-                   whiteSpace: 'pre-line',
-                   padding: '20px 0'
-                 }}>
-                   {product.description}
-                 </div>
-               ) : (
-                 <div style={{
-                   textAlign: 'center',
-                   padding: '60px 20px',
-                   color: '#999'
-                 }}>
-                   관리자가 상품설명을 등록하지 않았습니다.
-                 </div>
-               )}
-            </div>
 
-            {/* 상세정보 섹션 */}
-            <div id="details" style={{ marginBottom: '60px' }}>
-             {(product.detailedDescription && product.detailedDescription.trim()) || (product.specifications && Object.keys(product.specifications).length > 0) ? (
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-                 
-                 {/* 상세 설명 */}
-                 {product.detailedDescription && product.detailedDescription.trim() && (
-                   <div 
-                     style={{
-                       fontSize: '16px',
-                       lineHeight: '1.8',
-                       color: '#333',
-                       whiteSpace: 'pre-line',
-                       padding: '20px 0'
-                     }}
-                     dangerouslySetInnerHTML={{ __html: product.detailedDescription }}
-                   />
-                 )}
-
-                 {/* 제품 사양 */}
-                 {product.specifications && Object.keys(product.specifications).length > 0 && (
-                   <div style={{ padding: '20px 0' }}>
-                     <h4 style={{ 
-                       fontSize: '18px',
-                       fontWeight: 'bold',
-                       color: '#333',
-                       marginBottom: '15px'
-                     }}>
-                       제품 사양
-                     </h4>
-                     <div style={{
-                       display: 'grid',
-                       gap: '8px'
-                     }}>
-                       {Object.entries(product.specifications).map(([key, value]) => (
-                         <div
-                           key={key}
-                           style={{
-                             display: 'grid',
-                             gridTemplateColumns: '1fr 2fr',
-                             gap: '15px',
-                             padding: '8px 0',
-                             borderBottom: '1px solid #f0f0f0'
-                           }}
-                         >
-                           <span style={{ 
-                             fontWeight: '500', 
-                             color: '#666',
-                             fontSize: '16px'
-                           }}>
-                             {key}
-                           </span>
-                           <span style={{ 
-                             color: '#333',
-                             fontSize: '16px'
-                           }}>
-                             {value}
-                           </span>
-                         </div>
-                       ))}
-                     </div>
-                   </div>
-                 )}
-               </div>
-             ) : (
-               <div style={{
-                 textAlign: 'center',
-                 padding: '60px 20px',
-                 color: '#999'
-               }}>
-                 관리자가 상세정보를 등록하지 않았습니다.
-               </div>
-             )}
-            </div>
 
                         {/* 후기 섹션 */}
             <div id="reviews" style={{ marginBottom: '60px' }}>

@@ -498,5 +498,25 @@ service cloud.firestore {
     match /subscriptionPayments/{subscriptionId} {
       allow read, write: if request.auth != null;
     }
+    
+    // ============== 배타적 장바구니 관리 규칙 ==============
+    
+    // 상품 예약/점유 - 보안 강화 버전
+    match /productReservations/{reservationId} {
+      // 읽기: 모든 사용자 가능 (예약 상태 확인용)
+      allow read: if true;
+      
+      // 생성: 인증된 사용자만, 본인 userId로만 생성 가능
+      allow create: if request.auth != null && 
+                       request.auth.uid == request.resource.data.userId;
+      
+      // 수정: 본인이 만든 예약만 수정 가능
+      allow update: if request.auth != null && 
+                       request.auth.uid == resource.data.userId;
+      
+      // 삭제: 본인이 만든 예약만 삭제 가능  
+      allow delete: if request.auth != null && 
+                       request.auth.uid == resource.data.userId;
+    }
   }
 }

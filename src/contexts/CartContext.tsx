@@ -84,7 +84,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         productId, 
         quantity, 
         price, 
-        user?.uid
+        user?.uid,
+        user?.displayName || user?.email || undefined,
+        user?.email || undefined
       );
       setCartItems(updatedCart);
     } catch (error) {

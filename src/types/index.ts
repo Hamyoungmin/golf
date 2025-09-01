@@ -127,6 +127,18 @@ export interface CartItem {
   price: number;
 }
 
+// 제품 예약 관련 타입 정의
+export interface ProductReservation {
+  id: string;
+  productId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  reservedAt: Date;
+  expiresAt: Date;
+  status: 'active' | 'expired' | 'completed' | 'cancelled';
+}
+
 export interface Cart {
   userId: string;
   items: CartItem[];

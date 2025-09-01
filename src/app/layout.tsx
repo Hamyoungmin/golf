@@ -13,6 +13,7 @@ import { FAQProvider } from "@/contexts/FAQContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import VisitorTracker from "@/components/VisitorTracker";
 import GlobalAlertProvider from "@/components/GlobalAlertProvider";
+import ReservationCleanup from "@/components/ReservationCleanup";
 
 export const metadata: Metadata = {
   title: "골프상회 - 골프용품 전문 도매몰",
@@ -57,6 +58,7 @@ export default function RootLayout({
                     <GlobalAlertProvider>
                       <AuthGuard>
                         <VisitorTracker />
+                        <ReservationCleanup />
                         <Header />
                         <main>
                           {children}
