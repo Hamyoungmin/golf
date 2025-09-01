@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   CogIcon,
   BuildingStorefrontIcon,
@@ -12,6 +13,7 @@ import {
 import { useSettings } from '@/contexts/SettingsContext';
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('general');
   const { 
     settings, 
@@ -609,17 +611,40 @@ export default function SettingsPage() {
               borderRadius: '4px',
               border: '1px solid #e9ecef'
             }}>
-              <h4 style={{ 
-                fontSize: '16px', 
-                fontWeight: 'bold', 
-                marginBottom: '15px',
-                color: '#333',
-                display: 'flex',
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
                 alignItems: 'center',
-                gap: '8px'
+                marginBottom: '15px'
               }}>
-                💳 사용 가능한 결제 수단
-              </h4>
+                <h4 style={{ 
+                  fontSize: '16px', 
+                  fontWeight: 'bold', 
+                  margin: 0,
+                  color: '#333',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  💳 사용 가능한 결제 수단
+                </h4>
+                <button
+                  onClick={() => router.push('/admin/payments')}
+                  style={{
+                    padding: '8px 16px',
+                    border: '1px solid #007bff',
+                    borderRadius: '4px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    color: '#007bff',
+                    backgroundColor: '#fff',
+                    cursor: 'pointer',
+                    textDecoration: 'none'
+                  }}
+                >
+                  💰 입금 관리 페이지로 이동
+                </button>
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
                 {[
                   { id: 'card', name: '신용카드/체크카드', key: 'card' },

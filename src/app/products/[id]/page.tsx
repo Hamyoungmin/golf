@@ -468,9 +468,9 @@ export default function ProductPage() {
                       productId={product.id}
                       price={parseInt(product.price.replace(/[^0-9]/g, '')) || 0}
                       onAddToCart={handleAddToCart}
-                      disabled={product.stock === 0}
-                    >
-                      장바구니
+                    disabled={product.stock === 0}
+                  >
+                    장바구니
                     </ReservationAwareAddToCartButton>
                   </div>
                 </>
@@ -672,7 +672,7 @@ export default function ProductPage() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{review.title}</span>
+                          <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{review.title}</span>
                             {review.status === 'pending' && (
                               <span style={{
                                 fontSize: '12px',
@@ -739,18 +739,18 @@ export default function ProductPage() {
 
                          {/* 문의 섹션 */}
              <div id="qna" style={{ marginBottom: '60px' }}>
-               <div style={{
-                 fontSize: '16px', 
-                 lineHeight: '1.8', 
-                 color: '#333',
-                 whiteSpace: 'pre-line',
+                 <div style={{
+                   fontSize: '16px', 
+                   lineHeight: '1.8', 
+                   color: '#333',
+                   whiteSpace: 'pre-line',
                  padding: '20px',
                  backgroundColor: '#f8f9fa',
                  border: '1px solid #e9ecef',
                  borderRadius: '8px'
                }}>
                  {settings.store.inquiryInfo}
-               </div>
+                 </div>
              </div>
           </div>
         </div>
