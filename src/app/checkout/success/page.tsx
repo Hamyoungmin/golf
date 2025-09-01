@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getOrder } from '@/lib/orders';
-import { getPaymentByOrderId, updateBankTransferInfo, COMPANY_BANK_ACCOUNTS } from '@/lib/payments';
+import { getPaymentByOrderId, updateBankTransferInfo } from '@/lib/payments';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Order, PaymentInfo, BankTransferInfo } from '@/types';
 
@@ -92,8 +92,8 @@ function CheckoutSuccessContent() {
     try {
       const bankTransferInfo: BankTransferInfo = {
         bankName: transferData.bankName,
-        accountNumber: COMPANY_BANK_ACCOUNTS.find(acc => acc.bankName === transferData.bankName)?.accountNumber || '',
-        accountHolder: COMPANY_BANK_ACCOUNTS.find(acc => acc.bankName === transferData.bankName)?.accountHolder || '',
+        accountNumber: settings.payment.bankAccounts.find(acc => acc.bankName === transferData.bankName)?.accountNumber || '',
+        accountHolder: settings.payment.bankAccounts.find(acc => acc.bankName === transferData.bankName)?.accountHolder || '',
         transferAmount,
         depositorName: transferData.depositorName,
         transferDate: new Date(),
@@ -395,7 +395,7 @@ function CheckoutSuccessContent() {
                 💰 입금 안내
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                {COMPANY_BANK_ACCOUNTS.map((account, index) => (
+                {settings.payment.bankAccounts.map((account, index) => (
                   <div key={index} style={{ 
                     backgroundColor: '#fff', 
                     padding: '20px', 
@@ -622,7 +622,7 @@ function CheckoutSuccessContent() {
                           required
                         >
                           <option value="">입금하신 은행을 선택하세요</option>
-                          {COMPANY_BANK_ACCOUNTS.map((account, index) => (
+                          {settings.payment.bankAccounts.map((account, index) => (
                             <option key={index} value={account.bankName}>
                               {account.bankName} ({account.accountNumber})
                             </option>

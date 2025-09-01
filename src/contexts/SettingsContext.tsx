@@ -39,6 +39,11 @@ export interface PaymentSettings {
   };
   pgProvider: string;
   refundPeriod: number;
+  bankAccounts: {
+    bankName: string;
+    accountNumber: string;
+    accountHolder: string;
+  }[];
 }
 
 export interface NotificationSettings {
@@ -125,7 +130,19 @@ const defaultSettings: AllSettings = {
       naverpay: false
     },
     pgProvider: '토스페이먼츠',
-    refundPeriod: 7
+    refundPeriod: 7,
+    bankAccounts: [
+      {
+        bankName: '국민은행',
+        accountNumber: '279801-04-257481',
+        accountHolder: '권혁규'
+      },
+      {
+        bankName: '신협',
+        accountNumber: '131-017-435952',
+        accountHolder: '권혁규'
+      }
+    ]
   },
   notifications: {
     emailNotifications: {
@@ -135,7 +152,7 @@ const defaultSettings: AllSettings = {
       newReview: false,
       dailyReport: true
     },
-    notificationEmail: 'admin@golf.com'
+    notificationEmail: 'crover.kk@gmail.com'
   },
   security: {
     securityPolicies: {

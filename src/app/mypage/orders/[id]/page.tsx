@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { getOrder, getOrderStatusText, getOrderStatusColor } from '@/lib/orders';
 import { useSettings } from '@/contexts/SettingsContext';
-import { COMPANY_BANK_ACCOUNTS } from '@/lib/payments';
+
 import { Order } from '@/types';
 
 export default function OrderDetailPage() {
@@ -523,8 +523,8 @@ export default function OrderDetailPage() {
                   borderRadius: '6px', 
                   border: '1px solid #ddd' 
                 }}>
-                  {COMPANY_BANK_ACCOUNTS.map((account, index) => (
-                    <div key={index} style={{ marginBottom: index < COMPANY_BANK_ACCOUNTS.length - 1 ? '15px' : '0' }}>
+                  {settings.payment.bankAccounts.map((account, index) => (
+                    <div key={index} style={{ marginBottom: index < settings.payment.bankAccounts.length - 1 ? '15px' : '0' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
                         <strong style={{ color: '#007bff' }}>{account.bankName}</strong>
                         <span style={{ fontSize: '12px', color: '#666' }}>예금주: {account.accountHolder}</span>

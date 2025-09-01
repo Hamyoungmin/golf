@@ -8,7 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { createOrder } from '@/lib/orders';
 import { getUserData } from '@/lib/users';
-import { createPaymentInfo, COMPANY_BANK_ACCOUNTS } from '@/lib/payments';
+import { createPaymentInfo } from '@/lib/payments';
 import { CartItem, Product, Address, User as UserType, PaymentMethod } from '@/types';
 import { useCustomAlert } from '@/hooks/useCustomAlert';
 import { getProduct } from '@/lib/products';
@@ -624,7 +624,7 @@ export default function CheckoutPage() {
                 }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '15px', color: '#007bff' }}>입금 계좌 정보</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {COMPANY_BANK_ACCOUNTS.map((account, index) => (
+                    {settings.payment.bankAccounts.map((account, index) => (
                       <div key={index} style={{ 
                         backgroundColor: '#fff', 
                         padding: '15px', 

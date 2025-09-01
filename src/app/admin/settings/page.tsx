@@ -729,6 +729,171 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
+
+            <div style={{ 
+              padding: '20px', 
+              backgroundColor: '#f8f9fa', 
+              borderRadius: '4px',
+              border: '1px solid #e9ecef'
+            }}>
+              <h4 style={{ 
+                fontSize: '16px', 
+                fontWeight: 'bold', 
+                marginBottom: '15px',
+                color: '#333',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                💰 입금 계좌 설정
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {settings.payment.bankAccounts.map((account, index) => (
+                  <div key={index} style={{ 
+                    padding: '15px',
+                    backgroundColor: '#fff',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    position: 'relative'
+                  }}>
+                    <div style={{ 
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '10px'
+                    }}>
+                      <span style={{ fontWeight: '600', fontSize: '14px', color: '#007bff' }}>
+                        계좌 {index + 1}
+                      </span>
+                      {settings.payment.bankAccounts.length > 1 && (
+                        <button
+                          onClick={() => {
+                            const newAccounts = settings.payment.bankAccounts.filter((_, i) => i !== index);
+                            updatePaymentSettings({ bankAccounts: newAccounts });
+                          }}
+                          style={{
+                            padding: '4px 8px',
+                            border: '1px solid #dc3545',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            color: '#dc3545',
+                            backgroundColor: '#fff',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          삭제
+                        </button>
+                      )}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                      <div>
+                        <label style={{ 
+                          display: 'block', 
+                          marginBottom: '5px',
+                          fontWeight: '500',
+                          fontSize: '12px'
+                        }}>
+                          은행명
+                        </label>
+                        <input
+                          type="text"
+                          value={account.bankName}
+                          onChange={(e) => {
+                            const newAccounts = [...settings.payment.bankAccounts];
+                            newAccounts[index] = { ...account, bankName: e.target.value };
+                            updatePaymentSettings({ bankAccounts: newAccounts });
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '14px'
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ 
+                          display: 'block', 
+                          marginBottom: '5px',
+                          fontWeight: '500',
+                          fontSize: '12px'
+                        }}>
+                          계좌번호
+                        </label>
+                        <input
+                          type="text"
+                          value={account.accountNumber}
+                          onChange={(e) => {
+                            const newAccounts = [...settings.payment.bankAccounts];
+                            newAccounts[index] = { ...account, accountNumber: e.target.value };
+                            updatePaymentSettings({ bankAccounts: newAccounts });
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '14px'
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ 
+                          display: 'block', 
+                          marginBottom: '5px',
+                          fontWeight: '500',
+                          fontSize: '12px'
+                        }}>
+                          예금주
+                        </label>
+                        <input
+                          type="text"
+                          value={account.accountHolder}
+                          onChange={(e) => {
+                            const newAccounts = [...settings.payment.bankAccounts];
+                            newAccounts[index] = { ...account, accountHolder: e.target.value };
+                            updatePaymentSettings({ bankAccounts: newAccounts });
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '14px'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  onClick={() => {
+                    const newAccounts = [...settings.payment.bankAccounts, {
+                      bankName: '',
+                      accountNumber: '',
+                      accountHolder: ''
+                    }];
+                    updatePaymentSettings({ bankAccounts: newAccounts });
+                  }}
+                  style={{
+                    padding: '10px',
+                    border: '2px dashed #007bff',
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    color: '#007bff',
+                    backgroundColor: '#f8f9ff',
+                    cursor: 'pointer',
+                    textAlign: 'center'
+                  }}
+                >
+                  + 계좌 추가
+                </button>
+                <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+                  💡 고객이 무통장 입금 시 안내되는 계좌 정보입니다. 최소 1개 이상의 계좌가 필요합니다.
+                </div>
+              </div>
+            </div>
           </div>
         );
 

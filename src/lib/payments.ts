@@ -13,19 +13,32 @@ import {
 } from './firebase';
 import { PaymentInfo, BankAccount } from '@/types';
 
-// 회사 계좌 정보 (실제 계좌)
-export const COMPANY_BANK_ACCOUNTS: BankAccount[] = [
-  {
-    bankName: '국민은행',
-    accountNumber: '279801-04-257481',
-    accountHolder: '권혁규'
-  },
-  {
-    bankName: '신협', 
-    accountNumber: '010-7236-8400',
-    accountHolder: '권혁규'
+// 설정에서 계좌 정보 가져오기
+export function getBankAccountsFromSettings(): BankAccount[] {
+  try {
+    const settingsData = localStorage.getItem('adminSettings');
+    if (settingsData) {
+      const settings = JSON.parse(settingsData).settings;
+      return settings?.payment?.bankAccounts || [];
+    }
+  } catch (error) {
+    console.error('계좌 정보 가져오기 오류:', error);
   }
-];
+  
+  // 기본 계좌 정보 (localStorage에서 가져올 수 없는 경우)
+  return [
+    {
+      bankName: '국민은행',
+      accountNumber: '279801-04-257481',
+      accountHolder: '권혁규'
+    },
+    {
+      bankName: '신협',
+      accountNumber: '131-017-435952',
+      accountHolder: '권혁규'
+    }
+  ];
+}
 
 // 대기 중인 결제 목록 가져오기
 export async function getPendingPayments(limit?: number): Promise<Partial<PaymentInfo>[]> {
