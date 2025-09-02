@@ -132,7 +132,7 @@ export async function getPaymentInfo(orderId: string): Promise<PaymentInfo | nul
         updatedAt: data.updatedAt?.toDate() || new Date(),
         verifiedAt: data.verifiedAt?.toDate(),
         transferDate: data.bankTransferInfo?.transferDate?.toDate(),
-      };
+      } as PaymentInfo;
     }
 
     return null;
@@ -234,7 +234,7 @@ export async function getPaymentByOrderId(orderId: string): Promise<PaymentInfo 
         updatedAt: data.updatedAt?.toDate() || new Date(),
         verifiedAt: data.verifiedAt?.toDate(),
         transferDate: data.bankTransferInfo?.transferDate?.toDate(),
-      };
+      } as PaymentInfo;
     }
 
     return null;

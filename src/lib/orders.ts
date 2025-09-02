@@ -15,6 +15,7 @@ import {
 import { Order, OrderStatus } from '@/types';
 import { onOrderCreated } from './analytics';
 import { completeProductReservation } from './productReservations';
+import { decreaseMultipleProductsStock } from './products';
 
 // 특정 사용자의 주문 목록 가져오기
 export async function getUserOrders(userId: string, limit?: number): Promise<Order[]> {
@@ -148,6 +149,8 @@ export function getOrderStatusColor(status: OrderStatus): string {
 // 주문 생성
 export async function createOrder(orderData: Omit<Order, 'orderId' | 'createdAt' | 'updatedAt'>): Promise<string | null> {
   try {
+    console.log('🛍️ 주문 생성 시작:', orderData);
+    
     const docRef = doc(collection(db, 'orders'));
     const now = new Date();
     
@@ -158,14 +161,35 @@ export async function createOrder(orderData: Omit<Order, 'orderId' | 'createdAt'
       updatedAt: now,
     };
 
+    // 주문 생성 전에 먼저 재고 감소 처리
+    if (orderData.items) {
+      console.log('📦 재고 감소 처리 시작...');
+      const stockDecreaseSuccess = await decreaseMultipleProductsStock(
+        orderData.items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          productName: item.productName
+        }))
+      );
+
+      if (!stockDecreaseSuccess) {
+        throw new Error('재고 감소 처리에 실패했습니다. 주문이 취소됩니다.');
+      }
+      console.log('✅ 재고 감소 완료');
+    }
+
+    // 재고 감소 성공 후 주문 생성
     await setDoc(docRef, order);
+    console.log('✅ 주문 생성 완료:', docRef.id);
     
     // 주문한 상품들의 예약을 완료 처리
     if (orderData.items && orderData.userId) {
+      console.log('🔒 상품 예약 완료 처리...');
       const reservationPromises = orderData.items.map(item => 
         completeProductReservation(item.productId, orderData.userId)
       );
       await Promise.all(reservationPromises);
+      console.log('✅ 예약 완료 처리 완료');
     }
     
     // 주문 생성 후 자동으로 통계 업데이트
@@ -173,7 +197,7 @@ export async function createOrder(orderData: Omit<Order, 'orderId' | 'createdAt'
     
     return docRef.id;
   } catch (error) {
-    console.error('주문 생성 오류:', error);
+    console.error('❌ 주문 생성 오류:', error);
     return null;
   }
 }

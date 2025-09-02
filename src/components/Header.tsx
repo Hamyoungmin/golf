@@ -26,6 +26,7 @@ const Header = () => {
   const [isUtilitiesOpen, setIsUtilitiesOpen] = useState(false);
   const [isWedgesOpen, setIsWedgesOpen] = useState(false);
   const [isPuttersOpen, setIsPuttersOpen] = useState(false);
+  const [isHeadsPartsOpen, setIsHeadsPartsOpen] = useState(false);
   const [isLeftHandedOpen, setIsLeftHandedOpen] = useState(false);
   const [isWomensOpen, setIsWomensOpen] = useState(false);
   
@@ -37,7 +38,8 @@ const Header = () => {
     { name: '웨지', href: '/wedges', category: 'wedges', hasDropdown: true },
     { name: '퍼터', href: '/putters', category: 'putters', hasDropdown: true },
     { name: '왼손용', href: '/left-handed', category: 'left', hasDropdown: true },
-    { name: '여성용', href: '/womens', category: 'womens', hasDropdown: true }
+    { name: '여성용', href: '/womens', category: 'womens', hasDropdown: true },
+    { name: '헤드&단품', href: '/heads-parts', category: 'heads-parts', hasDropdown: true }
   ];
 
 
@@ -95,6 +97,11 @@ const Header = () => {
     { name: '브리지스톤', href: '/putters/bridgestone' },
     { name: '핑', href: '/putters/ping' },
     { name: '기타', href: '/putters/others' }
+  ];
+
+  const headsPartsItems = [
+    { name: '헤드', href: '/heads-parts/heads' },
+    { name: '단품', href: '/heads-parts/parts' }
   ];
 
   const leftHandedItems = [
@@ -206,6 +213,7 @@ const Header = () => {
               const isUtilities = item.category === 'utilities';
               const isWedges = item.category === 'wedges';
               const isPutters = item.category === 'putters';
+              const isHeadsParts = item.category === 'heads-parts';
               const isLeftHanded = item.category === 'left';
               const isWomens = item.category === 'womens';
               
@@ -214,6 +222,7 @@ const Header = () => {
                 : isUtilities ? utilitiesItems
                 : isWedges ? wedgesItems
                 : isPutters ? puttersItems
+                : isHeadsParts ? headsPartsItems
                 : isLeftHanded ? leftHandedItems
                 : isWomens ? womensItems
                 : [];
@@ -223,6 +232,7 @@ const Header = () => {
                 : isUtilities ? isUtilitiesOpen
                 : isWedges ? isWedgesOpen
                 : isPutters ? isPuttersOpen
+                : isHeadsParts ? isHeadsPartsOpen
                 : isLeftHanded ? isLeftHandedOpen
                 : isWomens ? isWomensOpen
                 : false;
@@ -237,6 +247,7 @@ const Header = () => {
                     if (isUtilities) setIsUtilitiesOpen(true);
                     if (isWedges) setIsWedgesOpen(true);
                     if (isPutters) setIsPuttersOpen(true);
+                    if (isHeadsParts) setIsHeadsPartsOpen(true);
                     if (isLeftHanded) setIsLeftHandedOpen(true);
                     if (isWomens) setIsWomensOpen(true);
                   } : undefined}
@@ -246,6 +257,7 @@ const Header = () => {
                     if (isUtilities) setIsUtilitiesOpen(false);
                     if (isWedges) setIsWedgesOpen(false);
                     if (isPutters) setIsPuttersOpen(false);
+                    if (isHeadsParts) setIsHeadsPartsOpen(false);
                     if (isLeftHanded) setIsLeftHandedOpen(false);
                     if (isWomens) setIsWomensOpen(false);
                   } : undefined}

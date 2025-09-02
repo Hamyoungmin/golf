@@ -137,7 +137,8 @@ export default function UsersManagement() {
     
     if (!reason) {
       const { customPrompt } = await import('@/utils/alertUtils');
-      reason = await customPrompt('거부 사유를 입력해주세요:', '', '거부 사유');
+      const promptResult = await customPrompt('거부 사유를 입력해주세요:', '', '거부 사유');
+      reason = promptResult || undefined;
       if (!reason) return;
     }
     const rejectionReason = reason;

@@ -120,11 +120,11 @@ export async function getActiveProductReservation(
       return null;
     }
 
-    const doc = querySnapshot.docs[0];
-    const data = doc.data();
+    const docSnapshot = querySnapshot.docs[0];
+    const data = docSnapshot.data();
     
     const reservation: ProductReservation = {
-      id: doc.id,
+      id: docSnapshot.id,
       productId: data.productId,
       userId: data.userId,
       userName: data.userName,
@@ -137,7 +137,7 @@ export async function getActiveProductReservation(
     // 만료 시간 확인
     if (reservation.expiresAt < new Date()) {
       // 만료된 예약은 자동으로 취소 처리
-      await updateDoc(doc(db, 'productReservations', doc.id), {
+      await updateDoc(doc(db, 'productReservations', docSnapshot.id), {
         status: 'expired',
         updatedAt: serverTimestamp()
       });

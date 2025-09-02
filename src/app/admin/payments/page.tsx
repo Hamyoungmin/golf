@@ -60,7 +60,7 @@ export default function AdminPaymentsPage() {
 
       // 사용자 정보 캐싱
       const userPromises = uniqueUserIds.map(async (userId) => {
-        if (!userCache[userId]) {
+        if (userId && !userCache[userId]) {
           const userData = await getUserData(userId);
           return { userId, userData };
         }
@@ -70,7 +70,7 @@ export default function AdminPaymentsPage() {
       const userResults = await Promise.all(userPromises);
       const newUserCache: { [key: string]: User } = { ...userCache };
       userResults.forEach(result => {
-        if (result && result.userData) {
+        if (result && result.userData && result.userId) {
           newUserCache[result.userId] = result.userData;
         }
       });
@@ -78,7 +78,7 @@ export default function AdminPaymentsPage() {
 
       // 주문 정보 캐싱
       const orderPromises = uniqueOrderIds.map(async (orderId) => {
-        if (!orderCache[orderId]) {
+        if (orderId && !orderCache[orderId]) {
           try {
             const orderData = await getOrderByOrderId(orderId);
             return { orderId, orderData };
@@ -93,7 +93,7 @@ export default function AdminPaymentsPage() {
       const orderResults = await Promise.all(orderPromises);
       const newOrderCache: { [key: string]: Order } = { ...orderCache };
       orderResults.forEach(result => {
-        if (result && result.orderData) {
+        if (result && result.orderData && result.orderId) {
           newOrderCache[result.orderId] = result.orderData;
         }
       });
@@ -734,7 +734,7 @@ export default function AdminPaymentsPage() {
             backgroundColor: '#fff'
           }}>
             <DataTable
-              data={filteredPayments.map(payment => ({ ...payment, id: payment.id || payment.orderId }))}
+              data={filteredPayments.map(payment => ({ ...payment, id: payment.orderId }))}
               columns={columns}
               loading={loading}
               emptyMessage="입금 내역이 없습니다."

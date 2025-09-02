@@ -36,39 +36,12 @@ function SearchContent() {
       try {
         setLoading(true);
         
-        // 실제로는 searchProducts(query) 사용
-        // 현재는 샘플 데이터에서 필터링
-        const filteredProducts = sampleProducts.filter(product => 
-          product.name.toLowerCase().includes(query.toLowerCase()) ||
-          product.description.toLowerCase().includes(query.toLowerCase()) ||
-          product.brand.toLowerCase().includes(query.toLowerCase()) ||
-          product.category.toLowerCase().includes(query.toLowerCase())
-        );
+        // 실제 searchProducts 함수 사용
+        const searchResult = await searchProducts(query, filters, sort);
+        let finalProducts = searchResult;
 
-        // 필터 적용
-        let finalProducts = filteredProducts;
-        
-        if (filters.category) {
-          finalProducts = finalProducts.filter(p => p.category === filters.category);
-        }
-        if (filters.brand) {
-          finalProducts = finalProducts.filter(p => p.brand === filters.brand);
-        }
-        if (filters.isWomens !== undefined) {
-          finalProducts = finalProducts.filter(p => p.isWomens === filters.isWomens);
-        }
-        if (filters.isKids !== undefined) {
-          finalProducts = finalProducts.filter(p => p.isKids === filters.isKids);
-        }
-        if (filters.isLeftHanded !== undefined) {
-          finalProducts = finalProducts.filter(p => p.isLeftHanded === filters.isLeftHanded);
-        }
-        if (filters.inStock) {
-          finalProducts = finalProducts.filter(p => p.stock > 0);
-        }
-
-        // 정렬 적용
-        finalProducts.sort((a, b) => {
+        // 정렬 적용 (이미 searchProducts에서 처리될 수 있지만, 클라이언트에서도 적용)
+        finalProducts.sort((a: Product, b: Product) => {
           if (sort.field === 'name') {
             return sort.direction === 'asc' 
               ? a.name.localeCompare(b.name)

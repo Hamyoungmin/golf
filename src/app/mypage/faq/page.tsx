@@ -8,7 +8,7 @@ export default function MyPageFAQPage() {
   const { faqs, incrementViews } = useFAQ();
   
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
-  const [openItems, setOpenItems] = useState<number[]>([]);
+  const [openItems, setOpenItems] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   // 공개된 FAQ만 필터링
@@ -27,7 +27,7 @@ export default function MyPageFAQPage() {
     return categoryMatch && searchMatch;
   });
 
-  const toggleItem = (id: number) => {
+  const toggleItem = (id: string) => {
     setOpenItems(prev => {
       const isCurrentlyOpen = prev.includes(id);
       if (!isCurrentlyOpen) {
@@ -44,7 +44,7 @@ export default function MyPageFAQPage() {
     if (openItems.length === filteredFAQs.length) {
       setOpenItems([]);
     } else {
-      setOpenItems(filteredFAQs.map(faq => faq.id));
+      setOpenItems(filteredFAQs.map(faq => String(faq.id)));
     }
   };
 
@@ -218,7 +218,7 @@ export default function MyPageFAQPage() {
                   borderBottom: index < filteredFAQs.length - 1 ? '1px solid #e0e0e0' : 'none'
                 }}>
                   <button
-                    onClick={() => toggleItem(faq.id)}
+                    onClick={() => toggleItem(String(faq.id))}
                     style={{
                       width: '100%',
                       padding: '15px',
@@ -258,7 +258,7 @@ export default function MyPageFAQPage() {
                         <span style={{ 
                           fontSize: '18px',
                           color: '#666',
-                          transform: openItems.includes(faq.id) ? 'rotate(180deg)' : 'rotate(0deg)',
+                          transform: openItems.includes(String(faq.id)) ? 'rotate(180deg)' : 'rotate(0deg)',
                           display: 'inline-block',
                           transition: 'transform 0.2s'
                         }}>
@@ -268,7 +268,7 @@ export default function MyPageFAQPage() {
                     </div>
                   </button>
                   
-                  {openItems.includes(faq.id) && (
+                  {openItems.includes(String(faq.id)) && (
                     <div style={{ padding: '0 15px 15px 15px' }}>
                       <div style={{ paddingLeft: '20px', borderLeft: '2px solid #e8f4fd' }}>
                         <div style={{ display: 'flex', alignItems: 'start', marginBottom: '8px' }}>

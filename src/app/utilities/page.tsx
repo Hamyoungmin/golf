@@ -36,16 +36,20 @@ export default function Utilities() {
     );
   }
 
+  // Product 타입을 ProductList가 기대하는 형태로 변환
+  const formattedProducts = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: formatPrice(product.price),
+    image: product.images?.[0] || '/placeholder-utility.jpg',
+    stock: product.stock // 재고 정보 포함
+  }));
+
   return (
     <ProductList 
       title="유틸리티"
       subtitle="| Utilities"
-      products={products.map(p => ({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        image: p.images[0] || null
-      }))}
+      products={formattedProducts}
       totalCount={products.length}
       category="유틸리티"
     />

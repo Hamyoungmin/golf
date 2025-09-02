@@ -159,6 +159,14 @@ export default function AdminProductCreatePage() {
         { path: 'womens/bridgestone', label: '브리지스톤 여성용' },
         { path: 'womens/others', label: '기타 여성용' },
       ]
+    },
+    'heads-parts': {
+      label: '헤드&단품',
+      pages: [
+        { path: 'heads-parts', label: '전체 헤드&단품' },
+        { path: 'heads-parts/heads', label: '헤드' },
+        { path: 'heads-parts/parts', label: '단품' },
+      ]
     }
   };
 
@@ -327,6 +335,7 @@ export default function AdminProductCreatePage() {
     if (firstPage.includes('wedges')) return 'wedges';
     if (firstPage.includes('putters')) return 'putters';
     if (firstPage.includes('irons')) return 'irons';
+    if (firstPage.includes('heads-parts')) return 'heads-parts';
     
     return 'drivers'; // 기본값
   };

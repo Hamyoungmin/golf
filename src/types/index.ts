@@ -19,6 +19,7 @@ export interface Product {
   isKids: boolean;
   isLeftHanded: boolean;
   targetPages?: string[]; // 상품이 표시될 페이지들 (예: ["drivers/titleist", "drivers/callaway"])
+  views?: number; // 조회수
   createdAt: Date;
   updatedAt: Date;
 }
@@ -100,6 +101,7 @@ export interface BankTransferInfo {
 }
 
 export interface PaymentInfo {
+  id?: string; // 문서 ID
   orderId: string;
   userId: string;
   paymentMethod: PaymentMethod;
@@ -109,6 +111,7 @@ export interface PaymentInfo {
   verifiedAt?: Date;
   verifiedBy?: string; // 관리자 ID
   notes?: string;
+  transferDate?: Date; // 이체 날짜 (호환성을 위해 추가)
   createdAt: Date;
   updatedAt: Date;
 }
@@ -202,7 +205,7 @@ export interface RecentlyViewed {
 }
 
 // 카테고리 타입 정의
-export type Category = 'drivers' | 'irons' | 'putters' | 'wedges' | 'woods' | 'utilities';
+export type Category = 'drivers' | 'irons' | 'putters' | 'wedges' | 'woods' | 'utilities' | 'heads-parts';
 export type Brand = 'titleist' | 'taylormade' | 'callaway' | 'honma' | 'xxio' | 'bridgestone' | 'others';
 
 // 검색 및 필터링 관련 타입

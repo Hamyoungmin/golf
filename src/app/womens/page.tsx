@@ -32,7 +32,8 @@ export default function Womens() {
     id: product.id,
     name: product.name,
     price: formatPrice(product.price),
-    image: product.images?.[0] || '/placeholder-womens.jpg'
+    image: product.images?.[0] || '/placeholder-womens.jpg',
+    stock: product.stock // 재고 정보 포함
   }));
 
   if (loading) {

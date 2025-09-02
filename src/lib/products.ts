@@ -12,7 +12,8 @@ import {
   orderBy, 
   limit as firestoreLimit,
   startAfter,
-  DocumentSnapshot
+  DocumentSnapshot,
+  increment
 } from './firebase';
 import { Product, ProductFilter, ProductSort } from '@/types';
 
@@ -166,6 +167,7 @@ export async function addProduct(productData: Omit<Product, 'id' | 'createdAt' |
     const product: Product = {
       ...productData,
       id: docRef.id,
+      views: 0, // 조회수 초기화
       createdAt: now,
       updatedAt: now,
     };
@@ -237,6 +239,76 @@ export async function updateProductStock(productId: string, newStock: number): P
     return true;
   } catch (error) {
     console.error('재고 업데이트 오류:', error);
+    return false;
+  }
+}
+
+// 주문 완료 시 재고 감소
+export async function decreaseProductStock(productId: string, quantity: number): Promise<boolean> {
+  try {
+    // 먼저 현재 상품 정보 가져오기
+    const product = await getProduct(productId);
+    if (!product) {
+      console.error('상품을 찾을 수 없습니다:', productId);
+      return false;
+    }
+
+    // 현재 재고보다 많은 수량 요청 시 오류
+    if (product.stock < quantity) {
+      console.error('재고 부족:', {
+        productId,
+        currentStock: product.stock,
+        requestedQuantity: quantity
+      });
+      return false;
+    }
+
+    // 재고 감소
+    const newStock = product.stock - quantity;
+    const docRef = doc(db, 'products', productId);
+    await updateDoc(docRef, {
+      stock: newStock,
+      updatedAt: new Date(),
+    });
+
+    console.log(`상품 재고 감소 완료: ${product.name} (${product.stock} → ${newStock})`);
+    return true;
+  } catch (error) {
+    console.error('재고 감소 오류:', error);
+    return false;
+  }
+}
+
+// 여러 상품의 재고 일괄 감소 (주문 완료용)
+export async function decreaseMultipleProductsStock(orderItems: Array<{
+  productId: string;
+  quantity: number;
+  productName?: string;
+}>): Promise<boolean> {
+  try {
+    console.log('주문 상품들의 재고 감소 시작:', orderItems);
+
+    // 모든 상품의 재고 감소를 병렬로 처리
+    const decreasePromises = orderItems.map(async (item) => {
+      const success = await decreaseProductStock(item.productId, item.quantity);
+      if (!success) {
+        throw new Error(`상품 재고 감소 실패: ${item.productName || item.productId}`);
+      }
+      return success;
+    });
+
+    const results = await Promise.all(decreasePromises);
+    const allSuccess = results.every(result => result === true);
+
+    if (allSuccess) {
+      console.log('✅ 모든 상품 재고 감소 완료');
+    } else {
+      console.error('❌ 일부 상품 재고 감소 실패');
+    }
+
+    return allSuccess;
+  } catch (error) {
+    console.error('다중 상품 재고 감소 오류:', error);
     return false;
   }
 }
@@ -394,6 +466,11 @@ export async function getProductsForPage(
         const aValue = a[sort.field as keyof Product];
         const bValue = b[sort.field as keyof Product];
         
+        // undefined 값 처리
+        if (aValue == null && bValue == null) return 0;
+        if (aValue == null) return sort.direction === 'asc' ? 1 : -1;
+        if (bValue == null) return sort.direction === 'asc' ? -1 : 1;
+        
         if (sort.direction === 'asc') {
           return aValue > bValue ? 1 : -1;
         } else {
@@ -423,6 +500,36 @@ export async function getProductCountForPage(pagePath: string): Promise<number> 
     return products.length;
   } catch (error) {
     console.error('페이지별 상품 개수 가져오기 오류:', error);
+    return 0;
+  }
+}
+
+// 상품 조회수 증가
+export async function incrementProductViews(productId: string): Promise<boolean> {
+  try {
+    const docRef = doc(db, 'products', productId);
+    await updateDoc(docRef, {
+      views: increment(1),
+      updatedAt: new Date()
+    });
+    return true;
+  } catch (error) {
+    console.error('상품 조회수 증가 오류:', error);
+    return false;
+  }
+}
+
+// 상품별 위시리스트 개수 가져오기
+export async function getProductWishlistCount(productId: string): Promise<number> {
+  try {
+    const q = query(
+      collection(db, 'wishlists'),
+      where('productIds', 'array-contains', productId)
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.length;
+  } catch (error) {
+    console.error('상품 위시리스트 개수 가져오기 오류:', error);
     return 0;
   }
 }

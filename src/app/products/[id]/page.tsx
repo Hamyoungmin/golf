@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useCart } from '../../../contexts/CartContext';
 import { useWishlist } from '../../../contexts/WishlistContext';
+import { useRecentlyViewed } from '../../../contexts/RecentlyViewedContext';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { useCustomAlert } from '../../../hooks/useCustomAlert';
-import { getProductById } from '../../../lib/products';
+import { getProductById, incrementProductViews } from '../../../lib/products';
 import { createReview, getProductReviews } from '../../../lib/reviews';
 import { Product, Review } from '../../../types';
 import ProductReservationStatus, { ReservationAwareAddToCartButton } from '../../../components/ProductReservationStatus';
@@ -20,6 +21,7 @@ export default function ProductPage() {
   const { user } = useAuth();
   const { addToCart } = useCart();
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const { addToRecentlyViewed } = useRecentlyViewed();
   const { settings } = useSettings();
   const { AlertComponent, showAlert } = useCustomAlert();
 
@@ -47,6 +49,24 @@ export default function ProductPage() {
             // 리뷰도 함께 가져오기
             const reviewsData = await getProductReviews(params.id);
             setReviews(reviewsData);
+            
+            // 최근 본 상품에 추가 (사용자가 로그인되어 있을 때만)
+            if (user) {
+              try {
+                await addToRecentlyViewed(params.id);
+              } catch (error) {
+                console.warn('최근 본 상품 추가 실패:', error);
+                // 실패해도 페이지는 정상적으로 표시
+              }
+            }
+
+            // 조회수 증가 (로그인 여부와 관계없이 항상 실행)
+            try {
+              await incrementProductViews(params.id);
+            } catch (error) {
+              console.warn('조회수 증가 실패:', error);
+              // 실패해도 페이지는 정상적으로 표시
+            }
           } else {
             setError('상품을 찾을 수 없습니다.');
           }
@@ -60,7 +80,7 @@ export default function ProductPage() {
     };
 
     fetchProduct();
-  }, [params.id]);
+  }, [params.id, user]);
 
 
 
@@ -98,7 +118,7 @@ export default function ProductPage() {
     router.push(`/checkout?productId=${product.id}&quantity=${quantity}`);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
     
     if (product.price === '가격문의') {
@@ -120,7 +140,7 @@ export default function ProductPage() {
 
     // 가격 문자열에서 숫자 추출 (예: "150,000원" -> 150000)
     const priceNumber = parseInt(product.price.replace(/[^0-9]/g, '')) || 0;
-    addToCart(product.id, quantity, priceNumber);
+    await addToCart(product.id, quantity, priceNumber);
     showAlert('장바구니에 추가되었습니다.', 'success');
   };
 
@@ -580,8 +600,8 @@ export default function ProductPage() {
                             padding: '2px',
                             transition: 'color 0.2s ease'
                           }}
-                          onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
-                          onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                          onMouseEnter={(e) => (e.target as HTMLElement).style.transform = 'scale(1.1)'}
+                          onMouseLeave={(e) => (e.target as HTMLElement).style.transform = 'scale(1)'}
                         >
                           ★
                         </button>

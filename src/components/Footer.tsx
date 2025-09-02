@@ -27,9 +27,7 @@ const Footer = () => {
           <h3>{settings.general.siteName}</h3>
           <div className="footer-info-grid">
             <div className="footer-row">
-              <span><strong>법인명</strong> {settings.store.companyName}</span>
-              <span><strong>대표</strong> {settings.store.representative}</span>
-                             <span><strong>주소</strong> {settings.store.address}</span>
+              <span><strong>주소</strong> {settings.store.address}</span>
               <span><strong>사업자번호</strong> {settings.store.businessNumber}</span>
                              <span><strong>통신판매업</strong> {settings.store.businessRegistration}</span>
             </div>
@@ -56,9 +54,6 @@ const Footer = () => {
               </span>
             </div>
           </div>
-          <p style={{ marginTop: '20px' }}>
-            copyright 2024. {settings.general.siteName} all right reserved
-          </p>
         </div>
       </div>
     </footer>

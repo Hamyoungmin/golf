@@ -312,7 +312,8 @@ export default function FAQPage() {
                 question: item.question,
                 answer: item.answer,
                 order: item.order || (maxOrder + i + 1),
-                isVisible: item.isVisible !== undefined ? item.isVisible : true
+                isVisible: item.isVisible !== undefined ? item.isVisible : true,
+                views: 0 // 조회수 초기값 추가
               };
               await addFaq(newFaq);
             }

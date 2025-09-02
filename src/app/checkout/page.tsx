@@ -854,12 +854,12 @@ export default function CheckoutPage() {
                 }}
                 onMouseEnter={(e) => {
                   if (!loading) {
-                    e.target.style.backgroundColor = '#0056b3';
+                    (e.target as HTMLElement).style.backgroundColor = '#0056b3';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!loading) {
-                    e.target.style.backgroundColor = '#007bff';
+                    (e.target as HTMLElement).style.backgroundColor = '#007bff';
                   }
                 }}
             >
@@ -883,10 +883,10 @@ export default function CheckoutPage() {
                     transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = '#f8f9fa';
+                    (e.target as HTMLElement).style.backgroundColor = '#f8f9fa';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = '#fff';
+                    (e.target as HTMLElement).style.backgroundColor = '#fff';
                   }}
                 >
                   상품으로 돌아가기
@@ -908,10 +908,10 @@ export default function CheckoutPage() {
                     transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = '#f8f9fa';
+                    (e.target as HTMLElement).style.backgroundColor = '#f8f9fa';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = '#fff';
+                    (e.target as HTMLElement).style.backgroundColor = '#fff';
                   }}
             >
               장바구니로 돌아가기

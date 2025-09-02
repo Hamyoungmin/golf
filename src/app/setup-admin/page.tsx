@@ -83,7 +83,8 @@ export default function SetupAdminPage() {
       
     } catch (error) {
       console.error('관리자 설정 실패:', error);
-      alert('❌ 관리자 설정에 실패했습니다: ' + error.message);
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+      alert('❌ 관리자 설정에 실패했습니다: ' + errorMessage);
     }
   };
 

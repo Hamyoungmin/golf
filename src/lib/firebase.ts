@@ -24,7 +24,8 @@ export {
   Timestamp,
   writeBatch,
   onSnapshot,
-  DocumentSnapshot
+  DocumentSnapshot,
+  increment
 } from 'firebase/firestore';
 
 export {

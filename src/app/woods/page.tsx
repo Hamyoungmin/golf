@@ -32,7 +32,8 @@ export default function Woods() {
     id: product.id,
     name: product.name,
     price: formatPrice(product.price),
-    image: product.images?.[0] || '/placeholder-wood.jpg'
+    image: product.images?.[0] || '/placeholder-wood.jpg',
+    stock: product.stock // 재고 정보 포함
   }));
 
   if (loading) {

@@ -27,7 +27,7 @@ export default function AdminProductsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [migrating, setMigrating] = useState(false);
 
-  const categories: Category[] = ['drivers', 'irons', 'putters', 'wedges', 'woods', 'utilities'];
+  const categories: Category[] = ['drivers', 'irons', 'putters', 'wedges', 'woods', 'utilities', 'heads-parts'];
   const brands: Brand[] = ['titleist', 'taylormade', 'callaway', 'honma', 'bridgestone', 'others'];
 
   useEffect(() => {

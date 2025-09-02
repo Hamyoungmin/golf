@@ -290,7 +290,7 @@ async function calculateConversionRate(
     // 클라이언트에서 날짜 필터링
     const filteredStats = statsSnapshot.docs.filter(doc => {
       const docDate = doc.data().date?.toDate();
-      if (!docDate) return false;
+      if (!docDate || !startDate || !endDate) return false;
       return docDate >= startDate && docDate <= endDate;
     });
     

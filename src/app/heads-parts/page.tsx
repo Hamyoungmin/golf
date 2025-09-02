@@ -6,7 +6,7 @@ import { getProductsForPage } from '@/lib/products';
 import { formatPrice } from '@/utils/priceUtils';
 import { Product } from '@/types';
 
-export default function Putters() {
+export default function HeadsParts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -14,10 +14,11 @@ export default function Putters() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const putterProducts = await getProductsForPage('putters');
-        setProducts(putterProducts);
+        // 'heads-parts' 페이지에 표시될 상품들 가져오기
+        const headsPartsProducts = await getProductsForPage('heads-parts');
+        setProducts(headsPartsProducts);
       } catch (error) {
-        console.error('퍼터 상품 로딩 실패:', error);
+        console.error('헤드&단품 상품 로딩 실패:', error);
       } finally {
         setLoading(false);
       }
@@ -26,11 +27,12 @@ export default function Putters() {
     fetchProducts();
   }, []);
 
+  // Product 타입을 ProductList가 기대하는 형태로 변환
   const formattedProducts = products.map(product => ({
     id: product.id,
     name: product.name,
     price: formatPrice(product.price),
-    image: product.images?.[0] || '/placeholder-putter.jpg',
+    image: product.images?.[0] || '/placeholder-image.jpg',
     stock: product.stock // 재고 정보 포함
   }));
 
@@ -51,11 +53,11 @@ export default function Putters() {
 
   return (
     <ProductList 
-      title="퍼터"
-      subtitle="| Putters"
+      title="헤드&단품"
+      subtitle="| HEADS & PARTS"
       products={formattedProducts}
       totalCount={products.length}
-      category="퍼터"
+      category="헤드&단품"
     />
   );
 }

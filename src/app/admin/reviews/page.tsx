@@ -436,7 +436,7 @@ export default function ReviewsPage() {
                     <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '4px' }}>
                       {review.productName}
                     </h3>
-                    <p style={{ fontSize: '14px', color: '#666' }}>작성자: {review.customerName}</p>
+                    <p style={{ fontSize: '14px', color: '#666' }}>작성자: {review.userName}</p>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>

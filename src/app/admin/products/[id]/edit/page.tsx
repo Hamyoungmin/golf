@@ -197,6 +197,14 @@ export default function AdminProductEditPage() {
         { path: 'left-handed/bridgestone', label: '브리지스톤 왼손용' },
         { path: 'left-handed/others', label: '기타 왼손용' },
       ]
+    },
+    'heads-parts': {
+      label: '헤드&단품',
+      pages: [
+        { path: 'heads-parts', label: '전체 헤드&단품' },
+        { path: 'heads-parts/heads', label: '헤드' },
+        { path: 'heads-parts/parts', label: '단품' },
+      ]
     }
   };
 
@@ -234,6 +242,7 @@ export default function AdminProductEditPage() {
           else if (firstPage.includes('wedges')) setSelectedMainCategory('wedges');
           else if (firstPage.includes('putters')) setSelectedMainCategory('putters');
           else if (firstPage.includes('irons')) setSelectedMainCategory('irons');
+          else if (firstPage.includes('heads-parts')) setSelectedMainCategory('heads-parts');
           else if (firstPage.includes('womens')) setSelectedMainCategory('womens');
           else if (firstPage.includes('left-handed')) setSelectedMainCategory('left-handed');
         }

@@ -168,7 +168,7 @@ export function ReservationAwareAddToCartButton({
   return (
     <button
       onClick={handleClick}
-      disabled={isDisabled}
+      disabled={!!isDisabled}
       style={{
         width: '100%',
         padding: '16px',

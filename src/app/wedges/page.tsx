@@ -32,7 +32,8 @@ export default function Wedges() {
     id: product.id,
     name: product.name,
     price: formatPrice(product.price),
-    image: product.images?.[0] || '/placeholder-wedge.jpg'
+    image: product.images?.[0] || '/placeholder-wedge.jpg',
+    stock: product.stock // 재고 정보 포함
   }));
 
   if (loading) {
