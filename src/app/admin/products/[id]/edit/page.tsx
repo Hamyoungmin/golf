@@ -441,7 +441,7 @@ export default function AdminProductEditPage() {
     if (!files) return;
 
     const validFiles = validateFiles(files);
-    setSelectedFiles(prev => [...prev, ...validFiles]);
+      setSelectedFiles(prev => [...prev, ...validFiles]);
 
     // input 초기화
     e.target.value = '';
@@ -1239,12 +1239,12 @@ export default function AdminProductEditPage() {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
-                <input
-                  type="file"
-                  multiple
+              <input
+                type="file"
+                multiple
                   accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                  onChange={handleFileSelect}
-                  style={{
+                onChange={handleFileSelect}
+                style={{
                     position: 'absolute',
                     opacity: 0,
                     width: '100%',
@@ -1268,13 +1268,13 @@ export default function AdminProductEditPage() {
                     여러 이미지 파일을 선택하세요
                   </div>
                   <div style={{ 
-                    fontSize: '14px', 
-                    color: '#666',
+                  fontSize: '14px',
+                  color: '#666',
                     marginBottom: '10px'
                   }}>
                     클릭하거나 파일을 드래그하세요
                   </div>
-                </label>
+              </label>
               </div>
               <div style={{ 
                 marginTop: '10px',
@@ -1303,7 +1303,7 @@ export default function AdminProductEditPage() {
                 </div>
               </div>
             </div>
-
+            
             {/* 선택된 파일 목록 */}
             {selectedFiles.length > 0 && (
               <div style={{ marginBottom: '15px' }}>
@@ -1313,7 +1313,7 @@ export default function AdminProductEditPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
                   {selectedFiles.map((file, index) => (
                     <div key={index} style={{ 
-                      display: 'flex',
+                      display: 'flex', 
                       flexDirection: 'column',
                       padding: '12px',
                       backgroundColor: '#fff',
@@ -1325,7 +1325,7 @@ export default function AdminProductEditPage() {
                       <div style={{
                         width: '100%',
                         height: '120px',
-                        backgroundColor: '#f8f9fa',
+                      backgroundColor: '#f8f9fa',
                         borderRadius: '4px',
                         marginBottom: '8px',
                         display: 'flex',

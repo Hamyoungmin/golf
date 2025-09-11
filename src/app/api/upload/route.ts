@@ -18,18 +18,21 @@ export async function OPTIONS() {
 
 // POST 요청 처리 (파일 업로드)
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  
   try {
-    console.log('📤 업로드 API 호출됨');
+    console.log('📤 [Vercel] 업로드 API 호출됨 - Start Time:', new Date().toISOString());
     
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const productName = formData.get('productName') as string;
     
-    console.log('📤 파일 정보:', {
+    console.log('📤 [Vercel] 파일 정보:', {
       fileName: file?.name,
       fileSize: file?.size,
       fileType: file?.type,
-      productName
+      productName,
+      environment: process.env.NODE_ENV
     });
     
     if (!file) {
@@ -92,24 +95,30 @@ export async function POST(request: NextRequest) {
     const downloadURL = await getDownloadURL(snapshot.ref);
     console.log('📤 다운로드 URL 생성 완료:', downloadURL);
     
+    const duration = Date.now() - startTime;
+    console.log(`📤 [Vercel] 업로드 완료! 소요시간: ${duration}ms`);
+    
     return NextResponse.json(
       { 
         success: true, 
         url: downloadURL,
-        fileName: fileName
+        fileName: fileName,
+        duration: duration
       },
       { headers: corsHeaders }
     );
 
   } catch (error) {
-    console.error('❌ 업로드 에러:', error);
+    const duration = Date.now() - startTime;
+    console.error(`❌ [Vercel] 업로드 에러 (${duration}ms):`, error);
     console.error('❌ 에러 타입:', typeof error);
     console.error('❌ 에러 스택:', error instanceof Error ? error.stack : 'No stack');
     
     return NextResponse.json(
       { 
         error: '업로드에 실패했습니다.',
-        details: error instanceof Error ? error.message : '알 수 없는 오류'
+        details: error instanceof Error ? error.message : '알 수 없는 오류',
+        duration: duration
       },
       { status: 500, headers: corsHeaders }
     );

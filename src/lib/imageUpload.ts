@@ -86,9 +86,9 @@ export async function uploadMultipleProductImages(
       const url = await uploadImage(file, productName);
       uploadedUrls.push(url);
       
-      // 다음 업로드 전 잠시 대기 (서버 부하 감소)
+      // 다음 업로드 전 잠시 대기 (서버 부하 감소) - Vercel 최적화
       if (i < fileArray.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
       
     } catch (error) {
