@@ -1,4 +1,64 @@
 /**
+ * 클라이언트에서 직접 Firebase Storage에 업로드 (무제한!)
+ * @param file 업로드할 이미지 파일
+ * @param productName 상품명 (파일명 생성용)
+ * @returns Promise<string> 업로드된 이미지의 다운로드 URL
+ */
+export async function uploadImageDirect(file: File, productName: string): Promise<string> {
+  try {
+    const { storage, ref, uploadBytes, getDownloadURL } = await import('@/lib/firebase');
+    
+    if (!storage) {
+      throw new Error('Firebase Storage가 초기화되지 않았습니다.');
+    }
+
+    // 파일 타입 검증
+    if (!file.type.startsWith('image/')) {
+      throw new Error('이미지 파일만 업로드 가능합니다.');
+    }
+
+    console.log(`📤 [직접 업로드] 시작: ${file.name} (${formatFileSize(file.size)})`);
+
+    // 파일명 생성
+    const timestamp = Date.now();
+    const fileExtension = file.name.split('.').pop();
+    const sanitizedProductName = productName.replace(/[^a-zA-Z0-9가-힣]/g, '_');
+    const fileName = `${sanitizedProductName}_${timestamp}.${fileExtension}`;
+    
+    // Firebase Storage에 직접 업로드
+    const imagePath = `products/${fileName}`;
+    const imageRef = ref(storage, imagePath);
+    
+    console.log(`📤 [직접 업로드] Firebase Storage 업로드 중... (${imagePath})`);
+    
+    // 파일을 ArrayBuffer로 변환
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = new Uint8Array(arrayBuffer);
+    
+    // 업로드 실행 (메타데이터 추가)
+    const snapshot = await uploadBytes(imageRef, buffer, {
+      contentType: file.type,
+      customMetadata: {
+        originalName: file.name,
+        uploadMethod: 'direct',
+        productName: productName
+      }
+    });
+    
+    console.log(`📤 [직접 업로드] 완료! 파일 크기: ${formatFileSize(file.size)}`);
+    
+    // 다운로드 URL 가져오기
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    
+    return downloadURL;
+    
+  } catch (error) {
+    console.error('❌ [직접 업로드] 실패:', error);
+    throw error;
+  }
+}
+
+/**
  * API 라우트를 통해 이미지를 업로드합니다 (CORS 문제 해결)
  * @param file 업로드할 이미지 파일
  * @param productName 상품명 (파일명 생성용)
@@ -11,12 +71,18 @@ export async function uploadImage(file: File, productName: string): Promise<stri
       throw new Error('이미지 파일만 업로드 가능합니다.');
     }
 
-    // 파일 크기 검증 제거 (무제한 업로드 허용)
-    // 큰 파일도 업로드 가능하도록 제한 해제
+    // Vercel 제한 대응: 3.5MB 이상이면 압축
+    const maxSize = 3.5 * 1024 * 1024; // 3.5MB
+    let processedFile = file;
+    
+    if (file.size > maxSize) {
+      console.log(`📦 파일 크기가 큽니다 (${formatFileSize(file.size)}). 압축을 시도합니다...`);
+      processedFile = await compressImage(file, maxSize);
+    }
 
     // FormData 생성
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', processedFile);
     formData.append('productName', productName);
 
     // API 라우트로 업로드 요청
@@ -45,17 +111,17 @@ export async function uploadImage(file: File, productName: string): Promise<stri
 }
 
 /**
- * 상품 이미지를 업로드합니다.
+ * 상품 이미지를 업로드합니다. (직접 Firebase 업로드 - 무제한!)
  * @param file 업로드할 이미지 파일
  * @param productName 상품명 (파일명에 사용)
  * @returns Promise<string> 업로드된 이미지의 다운로드 URL
  */
 export async function uploadProductImage(file: File, productName: string): Promise<string> {
-  return uploadImage(file, productName);
+  return uploadImageDirect(file, productName);
 }
 
 /**
- * 여러 이미지 파일을 순차적으로 업로드합니다. (백엔드 API 사용)
+ * 여러 이미지 파일을 순차적으로 업로드합니다. (직접 Firebase 업로드 - 무제한!)
  * @param files 업로드할 이미지 파일들
  * @param productName 상품명
  * @param onProgress 진행률 콜백 함수 (선택)
@@ -69,7 +135,9 @@ export async function uploadMultipleProductImages(
   const fileArray = Array.from(files);
   const uploadedUrls: string[] = [];
   
-  // 파일을 순차적으로 업로드
+  console.log(`🚀 [무제한 업로드] ${fileArray.length}개 파일 직접 업로드 시작`);
+  
+  // 파일을 순차적으로 직접 업로드
   for (let i = 0; i < fileArray.length; i++) {
     const file = fileArray[i];
     
@@ -79,21 +147,24 @@ export async function uploadMultipleProductImages(
         onProgress(i + 1, fileArray.length, file.name);
       }
       
-      // API를 통해 업로드
-      const url = await uploadImage(file, productName);
+      // 직접 Firebase Storage에 업로드 (무제한!)
+      const url = await uploadImageDirect(file, productName);
       uploadedUrls.push(url);
       
-      // 다음 업로드 전 잠시 대기 (서버 부하 감소) - Vercel 최적화
+      console.log(`✅ [무제한 업로드] ${i + 1}/${fileArray.length} 완료: ${file.name} (${formatFileSize(file.size)})`);
+      
+      // 다음 업로드 전 잠시 대기 (Firebase 부하 감소)
       if (i < fileArray.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
       
     } catch (error) {
-      console.error(`파일 업로드 실패: ${file.name}`, error);
+      console.error(`❌ [무제한 업로드] 파일 업로드 실패: ${file.name}`, error);
       throw new Error(`${file.name} 업로드 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     }
   }
 
+  console.log(`🎉 [무제한 업로드] 모든 파일 업로드 완료! 총 ${fileArray.length}개`);
   return uploadedUrls;
 }
 

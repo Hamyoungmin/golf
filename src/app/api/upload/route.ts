@@ -16,6 +16,10 @@ export async function OPTIONS() {
   });
 }
 
+// Body size 제한 설정 (Vercel Hobby 플랜: 4.5MB)
+export const maxDuration = 60; // 60초 타임아웃
+export const runtime = 'nodejs';
+
 // POST 요청 처리 (파일 업로드)
 export async function POST(request: NextRequest) {
   const startTime = Date.now();

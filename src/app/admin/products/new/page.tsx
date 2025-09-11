@@ -1229,7 +1229,7 @@ export default function AdminProductCreatePage() {
                     border: '1px solid #b3d9ff'
                   }}>
                     <strong>📋 지원 형식:</strong> JPG, JPEG, PNG, WebP, GIF<br/>
-                    <strong>📏 최대 크기:</strong> 무제한 (고화질 이미지 가능)<br/>
+                    <strong>📏 최대 크기:</strong> 🚀 진짜 무제한 (Vercel 제한 우회!)<br/>
                     <strong>📦 개수 제한:</strong> 무제한 (한 번에 여러 개 업로드 가능)
                   </div>
                 </div>
@@ -1328,7 +1328,7 @@ export default function AdminProductCreatePage() {
                     fontSize: '14px',
                     color: '#666'
                   }}>
-                    💡 &quot;상품 등록&quot; 버튼을 누르면 자동으로 이미지가 업로드됩니다
+                    🚀 &quot;상품 등록&quot; 버튼을 누르면 무제한 직접 업로드가 시작됩니다
                   </div>
                 </div>
               )}
