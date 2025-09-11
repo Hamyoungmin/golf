@@ -8,6 +8,7 @@ import { getUserData } from '@/lib/users';
 import { getUserOrders } from '@/lib/orders';
 import { User as UserType, Order } from '@/types';
 import { useCustomAlert } from '@/hooks/useCustomAlert';
+import { db, doc, onSnapshot } from '@/lib/firebase';
 
 export default function MyPage() {
   const router = useRouter();
@@ -28,29 +29,48 @@ export default function MyPage() {
     }
   }, [user, authLoading, router, showAlert]);
 
-  // 사용자 정보 및 최근 주문 로드
+  // 사용자 정보 실시간 구독 및 최근 주문 로드
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
+    if (!user) return;
 
-      try {
-        setLoading(true);
+    setLoading(true);
+    
+    // 🔥 사용자 정보 실시간 구독
+    const userRef = doc(db, 'users', user.uid);
+    const unsubscribeUser = onSnapshot(userRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const userData = {
+          ...snapshot.data(),
+          uid: snapshot.id,
+          createdAt: snapshot.data().createdAt?.toDate() || new Date(),
+          updatedAt: snapshot.data().updatedAt?.toDate() || new Date(),
+        } as UserType;
         
-        // 사용자 정보 로드
-        const userInfo = await getUserData(user.uid);
-        setUserData(userInfo);
+        console.log('🔥 실시간 사용자 정보 업데이트:', userData.name, userData.companyName);
+        setUserData(userData);
+      }
+    }, (error) => {
+      console.error('사용자 정보 실시간 구독 오류:', error);
+    });
 
-        // 최근 주문 3개 로드
+    // 최근 주문 로드 (한 번만)
+    const fetchRecentOrders = async () => {
+      try {
         const orders = await getUserOrders(user.uid, 3);
         setRecentOrders(orders);
       } catch (error) {
-        console.error('데이터 로드 오류:', error);
+        console.error('주문 데이터 로드 오류:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchRecentOrders();
+
+    // 컴포넌트 언마운트 시 구독 해제
+    return () => {
+      unsubscribeUser();
+    };
   }, [user]);
 
   const formatPrice = (price: number) => {

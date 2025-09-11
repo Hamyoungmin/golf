@@ -60,7 +60,7 @@ export interface Address {
   street: string;
   city: string;
   state: string;
-  zipCode: string;
+  zipCode?: string; // 우편번호를 선택적으로 변경
   isDefault?: boolean;
 }
 
@@ -106,12 +106,13 @@ export interface PaymentInfo {
   userId: string;
   paymentMethod: PaymentMethod;
   amount: number;
-  status: 'pending' | 'confirmed' | 'rejected';
+  status: 'pending' | 'confirmed' | 'rejected' | 'cancelled';
   bankTransferInfo?: BankTransferInfo;
   verifiedAt?: Date;
   verifiedBy?: string; // 관리자 ID
   notes?: string;
   transferDate?: Date; // 이체 날짜 (호환성을 위해 추가)
+  cancelledAt?: Date; // 취소 날짜
   createdAt: Date;
   updatedAt: Date;
 }

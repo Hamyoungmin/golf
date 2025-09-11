@@ -15,6 +15,7 @@ import { getOrder, updateOrderStatus, getOrderStatusText, getOrderStatusColor } 
 import { getUserData } from '@/lib/users';
 import { getProduct } from '@/lib/products';
 import { Order, OrderStatus, User, Product } from '@/types';
+import { db, doc, onSnapshot } from '@/lib/firebase';
 
 export default function AdminOrderDetailPage() {
   const router = useRouter();
@@ -32,6 +33,36 @@ export default function AdminOrderDetailPage() {
   useEffect(() => {
     fetchOrderDetails();
   }, [orderId]);
+
+  // 🔥 상품 정보 실시간 구독 설정
+  useEffect(() => {
+    if (!order?.items) return;
+
+    const unsubscribeFunctions: (() => void)[] = [];
+
+    order.items.forEach(item => {
+      const productRef = doc(db, 'products', item.productId);
+      const unsubscribe = onSnapshot(productRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const updatedProduct = { id: snapshot.id, ...snapshot.data() } as Product;
+          console.log('🔥 상품 정보 실시간 업데이트:', updatedProduct.name, updatedProduct.productCode);
+          
+          setProducts(prev => ({
+            ...prev,
+            [item.productId]: updatedProduct
+          }));
+        }
+      }, (error) => {
+        console.error('상품 정보 실시간 구독 오류:', error);
+      });
+
+      unsubscribeFunctions.push(unsubscribe);
+    });
+
+    return () => {
+      unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
+    };
+  }, [order?.items]);
 
   const fetchOrderDetails = async () => {
     try {
@@ -189,6 +220,7 @@ export default function AdminOrderDetailPage() {
                 <thead style={{ backgroundColor: '#f8f9fa' }}>
                   <tr>
                     <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '500', color: '#666' }}>상품</th>
+                    <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '500', color: '#666' }}>상품코드</th>
                     <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '500', color: '#666' }}>수량</th>
                     <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '500', color: '#666' }}>가격</th>
                     <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '500', color: '#666' }}>소계</th>
@@ -222,6 +254,22 @@ export default function AdminOrderDetailPage() {
                             </div>
                           </div>
                         </td>
+                        <td style={{ padding: '15px 12px', textAlign: 'center', fontSize: '14px' }}>
+                          {product?.productCode ? (
+                            <span style={{ 
+                              backgroundColor: '#e8f4fd', 
+                              padding: '4px 8px', 
+                              borderRadius: '4px', 
+                              fontSize: '12px',
+                              fontWeight: '500',
+                              color: '#0066cc'
+                            }}>
+                              {product.productCode}
+                            </span>
+                          ) : (
+                            <span style={{ color: '#999', fontSize: '12px' }}>미지정</span>
+                          )}
+                        </td>
                         <td style={{ padding: '15px 12px', textAlign: 'center', fontSize: '14px' }}>{item.quantity}</td>
                         <td style={{ padding: '15px 12px', textAlign: 'right', fontSize: '14px' }}>{formatPrice(item.price)}</td>
                         <td style={{ padding: '15px 12px', textAlign: 'right', fontSize: '14px', fontWeight: '500' }}>{formatPrice(item.totalPrice)}</td>
@@ -231,7 +279,7 @@ export default function AdminOrderDetailPage() {
                 </tbody>
                 <tfoot style={{ backgroundColor: '#f8f9fa' }}>
                   <tr>
-                    <td colSpan={3} style={{ padding: '15px 12px', textAlign: 'right', fontSize: '16px', fontWeight: 'bold' }}>총 결제금액</td>
+                    <td colSpan={4} style={{ padding: '15px 12px', textAlign: 'right', fontSize: '16px', fontWeight: 'bold' }}>총 결제금액</td>
                     <td style={{ padding: '15px 12px', textAlign: 'right', fontSize: '18px', fontWeight: 'bold', color: '#007bff' }}>{formatPrice(order.totalAmount)}</td>
                   </tr>
                 </tfoot>
@@ -564,8 +612,7 @@ export default function AdminOrderDetailPage() {
                   </div>
                   <div style={{ fontSize: '13px', lineHeight: '1.5' }}>
                     <p style={{ marginBottom: '3px' }}>{order.shippingAddress.street}</p>
-                    <p style={{ marginBottom: '3px' }}>{order.shippingAddress.city} {order.shippingAddress.state}</p>
-                    <p>{order.shippingAddress.zipCode}</p>
+                    <p>{order.shippingAddress.city} {order.shippingAddress.state}</p>
                   </div>
                 </div>
 

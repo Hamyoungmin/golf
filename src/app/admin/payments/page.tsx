@@ -13,11 +13,11 @@ import {
   formatCurrency 
 } from '@/lib/payments';
 import { getUserData } from '@/lib/users';
-import { getOrderByOrderId } from '@/lib/orders';
+import { getOrderByOrderId, updateOrderStatus } from '@/lib/orders';
 import { PaymentInfo, User, Order } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSettings } from '@/contexts/SettingsContext';
-import { updateOrderStatus } from '@/lib/orders';
+import { db, collection, query, where, onSnapshot, orderBy } from '@/lib/firebase';
 
 export default function AdminPaymentsPage() {
   const router = useRouter();
@@ -32,10 +32,13 @@ export default function AdminPaymentsPage() {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [processing, setProcessing] = useState<{ [key: string]: boolean }>({});
 
-  const paymentStatuses = ['pending', 'confirmed', 'rejected'];
+  const paymentStatuses = ['pending', 'confirmed', 'rejected', 'cancelled'];
 
   useEffect(() => {
-    fetchPayments();
+    const unsubscribe = setupRealtimePayments();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [selectedStatus]);
 
   const fetchPayments = async () => {
@@ -106,6 +109,100 @@ export default function AdminPaymentsPage() {
     }
   };
 
+  // 🔥 실시간 결제 데이터 구독 설정
+  const setupRealtimePayments = () => {
+    try {
+      setLoading(true);
+      
+      // 기본 쿼리 설정
+      let paymentsQuery = query(
+        collection(db, 'payments'),
+        orderBy('createdAt', 'desc')
+      );
+      
+      // 상태 필터링이 있는 경우 추가
+      if (selectedStatus) {
+        paymentsQuery = query(
+          collection(db, 'payments'),
+          where('status', '==', selectedStatus),
+          orderBy('createdAt', 'desc')
+        );
+      }
+      
+      // 실시간 구독 시작
+      const unsubscribe = onSnapshot(paymentsQuery, async (snapshot) => {
+        console.log('🔥 실시간 결제 데이터 업데이트:', snapshot.docs.length, '개');
+        
+        const paymentList = snapshot.docs.map(doc => ({
+          id: doc.id, // ✅ Firestore 문서의 실제 ID
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate() || new Date(),
+          updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+          verifiedAt: doc.data().verifiedAt?.toDate(),
+          cancelledAt: doc.data().cancelledAt?.toDate(),
+        })) as PaymentInfo[];
+        
+        setPayments(paymentList);
+        
+        // 사용자 정보 및 주문 정보 캐싱
+        const uniqueUserIds = [...new Set(paymentList.map(payment => payment.userId))];
+        const uniqueOrderIds = [...new Set(paymentList.map(payment => payment.orderId))];
+
+        // 사용자 정보 캐싱
+        const userPromises = uniqueUserIds.map(async (userId) => {
+          if (userId && !userCache[userId]) {
+            const userData = await getUserData(userId);
+            return { userId, userData };
+          }
+          return null;
+        });
+
+        const userResults = await Promise.all(userPromises);
+        const newUserCache: { [key: string]: User } = { ...userCache };
+        userResults.forEach(result => {
+          if (result && result.userData && result.userId) {
+            newUserCache[result.userId] = result.userData;
+          }
+        });
+        setUserCache(prev => ({ ...prev, ...newUserCache }));
+
+        // 주문 정보 캐싱
+        const orderPromises = uniqueOrderIds.map(async (orderId) => {
+          if (orderId && !orderCache[orderId]) {
+            try {
+              const orderData = await getOrderByOrderId(orderId);
+              return { orderId, orderData };
+            } catch (error) {
+              console.error(`주문 정보 로드 실패 (${orderId}):`, error);
+              return null;
+            }
+          }
+          return null;
+        });
+
+        const orderResults = await Promise.all(orderPromises);
+        const newOrderCache: { [key: string]: Order } = { ...orderCache };
+        orderResults.forEach(result => {
+          if (result && result.orderData && result.orderId) {
+            newOrderCache[result.orderId] = result.orderData;
+          }
+        });
+        setOrderCache(prev => ({ ...prev, ...newOrderCache }));
+        
+        setLoading(false);
+      }, (error) => {
+        console.error('❌ 실시간 결제 데이터 구독 오류:', error);
+        setLoading(false);
+      });
+      
+      return unsubscribe;
+    } catch (error) {
+      console.error('❌ 실시간 구독 설정 실패:', error);
+      setLoading(false);
+      return null;
+    }
+  };
+
   const handlePaymentAction = async (paymentId: string, action: 'confirmed' | 'rejected', notes?: string) => {
     if (!user) return;
     
@@ -116,22 +213,31 @@ export default function AdminPaymentsPage() {
       const success = await updatePaymentStatus(paymentId, action, user.uid, notes);
       
       if (success) {
-        // 결제 승인 시 해당 주문 상태도 배송중으로 변경
+        // 🔍 결제 문서에서 주문 ID 찾기
+        const payment = payments.find(p => p.id === paymentId);
+        if (!payment) {
+          alert('결제 정보를 찾을 수 없습니다.');
+          return;
+        }
+        
+        // 결제 승인 시 해당 주문 상태도 배송중으로 변경 (올바른 주문 ID 사용)
         if (action === 'confirmed') {
-          const orderUpdateSuccess = await updateOrderStatus(paymentId, 'shipped');
+          console.log('🔍 주문 상태 업데이트 중 (배송중):', payment.orderId);
+          const orderUpdateSuccess = await updateOrderStatus(payment.orderId, 'shipped');
           if (!orderUpdateSuccess) {
-            console.warn('주문 상태 업데이트 실패:', paymentId);
+            console.warn('주문 상태 업데이트 실패:', payment.orderId);
           }
         }
-        // 결제 거부 시 주문 상태를 취소로 변경
+        // 결제 거부 시 주문 상태를 취소로 변경 (올바른 주문 ID 사용)
         else if (action === 'rejected') {
-          const orderUpdateSuccess = await updateOrderStatus(paymentId, 'cancelled');
+          console.log('🔍 주문 상태 업데이트 중 (취소):', payment.orderId);
+          const orderUpdateSuccess = await updateOrderStatus(payment.orderId, 'cancelled');
           if (!orderUpdateSuccess) {
-            console.warn('주문 상태 업데이트 실패:', paymentId);
+            console.warn('주문 상태 업데이트 실패:', payment.orderId);
           }
         }
         
-        await fetchPayments(); // 목록 새로고침
+        // 실시간 구독으로 자동 업데이트되므로 fetchPayments() 불필요
         alert(`결제가 ${action === 'confirmed' ? '승인' : '거부'}되었습니다.${action === 'confirmed' ? ' 주문이 배송 준비 중입니다.' : ' 주문이 취소되었습니다.'}`);
       } else {
         alert('처리 중 오류가 발생했습니다.');
@@ -242,6 +348,7 @@ export default function AdminPaymentsPage() {
         return (
           <div className="text-xs">
             {payment.verifiedAt && <p>{formatDate(payment.verifiedAt)}</p>}
+            {payment.cancelledAt && <p>{formatDate(payment.cancelledAt)}</p>}
             {payment.verifiedBy && <p className="text-gray-500">처리자: {payment.verifiedBy}</p>}
             {payment.notes && <p className="text-gray-500 mt-1">{payment.notes}</p>}
           </div>
@@ -277,6 +384,7 @@ export default function AdminPaymentsPage() {
   const pendingCount = payments.filter(p => p.status === 'pending').length;
   const confirmedCount = payments.filter(p => p.status === 'confirmed').length;
   const rejectedCount = payments.filter(p => p.status === 'rejected').length;
+  const cancelledCount = payments.filter(p => p.status === 'cancelled').length;
 
   return (
     <div className="container" style={{ maxWidth: '1200px', margin: '50px auto', padding: '20px' }}>
@@ -292,8 +400,8 @@ export default function AdminPaymentsPage() {
           fontSize: '24px',
           fontWeight: 'bold'
         }}>
-          입금 관리
-        </h1>
+            입금 관리
+          </h1>
 
         {/* 통계 현황 */}
         <div style={{ marginBottom: '25px' }}>
@@ -307,7 +415,7 @@ export default function AdminPaymentsPage() {
             입금 현황
           </h3>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '15px' }}>
             <div style={{ 
               padding: '20px', 
               border: '1px solid #ddd', 
@@ -358,6 +466,19 @@ export default function AdminPaymentsPage() {
                 {rejectedCount}
               </div>
               <div style={{ fontSize: '14px', color: '#666' }}>거부</div>
+            </div>
+            
+            <div style={{ 
+              padding: '20px', 
+              border: '1px solid #ddd', 
+              borderRadius: '4px', 
+              textAlign: 'center',
+              backgroundColor: '#f9f9f9'
+            }}>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
+                {cancelledCount}
+              </div>
+              <div style={{ fontSize: '14px', color: '#666' }}>취소</div>
             </div>
           </div>
         </div>
@@ -630,6 +751,22 @@ export default function AdminPaymentsPage() {
             >
               거부 ({rejectedCount})
             </button>
+            
+            <button
+              onClick={() => setSelectedStatus('cancelled')}
+              style={{
+                padding: '8px 16px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: selectedStatus === 'cancelled' ? '#fff' : '#666',
+                backgroundColor: selectedStatus === 'cancelled' ? '#6c757d' : '#f9f9f9',
+                cursor: 'pointer'
+              }}
+            >
+              취소 ({cancelledCount})
+            </button>
           </div>
         </div>
 
@@ -734,7 +871,12 @@ export default function AdminPaymentsPage() {
             backgroundColor: '#fff'
           }}>
             <DataTable
-              data={filteredPayments.map(payment => ({ ...payment, id: payment.orderId }))}
+              data={filteredPayments.map(payment => ({ 
+                ...payment, 
+                // ✅ 결제 문서의 실제 ID를 사용 (주문 ID가 아님)
+                displayId: payment.orderId, // 화면 표시용 주문 ID
+                id: payment.id || payment.orderId // Firestore 문서 ID 우선, 없으면 주문 ID
+              }))}
               columns={columns}
               loading={loading}
               emptyMessage="입금 내역이 없습니다."
@@ -746,10 +888,10 @@ export default function AdminPaymentsPage() {
                         onClick={(e) => {
                           e.stopPropagation();
                           if (confirm('이 입금을 승인하시겠습니까?')) {
-                            handlePaymentAction(payment.id || payment.orderId, 'confirmed');
+                            handlePaymentAction(payment.id, 'confirmed');
                           }
                         }}
-                        disabled={processing[payment.id || payment.orderId]}
+                        disabled={processing[payment.id]}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -757,10 +899,10 @@ export default function AdminPaymentsPage() {
                           padding: '4px 8px',
                           fontSize: '12px',
                           color: '#fff',
-                          backgroundColor: processing[payment.id || payment.orderId] ? '#6c757d' : '#28a745',
+                          backgroundColor: processing[payment.id] ? '#6c757d' : '#28a745',
                           border: 'none',
                           borderRadius: '4px',
-                          cursor: processing[payment.id || payment.orderId] ? 'not-allowed' : 'pointer'
+                          cursor: processing[payment.id] ? 'not-allowed' : 'pointer'
                         }}
                       >
                         <CheckIcon style={{ width: '12px', height: '12px' }} />
@@ -772,10 +914,10 @@ export default function AdminPaymentsPage() {
                           e.stopPropagation();
                           const reason = prompt('거부 사유를 입력하세요:');
                           if (reason && confirm('이 입금을 거부하시겠습니까?')) {
-                            handlePaymentAction(payment.id || payment.orderId, 'rejected', reason);
+                            handlePaymentAction(payment.id, 'rejected', reason);
                           }
                         }}
-                        disabled={processing[payment.id || payment.orderId]}
+                        disabled={processing[payment.id]}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -783,10 +925,10 @@ export default function AdminPaymentsPage() {
                           padding: '4px 8px',
                           fontSize: '12px',
                           color: '#fff',
-                          backgroundColor: processing[payment.id || payment.orderId] ? '#6c757d' : '#dc3545',
+                          backgroundColor: processing[payment.id] ? '#6c757d' : '#dc3545',
                           border: 'none',
                           borderRadius: '4px',
-                          cursor: processing[payment.id || payment.orderId] ? 'not-allowed' : 'pointer'
+                          cursor: processing[payment.id] ? 'not-allowed' : 'pointer'
                         }}
                       >
                         <XMarkIcon style={{ width: '12px', height: '12px' }} />

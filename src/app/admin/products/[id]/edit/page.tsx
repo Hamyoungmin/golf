@@ -24,6 +24,8 @@ export default function AdminProductEditPage() {
     description: '',
     detailedDescription: '',
     stock: 0,
+    cover: false,
+    productCode: '',
     specifications: {} as { [key: string]: string },
     images: [] as string[],
     isWomens: false,
@@ -35,6 +37,7 @@ export default function AdminProductEditPage() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedMainCategory, setSelectedMainCategory] = useState('');
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, fileName: '' });
 
   // 모달 상태 관리
   const [modalState, setModalState] = useState({
@@ -225,6 +228,8 @@ export default function AdminProductEditPage() {
           description: productData.description,
           detailedDescription: productData.detailedDescription || '',
           stock: productData.stock,
+          cover: productData.cover || false,
+          productCode: productData.productCode || '',
           specifications: productData.specifications || {},
           images: productData.images || [],
           isWomens: productData.isWomens,
@@ -316,8 +321,43 @@ export default function AdminProductEditPage() {
       return;
     }
 
+    if (formData.targetPages.length === 0) {
+      alert('상품이 표시될 페이지를 하나 이상 선택해주세요.');
+      return;
+    }
+
     setSaving(true);
+    let finalImages = [...formData.images]; // 기존 이미지들
+
     try {
+      // 🚀 선택된 파일들이 있으면 자동으로 업로드
+      if (selectedFiles.length > 0) {
+        console.log(`📤 ${selectedFiles.length}개 이미지 자동 업로드 시작...`);
+        
+        // 업로드 진행률 표시
+        setUploadingImages(true);
+        setUploadProgress({ current: 0, total: selectedFiles.length, fileName: '' });
+        
+        const uploadedUrls = await uploadMultipleProductImages(
+          selectedFiles, 
+          formData.name,
+          (current, total, fileName) => {
+            setUploadProgress({ current, total, fileName });
+            console.log(`📤 업로드 진행: ${current}/${total} - ${fileName}`);
+          }
+        );
+        
+        // 업로드된 이미지들을 기존 이미지들과 합치기
+        finalImages = [...finalImages, ...uploadedUrls];
+        console.log(`✅ ${uploadedUrls.length}개 이미지 업로드 완료!`);
+        
+        // 선택된 파일들 초기화
+        setSelectedFiles([]);
+        setUploadProgress({ current: 0, total: 0, fileName: '' });
+      }
+
+      // 🛍️ 상품 데이터 저장
+      console.log('💾 상품 데이터 저장 중...');
       await updateProduct(productId, {
         name: formData.name,
         price: unformatPrice(formData.price) || '0',
@@ -325,21 +365,38 @@ export default function AdminProductEditPage() {
         description: formData.description,
         detailedDescription: formData.detailedDescription,
         stock: formData.stock,
+        cover: formData.cover,
+        productCode: formData.productCode,
         specifications: formData.specifications,
-        images: formData.images.length > 0 ? formData.images : ['/placeholder.jpg'],
+        images: finalImages.length > 0 ? finalImages : ['/placeholder.jpg'],
         isWomens: formData.isWomens,
         isKids: formData.isKids,
         isLeftHanded: formData.isLeftHanded,
         targetPages: formData.targetPages,
       });
 
-      alert('상품이 수정되었습니다.');
+      alert('✅ 상품이 성공적으로 수정되었습니다!');
       router.push('/admin/products');
+      
     } catch (error) {
-      console.error('상품 수정 실패:', error);
-      alert('상품 수정에 실패했습니다.');
+      console.error('❌ 상품 수정 실패:', error);
+      
+      let errorMessage = '상품 수정에 실패했습니다.';
+      if (error instanceof Error) {
+        if (error.message.includes('업로드 타임아웃')) {
+          errorMessage = '이미지 업로드 시간이 초과되었습니다. 파일 크기를 줄이거나 개별로 시도해주세요.';
+        } else if (error.message.includes('파일 크기')) {
+          errorMessage = '파일 크기가 너무 큽니다. 5MB 이하의 파일을 사용해주세요.';
+        } else if (error.message.includes('이미지 파일만')) {
+          errorMessage = '이미지 파일만 업로드 가능합니다.';
+        }
+      }
+      alert(errorMessage);
+      
     } finally {
       setSaving(false);
+      setUploadingImages(false);
+      setUploadProgress({ current: 0, total: 0, fileName: '' });
     }
   };
 
@@ -361,62 +418,65 @@ export default function AdminProductEditPage() {
     });
   };
 
+  // 파일 유효성 검사 함수
+  const validateFiles = (files: FileList | File[]) => {
+    const fileArray = Array.from(files);
+    const validFiles = fileArray.filter(file => {
+      if (!isValidImageFile(file)) {
+        alert(`${file.name}은(는) 지원되지 않는 파일 형식입니다. (지원: JPG, PNG, WebP, GIF)`);
+        return false;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`${file.name}은(는) 파일 크기가 너무 큽니다. (최대 5MB)`);
+        return false;
+      }
+      return true;
+    });
+    return validFiles;
+  };
+
   // 파일 선택 핸들러
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
-    const validFiles: File[] = [];
-    const invalidFiles: string[] = [];
-
-    Array.from(files).forEach(file => {
-      if (isValidImageFile(file)) {
-        if (file.size <= 5 * 1024 * 1024) { // 5MB 제한
-          validFiles.push(file);
-        } else {
-          invalidFiles.push(`${file.name} (파일 크기가 5MB를 초과합니다)`);
-        }
-      } else {
-        invalidFiles.push(`${file.name} (지원하지 않는 파일 형식입니다)`);
-      }
-    });
-
-    if (invalidFiles.length > 0) {
-      alert(`다음 파일들을 업로드할 수 없습니다:\n${invalidFiles.join('\n')}`);
-    }
-
-    if (validFiles.length > 0) {
-      setSelectedFiles(prev => [...prev, ...validFiles]);
-    }
+    const validFiles = validateFiles(files);
+    setSelectedFiles(prev => [...prev, ...validFiles]);
 
     // input 초기화
     e.target.value = '';
   };
 
+  // 드래그 앤 드롭 핸들러
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const files = e.dataTransfer.files;
+    if (!files) return;
+
+    const validFiles = validateFiles(files);
+    setSelectedFiles(prev => [...prev, ...validFiles]);
+  };
+
   // 선택된 파일 제거
   const handleFileRemove = (index: number) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  // 파일 업로드
-  const handleFileUpload = async () => {
-    if (selectedFiles.length === 0) return;
-
-    setUploadingImages(true);
-    try {
-      const uploadedUrls = await uploadMultipleProductImages(selectedFiles, formData.name);
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, ...uploadedUrls]
-      }));
-      setSelectedFiles([]);
-      alert(`${uploadedUrls.length}개의 이미지가 업로드되었습니다.`);
-    } catch (error) {
-      console.error('이미지 업로드 실패:', error);
-      alert('이미지 업로드에 실패했습니다.');
-    } finally {
-      setUploadingImages(false);
-    }
   };
 
   // 스펙 추가
@@ -611,7 +671,7 @@ export default function AdminProductEditPage() {
               </label>
               <input
                 type="text"
-                value={formData.name}
+                value={formData.name || ''}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 style={{
                   width: '100%',
@@ -633,7 +693,7 @@ export default function AdminProductEditPage() {
               </label>
               <input
                 type="text"
-                value={formData.price}
+                value={formData.price || ''}
                 onChange={(e) => {
                   // 숫자와 쉼표만 허용
                   let value = e.target.value.replace(/[^\d,]/g, '');
@@ -853,7 +913,7 @@ export default function AdminProductEditPage() {
                 브랜드 <span style={{ color: '#ff4757' }}>*</span>
               </label>
               <select
-                value={formData.brand}
+                value={formData.brand || ''}
                 onChange={(e) => setFormData({ ...formData, brand: e.target.value as Brand })}
                 style={{
                   width: '100%',
@@ -881,7 +941,7 @@ export default function AdminProductEditPage() {
               </label>
               <input
                 type="number"
-                value={formData.stock}
+                value={formData.stock || 0}
                 onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
                 style={{
                   width: '100%',
@@ -891,6 +951,57 @@ export default function AdminProductEditPage() {
                   fontSize: '16px',
                 }}
                 min="0"
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>
+                커버 유무
+              </label>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '12px',
+                border: '2px solid #e1e5e9',
+                borderRadius: '8px',
+                backgroundColor: '#f9f9f9'
+              }}>
+                <input
+                  type="checkbox"
+                  checked={formData.cover || false}
+                  onChange={(e) => setFormData({ ...formData, cover: e.target.checked })}
+                  style={{ 
+                    marginRight: '10px',
+                    transform: 'scale(1.2)'
+                  }}
+                />
+                <span style={{ fontSize: '16px', color: '#666' }}>
+                  커버 포함
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>
+                상품 코드
+              </label>
+              <input
+                type="text"
+                value={formData.productCode || ''}
+                onChange={(e) => setFormData({ ...formData, productCode: e.target.value })}
+                placeholder="예: PRD001"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '2px solid #e1e5e9',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  transition: 'border-color 0.2s',
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#3742fa'}
+                onBlur={(e) => e.target.style.borderColor = '#e1e5e9'}
               />
             </div>
           </div>
@@ -966,7 +1077,7 @@ export default function AdminProductEditPage() {
             </div>
           </div>
           <textarea
-            value={formData.description}
+            value={formData.description || ''}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={6}
             style={{
@@ -1058,7 +1169,7 @@ export default function AdminProductEditPage() {
             </div>
           </div>
           <textarea
-            value={formData.detailedDescription}
+            value={formData.detailedDescription || ''}
             onChange={(e) => setFormData({ ...formData, detailedDescription: e.target.value })}
             rows={8}
             style={{
@@ -1095,92 +1206,198 @@ export default function AdminProductEditPage() {
           </h2>
           
           {/* 파일 업로드 섹션 */}
-          <div style={{ marginBottom: '25px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '10px' }}>파일 업로드</h3>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleFileSelect}
-                style={{ display: 'none' }}
-                id="image-file-input"
-              />
-              <label
-                htmlFor="image-file-input"
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#f1f2f6',
-                  border: '2px dashed #ddd',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  color: '#666',
-                  transition: 'all 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e1e5e9';
-                  e.currentTarget.style.borderColor = '#3742fa';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f1f2f6';
-                  e.currentTarget.style.borderColor = '#ddd';
-                }}
-              >
-                📁 이미지 파일 선택 (JPG, PNG, GIF, WebP - 최대 5MB)
-              </label>
-              
-              {selectedFiles.length > 0 && (
-                <button
-                  type="button"
-                  onClick={handleFileUpload}
-                  disabled={uploadingImages}
-                  style={{
-                    padding: '10px 20px',
-                    backgroundColor: uploadingImages ? '#ddd' : '#3742fa',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: uploadingImages ? 'not-allowed' : 'pointer',
-                    fontSize: '14px'
-                  }}
-                >
-                  {uploadingImages ? '업로드 중...' : `${selectedFiles.length}개 파일 업로드`}
-                </button>
-              )}
-            </div>
+          <div style={{ 
+            border: '1px solid #e0e0e0',
+            borderRadius: '6px',
+            padding: '20px',
+            marginBottom: '20px',
+            backgroundColor: '#f9f9f9'
+          }}>
+            <h4 style={{ 
+              fontSize: '16px', 
+              fontWeight: 'bold',
+              marginBottom: '15px',
+              color: '#333'
+            }}>
+              📁 파일 업로드
+            </h4>
             
+            <div style={{ marginBottom: '15px' }}>
+              <div 
+                style={{
+                  border: '2px dashed #007bff',
+                  borderRadius: '8px',
+                  padding: '30px',
+                  textAlign: 'center',
+                  backgroundColor: '#f8f9ff',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  position: 'relative'
+                }}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <input
+                  type="file"
+                  multiple
+                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                  onChange={handleFileSelect}
+                  style={{
+                    position: 'absolute',
+                    opacity: 0,
+                    width: '100%',
+                    height: '100%',
+                    cursor: 'pointer'
+                  }}
+                  id="imageUploadEdit"
+                />
+                <label htmlFor="imageUploadEdit" style={{ 
+                  cursor: 'pointer',
+                  display: 'block',
+                  width: '100%'
+                }}>
+                  <div style={{ fontSize: '48px', marginBottom: '10px' }}>📁</div>
+                  <div style={{ 
+                    fontSize: '16px', 
+                    fontWeight: 'bold',
+                    color: '#007bff',
+                    marginBottom: '8px'
+                  }}>
+                    여러 이미지 파일을 선택하세요
+                  </div>
+                  <div style={{ 
+                    fontSize: '14px', 
+                    color: '#666',
+                    marginBottom: '10px'
+                  }}>
+                    클릭하거나 파일을 드래그하세요
+                  </div>
+                </label>
+              </div>
+              <div style={{ 
+                marginTop: '10px',
+                padding: '15px',
+                backgroundColor: '#e7f3ff',
+                borderRadius: '4px',
+                fontSize: '12px',
+                color: '#0066cc'
+              }}>
+                <div style={{ marginBottom: '10px' }}>
+                  <strong>💡 다중 선택 방법:</strong><br/>
+                  • <strong>드래그 앤 드롭</strong>: 파일들을 드래그해서 위 영역에 놓기<br/>
+                  • <strong>Ctrl + 클릭</strong>: 개별 파일 여러 개 선택<br/>
+                  • <strong>Shift + 클릭</strong>: 범위 선택<br/>
+                  • <strong>Ctrl + A</strong>: 폴더 내 모든 이미지 선택
+                </div>
+                <div style={{ 
+                  padding: '8px',
+                  backgroundColor: '#fff',
+                  borderRadius: '4px',
+                  border: '1px solid #b3d9ff'
+                }}>
+                  <strong>📋 지원 형식:</strong> JPG, JPEG, PNG, WebP, GIF<br/>
+                  <strong>📏 최대 크기:</strong> 파일당 5MB<br/>
+                  <strong>📦 개수 제한:</strong> 무제한 (한 번에 여러 개 업로드 가능)
+                </div>
+              </div>
+            </div>
+
             {/* 선택된 파일 목록 */}
             {selectedFiles.length > 0 && (
-              <div style={{ marginTop: '10px' }}>
-                <h4 style={{ fontSize: '14px', marginBottom: '5px', color: '#666' }}>선택된 파일:</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <div style={{ marginBottom: '15px' }}>
+                <h5 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '10px', color: '#28a745' }}>
+                  ✅ 선택된 파일 ({selectedFiles.length}개)
+                </h5>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
                   {selectedFiles.map((file, index) => (
                     <div key={index} style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '8px',
-                      backgroundColor: '#f8f9fa',
-                      borderRadius: '6px',
-                      fontSize: '13px'
+                      display: 'flex',
+                      flexDirection: 'column',
+                      padding: '12px',
+                      backgroundColor: '#fff',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                     }}>
-                      <span>{file.name} ({formatFileSize(file.size)})</span>
+                      {/* 이미지 미리보기 */}
+                      <div style={{
+                        width: '100%',
+                        height: '120px',
+                        backgroundColor: '#f8f9fa',
+                        borderRadius: '4px',
+                        marginBottom: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden'
+                      }}>
+                        <img 
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          style={{
+                            maxWidth: '100%',
+                            maxHeight: '100%',
+                            objectFit: 'cover',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      {/* 파일 정보 */}
+                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+                        <div style={{ fontWeight: 'bold', marginBottom: '2px', wordBreak: 'break-all' }}>
+                          {file.name}
+                        </div>
+                        <div>크기: {formatFileSize(file.size)}</div>
+                      </div>
+                      
+                      {/* 제거 버튼 */}
                       <button
                         type="button"
                         onClick={() => handleFileRemove(index)}
                         style={{
-                          color: '#ff4757',
-                          background: 'none',
+                          padding: '6px 12px',
+                          backgroundColor: '#dc3545',
+                          color: '#fff',
                           border: 'none',
+                          borderRadius: '4px',
                           cursor: 'pointer',
-                          fontSize: '12px'
+                          fontSize: '12px',
+                          fontWeight: 'bold'
                         }}
                       >
-                        삭제
+                        🗑️ 제거
                       </button>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* 선택된 파일 안내 */}
+            {selectedFiles.length > 0 && (
+              <div style={{
+                marginTop: '15px',
+                padding: '15px',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '8px',
+                border: '1px solid #dee2e6',
+                textAlign: 'center'
+              }}>
+                <div style={{
+                  fontWeight: 'bold',
+                  color: '#28a745',
+                  marginBottom: '8px'
+                }}>
+                  📁 {selectedFiles.length}개 파일이 선택되었습니다
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  color: '#666'
+                }}>
+                  💡 "변경사항 저장" 버튼을 누르면 자동으로 이미지가 업로드됩니다
                 </div>
               </div>
             )}
@@ -1372,7 +1589,21 @@ export default function AdminProductEditPage() {
               transition: 'all 0.2s'
             }}
           >
-            {saving ? '저장 중...' : '변경사항 저장'}
+            {saving ? (
+              uploadingImages ? (
+                uploadProgress.total > 0 ? (
+                  <>📤 이미지 업로드 중... ({uploadProgress.current}/{uploadProgress.total})</>
+                ) : (
+                  <>📤 이미지 업로드 준비 중...</>
+                )
+              ) : (
+                <>💾 상품 저장 중...</>
+              )
+            ) : selectedFiles.length > 0 ? (
+              <>🚀 변경사항 저장 + {selectedFiles.length}개 이미지 업로드</>
+            ) : (
+              <>📝 변경사항 저장</>
+            )}
           </button>
         </div>
       </form>

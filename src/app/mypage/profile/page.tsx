@@ -28,7 +28,6 @@ export default function ProfilePage() {
     street: '',
     city: '',
     state: '',
-    zipCode: '',
   });
 
   const [shopPhotos, setShopPhotos] = useState({
@@ -179,22 +178,8 @@ export default function ProfilePage() {
       await updateUserProfile(user.uid, updateData);
       alert('회원정보가 성공적으로 수정되었습니다.');
       
-      // 데이터 다시 로드
-      const updatedData = await getUserData(user.uid);
-      setUserData(updatedData);
-      
-      // 사진 상태 초기화
-      setShopPhotos({
-        shopInteriorPhoto: null,
-        shopSignPhoto: null
-      });
-      
-      if (updatedData) {
-        setCurrentPhotoUrls({
-          shopInteriorPhotoUrl: updatedData.shopInteriorPhotoUrl || '',
-          shopSignPhotoUrl: updatedData.shopSignPhotoUrl || ''
-        });
-      }
+      // 저장 완료 후 마이페이지로 이동
+      router.push('/mypage');
     } catch (error) {
       console.error('회원정보 수정 오류:', error);
       alert('회원정보 수정 중 오류가 발생했습니다.');
@@ -331,7 +316,7 @@ export default function ProfilePage() {
               type="text"
               value={formData.businessNumber}
               onChange={(e) => handleFormChange('businessNumber', e.target.value)}
-              placeholder="740-47-00888"
+              placeholder="000-00-00000"
               required
               style={{
                 width: '100%',
@@ -367,28 +352,6 @@ export default function ProfilePage() {
           </div>
 
           {/* 주소 정보 */}
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px',
-              fontWeight: '500'
-            }}>
-              우편번호
-            </label>
-            <input
-              type="text"
-              value={addressData.zipCode}
-              onChange={(e) => handleAddressChange('zipCode', e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
-            />
-          </div>
-          
           <div style={{ marginBottom: '20px' }}>
             <label style={{ 
               display: 'block', 

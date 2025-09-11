@@ -258,6 +258,8 @@ export function getPaymentStatusText(status: string): string {
       return '결제 확인';
     case 'rejected':
       return '결제 거부';
+    case 'cancelled':
+      return '결제 취소';
     default:
       return '알 수 없음';
   }
@@ -272,6 +274,8 @@ export function getPaymentStatusColor(status: string): string {
       return 'text-blue-600 bg-blue-100';
     case 'rejected':
       return 'text-red-600 bg-red-100';
+    case 'cancelled':
+      return 'text-gray-600 bg-gray-100';
     default:
       return 'text-gray-600 bg-gray-100';
   }

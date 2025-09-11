@@ -202,7 +202,7 @@ export async function createOrder(orderData: Omit<Order, 'orderId' | 'createdAt'
   }
 }
 
-// 주문 상태 업데이트
+// 주문 상태 업데이트 (결제 상태도 함께 업데이트)
 export async function updateOrderStatus(orderId: string, status: OrderStatus): Promise<boolean> {
   try {
     const docRef = doc(db, 'orders', orderId);
@@ -210,11 +210,73 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
       status,
       updatedAt: new Date()
     });
+
+    // 🔄 주문이 취소된 경우 관련 결제 정보도 취소 상태로 업데이트
+    if (status === 'cancelled') {
+      console.log('📋 주문 취소 - 관련 결제 정보 업데이트 중...', orderId);
+      await updatePaymentStatusByCancellation(orderId);
+    }
+
     return true;
   } catch (error) {
     console.error('주문 상태 업데이트 오류:', error);
     return false;
   }
+}
+
+// 주문 취소 시 관련 결제 정보 취소 처리
+async function updatePaymentStatusByCancellation(orderId: string): Promise<boolean> {
+  try {
+    console.log('🔍 주문 취소 처리 시작:', orderId);
+    
+    // 해당 주문 ID와 관련된 모든 결제 정보 찾기 (복합 쿼리 피하기)
+    const paymentsQuery = query(
+      collection(db, 'payments'),
+      where('orderId', '==', orderId)
+    );
+    
+    const paymentsSnapshot = await getDocs(paymentsQuery);
+    
+    if (paymentsSnapshot.empty) {
+      console.log('📋 해당 주문의 결제 정보가 없습니다:', orderId);
+      return true;
+    }
+
+    console.log(`📋 찾은 결제 정보: ${paymentsSnapshot.docs.length}개`);
+
+    // 취소되지 않은 결제만 필터링하여 업데이트
+    const updatePromises = paymentsSnapshot.docs
+      .filter(paymentDoc => paymentDoc.data().status !== 'cancelled') // 클라이언트에서 필터링
+      .map(paymentDoc => {
+        console.log(`📋 결제 정보 취소 중: ${paymentDoc.id} (현재 상태: ${paymentDoc.data().status})`);
+        return updateDoc(doc(db, 'payments', paymentDoc.id), {
+          status: 'cancelled',
+          cancelledAt: new Date(),
+          updatedAt: new Date(),
+          notes: (paymentDoc.data().notes || '') + '\n[자동] 주문 취소로 인한 결제 취소'
+        });
+      });
+
+    if (updatePromises.length === 0) {
+      console.log('📋 업데이트할 결제 정보가 없습니다 (이미 모두 취소됨)');
+      return true;
+    }
+
+    await Promise.all(updatePromises);
+    
+    console.log(`✅ ${updatePromises.length}개의 결제 정보를 취소 상태로 업데이트 완료`);
+    return true;
+  } catch (error) {
+    console.error('❌ 결제 정보 취소 처리 실패:', error);
+    // 결제 상태 업데이트가 실패해도 주문 상태 변경은 유지
+    return false;
+  }
+}
+
+// 특정 주문의 결제 상태를 강제로 취소 처리 (디버깅용)
+export async function forceUpdatePaymentStatus(orderId: string): Promise<boolean> {
+  console.log('🔧 특정 주문의 결제 상태 강제 업데이트:', orderId);
+  return await updatePaymentStatusByCancellation(orderId);
 }
 
 // 주문 ID로 주문 정보 가져오기 (별칭 함수)

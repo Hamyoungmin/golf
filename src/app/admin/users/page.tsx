@@ -83,7 +83,7 @@ export default function UsersManagement() {
     }
   };
 
-  // 사용자 승인 (API 사용)
+  // 사용자 승인 (직접 Firebase 접근)
   const approveUser = async (uid: string) => {
     if (!currentUser) {
       alert('로그인이 필요합니다.');
@@ -98,33 +98,25 @@ export default function UsersManagement() {
     
     try {
       console.log('승인 시작:', uid, '관리자:', currentUser.uid);
+      const userRef = doc(db, 'users', uid);
+      const updateData = {
+        status: 'approved',
+        approvedBy: currentUser.uid,
+        approvedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
       
-      const response = await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: uid,
-          action: 'approve',
-          adminUid: currentUser.uid
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '승인 처리에 실패했습니다.');
-      }
-
-      const result = await response.json();
+      console.log('업데이트 데이터:', updateData);
+      await updateDoc(userRef, updateData);
+      
       const { triggerCustomAlert } = await import('@/utils/alertUtils');
-      triggerCustomAlert(result.message, result.success ? 'success' : 'error');
+      triggerCustomAlert('사용자가 승인되었습니다.', 'success');
       fetchUsers(); // 목록 새로고침
       fetchCounts(); // 카운트 새로고침
     } catch (error) {
       console.error('사용자 승인 실패:', error);
       const { triggerCustomAlert } = await import('@/utils/alertUtils');
-      triggerCustomAlert(`승인 처리 중 오류가 발생했습니다: ${error instanceof Error ? error.message : error}`, 'error');
+      triggerCustomAlert(`승인 처리 중 오류가 발생했습니다: ${error}`, 'error');
     }
   };
 

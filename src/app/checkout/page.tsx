@@ -38,7 +38,6 @@ export default function CheckoutPage() {
     street: '',
     city: '',
     state: '',
-    zipCode: '',
   });
 
   // 결제 방법 - 활성화된 첫 번째 결제 수단을 기본값으로 설정
@@ -230,7 +229,7 @@ export default function CheckoutPage() {
   };
 
   const validateForm = () => {
-    if (!shippingInfo.street || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode) {
+    if (!shippingInfo.street || !shippingInfo.city || !shippingInfo.state) {
       showAlert('배송지 정보를 모두 입력해주세요.', 'warning');
       return false;
     }
@@ -434,34 +433,35 @@ export default function CheckoutPage() {
               padding: '25px',
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
             }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px', color: '#333' }}>배송지 정보</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div>
-                  <label style={{ 
-                    display: 'block', 
-                    fontSize: '14px', 
-                    fontWeight: '500', 
-                    marginBottom: '8px',
-                    color: '#555'
-                  }}>우편번호 *</label>
-                <input
-                  type="text"
-                  value={shippingInfo.zipCode}
-                  onChange={(e) => handleShippingInfoChange('zipCode', e.target.value)}
-                  placeholder="우편번호를 입력하세요"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      outline: 'none',
-                      transition: 'border-color 0.2s'
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#333', margin: 0 }}>배송지 정보</h2>
+                {userData && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (userData.address) {
+                        setShippingInfo(userData.address);
+                        showAlert('주문자 정보에서 배송지 정보를 가져왔습니다.', 'success');
+                      } else {
+                        showAlert('저장된 주문자 주소 정보가 없습니다.', 'warning');
+                      }
                     }}
-                    onFocus={(e) => e.target.style.borderColor = '#007bff'}
-                    onBlur={(e) => e.target.style.borderColor = '#ddd'}
-                />
+                    style={{
+                      padding: '8px 16px',
+                      fontSize: '13px',
+                      backgroundColor: '#007bff',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontWeight: '500'
+                    }}
+                  >
+                    📍 주문자 정보로 자동입력
+                  </button>
+                )}
               </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div>
                   <label style={{ 
                     display: 'block', 
