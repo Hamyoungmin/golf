@@ -357,7 +357,7 @@ export async function getFAQsByCategory(category: string) {
 }
 
 // 로컬 스토리지 이벤트 리스너들
-let localStorageListeners: ((faqs: FAQItem[]) => void)[] = [];
+const localStorageListeners: ((faqs: FAQItem[]) => void)[] = [];
 
 // 로컬 스토리지 변경 시 모든 리스너에게 알림
 function notifyLocalStorageListeners() {

@@ -38,7 +38,7 @@ function SearchContent() {
         
         // 실제 searchProducts 함수 사용
         const searchResult = await searchProducts(query, filters, sort);
-        let finalProducts = searchResult;
+        const finalProducts = searchResult;
 
         // 정렬 적용 (이미 searchProducts에서 처리될 수 있지만, 클라이언트에서도 적용)
         finalProducts.sort((a: Product, b: Product) => {

@@ -11,11 +11,8 @@ export async function uploadImage(file: File, productName: string): Promise<stri
       throw new Error('이미지 파일만 업로드 가능합니다.');
     }
 
-    // 파일 크기 검증 (5MB 제한)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      throw new Error('파일 크기는 5MB 이하여야 합니다.');
-    }
+    // 파일 크기 검증 제거 (무제한 업로드 허용)
+    // 큰 파일도 업로드 가능하도록 제한 해제
 
     // FormData 생성
     const formData = new FormData();

@@ -386,7 +386,7 @@ export default function AdminProductEditPage() {
         if (error.message.includes('업로드 타임아웃')) {
           errorMessage = '이미지 업로드 시간이 초과되었습니다. 파일 크기를 줄이거나 개별로 시도해주세요.';
         } else if (error.message.includes('파일 크기')) {
-          errorMessage = '파일 크기가 너무 큽니다. 5MB 이하의 파일을 사용해주세요.';
+          errorMessage = '파일 업로드에 실패했습니다. 네트워크 연결을 확인해주세요.';
         } else if (error.message.includes('이미지 파일만')) {
           errorMessage = '이미지 파일만 업로드 가능합니다.';
         }
@@ -426,10 +426,7 @@ export default function AdminProductEditPage() {
         alert(`${file.name}은(는) 지원되지 않는 파일 형식입니다. (지원: JPG, PNG, WebP, GIF)`);
         return false;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        alert(`${file.name}은(는) 파일 크기가 너무 큽니다. (최대 5MB)`);
-        return false;
-      }
+      // 파일 크기 제한 제거 - 무제한 업로드 허용
       return true;
     });
     return validFiles;
@@ -578,10 +575,7 @@ export default function AdminProductEditPage() {
         return;
       }
 
-      if (file.size > 5 * 1024 * 1024) {
-        alert('파일 크기가 너무 큽니다. (최대 5MB)');
-        return;
-      }
+      // 파일 크기 제한 제거 - 무제한 업로드 허용
 
       if (!formData.name.trim()) {
         alert('상품명을 먼저 입력해주세요.');
@@ -696,7 +690,7 @@ export default function AdminProductEditPage() {
                 value={formData.price || ''}
                 onChange={(e) => {
                   // 숫자와 쉼표만 허용
-                  let value = e.target.value.replace(/[^\d,]/g, '');
+                  const value = e.target.value.replace(/[^\d,]/g, '');
                   
                   // 쉼표 제거 후 숫자만 추출
                   const numbers = value.replace(/,/g, '');
@@ -1298,7 +1292,7 @@ export default function AdminProductEditPage() {
                   border: '1px solid #b3d9ff'
                 }}>
                   <strong>📋 지원 형식:</strong> JPG, JPEG, PNG, WebP, GIF<br/>
-                  <strong>📏 최대 크기:</strong> 파일당 5MB<br/>
+                  <strong>📏 최대 크기:</strong> 무제한 (고화질 이미지 가능)<br/>
                   <strong>📦 개수 제한:</strong> 무제한 (한 번에 여러 개 업로드 가능)
                 </div>
               </div>
@@ -1397,7 +1391,7 @@ export default function AdminProductEditPage() {
                   fontSize: '14px',
                   color: '#666'
                 }}>
-                  💡 "변경사항 저장" 버튼을 누르면 자동으로 이미지가 업로드됩니다
+                  💡 &quot;변경사항 저장&quot; 버튼을 누르면 자동으로 이미지가 업로드됩니다
                 </div>
               </div>
             )}

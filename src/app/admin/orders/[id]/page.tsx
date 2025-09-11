@@ -4,8 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
-  ArrowLeftIcon,
-  TruckIcon,
   CreditCardIcon,
   UserIcon,
   MapPinIcon,
@@ -15,7 +13,7 @@ import { getOrder, updateOrderStatus, getOrderStatusText, getOrderStatusColor } 
 import { getUserData } from '@/lib/users';
 import { getProduct } from '@/lib/products';
 import { Order, OrderStatus, User, Product } from '@/types';
-import { db, doc, onSnapshot } from '@/lib/firebase';
+import { db, doc, onSnapshot, collection } from '@/lib/firebase';
 
 export default function AdminOrderDetailPage() {
   const router = useRouter();
@@ -36,12 +34,12 @@ export default function AdminOrderDetailPage() {
 
   // 🔥 상품 정보 실시간 구독 설정
   useEffect(() => {
-    if (!order?.items) return;
+    if (!order?.items || !db) return;
 
     const unsubscribeFunctions: (() => void)[] = [];
 
     order.items.forEach(item => {
-      const productRef = doc(db, 'products', item.productId);
+      const productRef = doc(collection(db!, 'products'), item.productId);
       const unsubscribe = onSnapshot(productRef, (snapshot) => {
         if (snapshot.exists()) {
           const updatedProduct = { id: snapshot.id, ...snapshot.data() } as Product;
@@ -234,16 +232,17 @@ export default function AdminOrderDetailPage() {
                         <td style={{ padding: '15px 12px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             {product && (
-                              <img
-                                src={product.images[0] || '/placeholder.jpg'}
-                                alt={item.productName}
+                              <div
                                 style={{
                                   width: '40px',
                                   height: '40px',
                                   borderRadius: '4px',
-                                  objectFit: 'cover',
-                                  border: '1px solid #ddd'
+                                  border: '1px solid #ddd',
+                                  backgroundImage: `url(${product.images[0] || '/placeholder.jpg'})`,
+                                  backgroundSize: 'cover',
+                                  backgroundPosition: 'center'
                                 }}
+                                aria-label={item.productName}
                               />
                             )}
                             <div>
@@ -416,7 +415,7 @@ export default function AdminOrderDetailPage() {
                       결제 대기 중
                     </h4>
                     <p style={{ fontSize: '13px', color: '#0c5460', marginBottom: '15px', lineHeight: '1.4' }}>
-                      고객에게 결제 안내가 발송되었습니다. 입금 확인 후 '결제 완료'로 상태를 변경해주세요.
+                      고객에게 결제 안내가 발송되었습니다. 입금 확인 후 &apos;결제 완료&apos;로 상태를 변경해주세요.
                     </p>
                     <div style={{ 
                       backgroundColor: '#fff', 
@@ -508,7 +507,7 @@ export default function AdminOrderDetailPage() {
                       배송 중
                     </h4>
                     <p style={{ fontSize: '13px', color: '#4c4ddb', marginBottom: '15px', lineHeight: '1.4' }}>
-                      상품이 배송 중입니다. 고객이 상품을 받으면 '배송 완료'로 상태를 변경해주세요.
+                      상품이 배송 중입니다. 고객이 상품을 받으면 &apos;배송 완료&apos;로 상태를 변경해주세요.
                     </p>
                     <button
                       onClick={() => handleStatusChange('delivered')}

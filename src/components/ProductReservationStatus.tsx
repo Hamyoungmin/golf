@@ -83,7 +83,7 @@ export default function ProductReservationStatus({
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
         <span>⚠️</span>
-        <span style={{ fontWeight: '600' }}>"{reservation.userName}"님이 장바구니에 담았습니다</span>
+        <span style={{ fontWeight: '600' }}>&quot;{reservation.userName}&quot;님이 장바구니에 담았습니다</span>
       </div>
       <div style={{ fontSize: '12px', color: '#dc3545' }}>
         다른 고객이 주문 완료하거나 장바구니에서 제거할 때까지 기다려주세요

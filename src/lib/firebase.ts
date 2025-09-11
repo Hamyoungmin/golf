@@ -45,10 +45,10 @@ const firebaseConfig = {
 // Firebase 초기화 설정 (프로덕션에서는 로그 제거)
 
 // Firebase 초기화 (환경변수가 있을 때만)
-let app: any = null;
-let auth: any = null;
-let db: any = null;
-let storage: any = null;
+let app: ReturnType<typeof initializeApp> | null = null;
+let auth: ReturnType<typeof getAuth> | null = null;
+let db: ReturnType<typeof getFirestore> | null = null;
+let storage: ReturnType<typeof getStorage> | null = null;
 
 try {
   if (firebaseConfig.apiKey && firebaseConfig.projectId) {

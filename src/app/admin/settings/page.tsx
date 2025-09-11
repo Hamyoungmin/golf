@@ -402,7 +402,7 @@ export default function SettingsPage() {
                     }}
                   />
                   <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-                    💡 이 정보는 모든 상품 페이지의 "문의" 탭에 자동으로 표시됩니다.
+                    💡 이 정보는 모든 상품 페이지의 &quot;문의&quot; 탭에 자동으로 표시됩니다.
                   </div>
                 </div>
               </div>

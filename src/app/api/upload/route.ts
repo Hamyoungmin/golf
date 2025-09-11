@@ -57,13 +57,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: '파일 크기는 5MB 이하여야 합니다.' },
-        { status: 400, headers: corsHeaders }
-      );
-    }
+    // 파일 크기 검증 제거 (무제한 업로드 허용)
+    // Firebase Storage 자체 제한에 의존
 
     // 파일명 생성
     const timestamp = Date.now();

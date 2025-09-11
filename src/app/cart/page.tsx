@@ -33,8 +33,7 @@ export default function CartPage() {
   const [shippingAddress, setShippingAddress] = useState<Address>({
     street: '',
     city: '',
-    state: '',
-    zipCode: ''
+    state: ''
   });
   const [isAddressValid, setIsAddressValid] = useState(false);
 
@@ -82,8 +81,8 @@ export default function CartPage() {
 
   // 주소 유효성 검사
   useEffect(() => {
-    const { street, city, state, zipCode } = shippingAddress;
-    setIsAddressValid(street.trim() !== '' && city.trim() !== '' && state.trim() !== '' && zipCode.trim() !== '');
+    const { street, city, state } = shippingAddress;
+    setIsAddressValid(street.trim() !== '' && city.trim() !== '' && state.trim() !== '');
   }, [shippingAddress]);
 
   // 설정 업데이트 이벤트 리스너
@@ -568,32 +567,18 @@ export default function CartPage() {
             }}>
               <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>배송 주소</h3>
               <div style={{ display: 'grid', gap: '15px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '10px' }}>
-                  <input
-                    type="text"
-                    placeholder="우편번호"
-                    value={shippingAddress.zipCode}
-                    onChange={(e) => setShippingAddress(prev => ({ ...prev, zipCode: e.target.value }))}
-                    style={{
-                      padding: '12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      fontSize: '14px'
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="시/도"
-                    value={shippingAddress.state}
-                    onChange={(e) => setShippingAddress(prev => ({ ...prev, state: e.target.value }))}
-                    style={{
-                      padding: '12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      fontSize: '14px'
-                    }}
-                  />
-                </div>
+                <input
+                  type="text"
+                  placeholder="시/도"
+                  value={shippingAddress.state}
+                  onChange={(e) => setShippingAddress(prev => ({ ...prev, state: e.target.value }))}
+                  style={{
+                    padding: '12px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '14px'
+                  }}
+                />
                 <input
                   type="text"
                   placeholder="시/군/구"

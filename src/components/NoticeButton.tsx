@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { Notice } from '@/types';
 import { getPublishedNotices } from '@/lib/notices';
 
@@ -157,7 +158,7 @@ const NoticeButton = () => {
               {/* 더보기 링크 */}
               {notices.length > 0 && (
                 <div style={{ textAlign: 'center', padding: '15px', borderTop: '1px solid #e0e0e0' }}>
-                  <a 
+                  <Link 
                     href="/notice" 
                     style={{ 
                       color: '#007bff', 
@@ -168,7 +169,7 @@ const NoticeButton = () => {
                     onClick={handleClosePopup}
                   >
                     전체 공지사항 보기 →
-                  </a>
+                  </Link>
                 </div>
               )}
             </div>

@@ -171,7 +171,7 @@ const addToCartWithoutReservation = async (
     throw new Error('현재 품절된 상품입니다.');
   }
 
-  let cartItems = getLocalCart();
+  const cartItems = getLocalCart();
 
   const existingItemIndex = cartItems.findIndex(item => item.productId === productId);
 

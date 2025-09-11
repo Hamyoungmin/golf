@@ -205,7 +205,7 @@ const ProductList = ({ title, subtitle, products, totalCount, category }: Produc
                   검색 결과가 없습니다
                 </h3>
                 <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#999' }}>
-                  "{searchTerm}"에 대한 {category} 상품을 찾을 수 없습니다.
+                  &quot;{searchTerm}&quot;에 대한 {category} 상품을 찾을 수 없습니다.
                 </p>
                 <button
                   onClick={handleSearchClear}

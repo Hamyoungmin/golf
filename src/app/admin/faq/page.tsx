@@ -870,7 +870,7 @@ export default function FAQPage() {
                         color: '#666', 
                         margin: '10px 0 0 0'
                       }}>
-                        JPG, PNG 파일만 업로드 가능 (최대 5MB)
+                        JPG, PNG 파일만 업로드 가능 (크기 제한 없음)
                       </p>
                     </div>
                   )}
@@ -1172,7 +1172,7 @@ export default function FAQPage() {
             <span>총 {faqs.length}개 중 {filteredFAQs.length}개 FAQ가 표시됩니다</span>
             {searchTerm && (
               <span style={{ marginLeft: '10px' }}>
-                검색어: "<strong>{searchTerm}</strong>"
+                검색어: &quot;<strong>{searchTerm}</strong>&quot;
               </span>
             )}
             {searchTerm || selectedCategory !== 'all' ? (
