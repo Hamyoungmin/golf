@@ -13,7 +13,7 @@ import ProductCard from '@/components/ProductCard';
 function SearchContent() {
   const { user } = useAuth(); // 로그인 상태 확인
   const searchParams = useSearchParams();
-  const router = useRouter();
+  // const router = useRouter();
   const query = searchParams.get('q') || '';
 
   const [products, setProducts] = useState<Product[]>([]);

@@ -19,7 +19,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { userData } = useAuth();
+  // const { userData } = useAuth();
   const { showToast, ToastComponent } = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,6 +38,10 @@ export default function Login() {
 
 
       // Firebase 로그인
+      if (!auth) {
+        throw new Error('Firebase 인증이 초기화되지 않았습니다');
+      }
+      
       const userCredential = await signInWithEmailAndPassword(
         auth, 
         formData.email, 

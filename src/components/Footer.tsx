@@ -5,13 +5,13 @@ import { useSettings } from '@/contexts/SettingsContext';
 
 const Footer = () => {
   const { settings } = useSettings();
-  const [forceUpdate, setForceUpdate] = useState(0);
+  // const [forceUpdate, setForceUpdate] = useState(0);
 
   // 설정 업데이트 이벤트 리스너
   useEffect(() => {
     const handleSettingsUpdate = (event: CustomEvent) => {
       console.log('🔄 Footer: 설정 업데이트 감지', event.detail);
-      setForceUpdate(prev => prev + 1);
+      // setForceUpdate(prev => prev + 1);
     };
 
     window.addEventListener('settingsUpdated', handleSettingsUpdate as EventListener);

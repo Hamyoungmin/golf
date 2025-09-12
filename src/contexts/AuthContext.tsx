@@ -55,16 +55,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return null;
   };
 
-  // 관리자 이메일 목록
-  const ADMIN_EMAILS = [
-    'dudals7334@naver.com',
-    'rentalgolf7@naver.com'  // 새로 추가된 관리자
-  ];
-
   // 관리자 권한 확인 - 특정 이메일 목록만 관리자로 인정
   const checkAdminRole = useCallback(async (email: string) => {
+    // 관리자 이메일 목록
+    const ADMIN_EMAILS = [
+      'dudals7334@naver.com',
+      'rentalgolf7@naver.com'  // 새로 추가된 관리자
+    ];
     return ADMIN_EMAILS.includes(email);
-  }, [ADMIN_EMAILS]);
+  }, []);
 
   // 사용자 데이터 업데이트
   const updateUserData = async (data: Partial<UserType>) => {

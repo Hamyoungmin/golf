@@ -2,17 +2,14 @@ import {
   db,
   collection, 
   query, 
-  where, 
   getDocs, 
   doc,
   getDoc,
   setDoc,
   updateDoc,
   orderBy,
-  addDoc,
   serverTimestamp
 } from './firebase';
-import { Order, Product } from '@/types';
 import { getAllOrders } from './orders';
 import { getProducts } from './products';
 

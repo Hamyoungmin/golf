@@ -107,9 +107,9 @@ const redirectToLogin = () => {
 // 기존 alert() 함수를 오버라이드하여 CustomAlert 사용
 export const overrideAlert = () => {
   if (typeof window !== 'undefined') {
-    const originalAlert = window.alert;
-    const originalConfirm = window.confirm;
-    const originalPrompt = window.prompt;
+  // const originalAlert = window.alert;
+  // const originalConfirm = window.confirm;
+  // const originalPrompt = window.prompt;
     
     window.alert = (message: string | unknown) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

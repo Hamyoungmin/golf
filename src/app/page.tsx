@@ -7,9 +7,9 @@ import { useSettings } from '@/contexts/SettingsContext';
 import ImageSlider from '@/components/ImageSlider';
 
 export default function Home() {
-  const { user, isAdmin, loading } = useAuth();
+  // const { user, isAdmin, loading } = useAuth();
   const { settings } = useSettings();
-  const router = useRouter();
+  // const router = useRouter();
   const [forceUpdate, setForceUpdate] = useState(0);
 
   // 관리자 자동 리다이렉트 제거 - 홈페이지도 볼 수 있게 함

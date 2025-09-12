@@ -3,7 +3,6 @@ import { CartItem } from '@/types';
 import { 
   reserveProduct, 
   releaseProductReservation,
-  getActiveProductReservation,
   checkProductAvailability
 } from './productReservations';
 import { getProductById } from './products';

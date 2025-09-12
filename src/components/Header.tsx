@@ -20,7 +20,7 @@ const Header = () => {
   const { user, loading, signOut } = useAuth();
   const { cartItemCount } = useCart();
   const { settings } = useSettings();
-  const [forceUpdate, setForceUpdate] = useState(0);
+  // const [forceUpdate, setForceUpdate] = useState(0);
   const [isDriversOpen, setIsDriversOpen] = useState(false);
   const [isWoodsOpen, setIsWoodsOpen] = useState(false);
   const [isUtilitiesOpen, setIsUtilitiesOpen] = useState(false);
@@ -148,7 +148,7 @@ const Header = () => {
   useEffect(() => {
     const handleSettingsUpdate = (event: CustomEvent) => {
       console.log('🔄 Header: 설정 업데이트 감지', event.detail);
-      setForceUpdate(prev => prev + 1);
+      // setForceUpdate(prev => prev + 1);
     };
 
     window.addEventListener('settingsUpdated', handleSettingsUpdate as EventListener);
