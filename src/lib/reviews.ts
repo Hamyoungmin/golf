@@ -9,10 +9,10 @@ import {
   query,
   where,
   orderBy,
-  limit,
+  // limit, // unused
   serverTimestamp,
-  Timestamp,
-  writeBatch,
+  // Timestamp, // unused
+  // writeBatch, // unused
   onSnapshot,
   db
 } from './firebase';

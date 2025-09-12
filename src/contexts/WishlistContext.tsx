@@ -3,12 +3,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { 
-  getUserWishlist, 
+  // getUserWishlist, // unused
   addToWishlist as addToWishlistAPI,
   removeFromWishlist as removeFromWishlistAPI,
   getWishlistProducts,
   removeMultipleFromWishlist as removeMultipleFromWishlistAPI,
-  isInWishlist as isInWishlistAPI
+  // isInWishlist as isInWishlistAPI // unused
 } from '@/lib/wishlist';
 import { Product } from '@/types';
 

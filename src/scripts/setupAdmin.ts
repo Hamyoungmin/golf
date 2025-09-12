@@ -1,5 +1,6 @@
 // 관리자 권한 설정 스크립트
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
+// import { getDoc } from 'firebase/firestore'; // unused
 import { db } from '@/lib/firebase';
 
 export async function setupAdminUser(email: string) {

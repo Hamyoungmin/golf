@@ -3,7 +3,7 @@ import {
   doc, 
   setDoc, 
   getDoc, 
-  collection, 
+  // collection, // unused
   deleteDoc,
   serverTimestamp 
 } from './firebase';

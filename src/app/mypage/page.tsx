@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { getUserData } from '@/lib/users';
+// import { getUserData } from '@/lib/users'; // unused
 import { getUserOrders } from '@/lib/orders';
 import { User as UserType, Order } from '@/types';
 import { useCustomAlert } from '@/hooks/useCustomAlert';

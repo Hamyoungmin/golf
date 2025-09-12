@@ -3,16 +3,17 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { 
-  getUserRecentlyViewed, 
-  addToRecentlyViewed as addToRecentlyViewedAPI,
+  // getUserRecentlyViewed, // unused
+  // addToRecentlyViewed as addToRecentlyViewedAPI, // unused
   addToRecentlyViewedDebounced,
   removeFromRecentlyViewed as removeFromRecentlyViewedAPI,
   getRecentlyViewedProducts,
   removeMultipleFromRecentlyViewed as removeMultipleFromRecentlyViewedAPI,
   clearRecentlyViewed as clearRecentlyViewedAPI,
-  isInRecentlyViewed as isInRecentlyViewedAPI
+  // isInRecentlyViewed as isInRecentlyViewedAPI // unused
 } from '@/lib/recently-viewed';
-import { Product, RecentlyViewedItem } from '@/types';
+import { Product } from '@/types';
+// import { RecentlyViewedItem } from '@/types'; // unused type
 
 interface RecentlyViewedContextType {
   recentlyViewedItems: Product[];

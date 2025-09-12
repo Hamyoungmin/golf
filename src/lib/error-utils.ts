@@ -6,9 +6,10 @@
  * Firestore 에러인지 확인
  */
 export function isFirestoreError(error: Error | unknown): boolean {
-  return error?.code?.startsWith?.('firestore/') || 
-         error?.message?.includes?.('Firestore') ||
-         error?.code === 'resource-exhausted';
+  const err = error as any;
+  return err?.code?.startsWith?.('firestore/') ||
+         err?.message?.includes?.('Firestore') ||
+         err?.code === 'resource-exhausted';
 }
 
 /**
