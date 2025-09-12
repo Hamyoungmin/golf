@@ -130,7 +130,8 @@ export async function searchProducts(
 ): Promise<Product[]> {
   try {
     // Firestore는 전문 검색을 지원하지 않으므로 클라이언트 측에서 필터링
-    let products = await getProducts(filter, sort, limit || 100);
+    // 제한 해제: 모든 상품에서 검색할 수 있도록 함
+    let products = await getProducts(filter, sort, limit);
     
     if (searchTerm.trim()) {
       const searchTermLower = searchTerm.toLowerCase();

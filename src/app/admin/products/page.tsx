@@ -37,8 +37,10 @@ export default function AdminProductsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const productList = await getProducts(filter, undefined, 20);
+      // 제한 해제: 모든 상품 가져오기 (관리자는 전체 목록 필요)
+      const productList = await getProducts(filter, undefined);
       setProducts(productList);
+      // 페이지네이션을 위한 전체 페이지 수 계산 (페이지당 20개)
       setTotalPages(Math.ceil(productList.length / 20));
     } catch (error) {
       console.error('상품 목록 로딩 실패:', error);
