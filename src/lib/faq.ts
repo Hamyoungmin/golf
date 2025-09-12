@@ -23,7 +23,7 @@ const LOCAL_STORAGE_KEY = 'golf_faqs';
 
 // Firebase가 제대로 초기화되었는지 체크하는 함수
 function checkFirebaseInitialized() {
-  if (!db || typeof db.collection !== 'function') {
+  if (!db) {
     console.warn('Firebase가 초기화되지 않았습니다. 로컬 스토리지를 사용합니다.');
     return false;
   }
@@ -61,7 +61,7 @@ function generateId(): string {
 
 // FAQ 컬렉션 참조 (안전하게)
 function getFaqCollection() {
-  if (!checkFirebaseInitialized()) {
+  if (!checkFirebaseInitialized() || !db) {
     throw new Error('Firebase가 초기화되지 않았습니다.');
   }
   return collection(db, 'faqs');
@@ -143,6 +143,10 @@ export async function updateFAQ(id: string, faqData: Partial<FAQItem>) {
       return;
     }
     
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
+    
     const docRef = doc(db, 'faqs', id);
     await updateDoc(docRef, {
       ...faqData,
@@ -167,6 +171,10 @@ export async function deleteFAQ(id: string) {
       notifyLocalStorageListeners(); // 리스너들에게 알림
       console.log('FAQ 로컬 저장소에서 삭제됨:', id);
       return;
+    }
+    
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
     }
     
     const docRef = doc(db, 'faqs', id);
@@ -198,6 +206,10 @@ export async function incrementFAQViews(id: string) {
         console.log('FAQ 조회수 로컬 저장소에서 증가됨:', id);
       }
       return;
+    }
+    
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
     }
     
     const docRef = doc(db, 'faqs', id);
@@ -247,6 +259,10 @@ export async function getAllFAQs(sortBy: string = 'order', sortOrder: 'asc' | 'd
 // 특정 FAQ 가져오기
 export async function getFAQ(id: string) {
   try {
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
+    
     const docRef = doc(db, 'faqs', id);
     const docSnap = await getDoc(docRef);
     
@@ -432,9 +448,14 @@ export async function batchDeleteFAQs(ids: string[]) {
       return;
     }
     
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
+    
     const batch = writeBatch(db);
     
     ids.forEach(id => {
+      if (!db) return;
       const docRef = doc(db, 'faqs', id);
       batch.delete(docRef);
     });
@@ -469,9 +490,14 @@ export async function batchUpdateFAQVisibility(ids: string[], isVisible: boolean
       return;
     }
     
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
+    
     const batch = writeBatch(db);
     
     ids.forEach(id => {
+      if (!db) return;
       const docRef = doc(db, 'faqs', id);
       batch.update(docRef, { 
         isVisible,
@@ -490,6 +516,10 @@ export async function batchUpdateFAQVisibility(ids: string[], isVisible: boolean
 // FAQ 순서 업데이트
 export async function updateFAQOrder(id: string, newOrder: number) {
   try {
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
+    
     const docRef = doc(db, 'faqs', id);
     await updateDoc(docRef, {
       order: newOrder,
@@ -522,6 +552,11 @@ export async function resetAllFAQViews() {
     
     const faqCollection = getFaqCollection();
     const querySnapshot = await getDocs(faqCollection);
+    
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
+    
     const batch = writeBatch(db);
     
     querySnapshot.docs.forEach(doc => {
@@ -558,6 +593,10 @@ export async function setFAQViews(id: string, views: number) {
         console.log('FAQ 조회수 로컬 저장소에서 설정됨:', id, views);
       }
       return;
+    }
+    
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
     }
     
     const docRef = doc(db, 'faqs', id);
@@ -729,6 +768,10 @@ export async function seedInitialFAQData() {
         views: 0
       }
     ];
+
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
 
     const batch = writeBatch(db);
     

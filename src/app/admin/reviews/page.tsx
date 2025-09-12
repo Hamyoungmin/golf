@@ -70,11 +70,6 @@ export default function ReviewsPage() {
 
 
 
-  // 데이터 로드
-  useEffect(() => {
-    loadReviews();
-  }, [loadReviews]);
-
   const loadReviews = useCallback(async () => {
     setLoading(true);
     try {
@@ -97,7 +92,10 @@ export default function ReviewsPage() {
     }
   }, [showAlert]);
 
-
+  // 데이터 로드
+  useEffect(() => {
+    loadReviews();
+  }, [loadReviews]);
 
   // 답글 작성
   const handleReplyReview = (reviewId: string) => {
@@ -160,7 +158,7 @@ export default function ReviewsPage() {
 
     showAlert('confirm', '이 신고를 해제하시겠습니까?', '신고 처리', async () => {
       try {
-        const success = await resolveReport(reviewId, user.uid);
+        const success = await resolveReport(reviewId);
         if (success) {
           // 즉시 로컬 상태에서 신고 상태 해제
           setReviews(prevReviews => 

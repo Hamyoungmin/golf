@@ -23,6 +23,10 @@ export async function getAllReviews(): Promise<Review[]> {
   try {
     console.log('getAllReviews: 전체 리뷰 조회 시작');
     
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
+    
     const reviewsQuery = query(
       collection(db, 'reviews'),
       orderBy('createdAt', 'desc')
@@ -57,6 +61,10 @@ export async function getAllReviews(): Promise<Review[]> {
 export async function getProductReviews(productId?: string): Promise<Review[]> {
   try {
     console.log('getProductReviews: 상품 리뷰 조회 시작, productId:', productId);
+    
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
     
     let reviewsQuery;
     if (productId) {
@@ -101,6 +109,10 @@ export async function getApprovedReviews(productId?: string): Promise<Review[]> 
   try {
     console.log('getApprovedReviews: 승인된 리뷰 조회 시작, productId:', productId);
     
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
+    
     let reviewsQuery;
     if (productId) {
       reviewsQuery = query(
@@ -142,6 +154,10 @@ export async function getApprovedReviews(productId?: string): Promise<Review[]> 
 // 특정 리뷰 가져오기
 export async function getReview(id: string): Promise<Review | null> {
   try {
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
+    
     const docRef = doc(db, 'reviews', id);
     const docSnap = await getDoc(docRef);
     
@@ -189,6 +205,10 @@ export async function createReview(reviewData: {
       updatedAt: serverTimestamp(),
     };
 
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
+    
     const docRef = await addDoc(collection(db, 'reviews'), newReview);
     console.log('createReview: 리뷰 작성 완료, ID:', docRef.id);
     
@@ -203,6 +223,10 @@ export async function createReview(reviewData: {
 export async function approveReview(id: string, adminId: string): Promise<boolean> {
   try {
     console.log('approveReview: 리뷰 승인 시작, ID:', id);
+    
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
     
     const docRef = doc(db, 'reviews', id);
     await updateDoc(docRef, {
@@ -224,6 +248,10 @@ export async function approveReview(id: string, adminId: string): Promise<boolea
 export async function rejectReview(id: string, adminId: string, reason?: string): Promise<boolean> {
   try {
     console.log('rejectReview: 리뷰 거부 시작, ID:', id);
+    
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
     
     const docRef = doc(db, 'reviews', id);
     await updateDoc(docRef, {
@@ -247,6 +275,10 @@ export async function addAdminReply(id: string, reply: string, adminId: string):
   try {
     console.log('addAdminReply: 관리자 답글 작성 시작, ID:', id);
     
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
+    
     const docRef = doc(db, 'reviews', id);
     await updateDoc(docRef, {
       adminReply: reply,
@@ -267,6 +299,10 @@ export async function addAdminReply(id: string, reply: string, adminId: string):
 export async function reportReview(id: string, reason: string, reportedBy: string): Promise<boolean> {
   try {
     console.log('reportReview: 리뷰 신고 시작, ID:', id);
+    
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
     
     const docRef = doc(db, 'reviews', id);
     await updateDoc(docRef, {
@@ -290,6 +326,10 @@ export async function resolveReport(id: string): Promise<boolean> {
   try {
     console.log('resolveReport: 신고 처리 시작, ID:', id);
     
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
+    
     const docRef = doc(db, 'reviews', id);
     await updateDoc(docRef, {
       isReported: false,
@@ -311,6 +351,10 @@ export async function resolveReport(id: string): Promise<boolean> {
 export async function deleteReview(id: string): Promise<boolean> {
   try {
     console.log('deleteReview: 리뷰 삭제 시작, ID:', id);
+    
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
     
     const docRef = doc(db, 'reviews', id);
     await deleteDoc(docRef);
@@ -403,6 +447,11 @@ export async function initializeReviews(): Promise<void> {
 
 // 실시간 리뷰 리스너 (관리자용)
 export function subscribeToAllReviews(callback: (reviews: Review[]) => void): () => void {
+  if (!db) {
+    console.error('Firebase가 초기화되지 않았습니다');
+    return () => {};
+  }
+  
   const reviewsQuery = query(
     collection(db, 'reviews'),
     orderBy('createdAt', 'desc')
@@ -432,6 +481,11 @@ export function subscribeToAllReviews(callback: (reviews: Review[]) => void): ()
 
 // 실시간 상품별 리뷰 리스너 (고객용)
 export function subscribeToProductReviews(productId: string, callback: (reviews: Review[]) => void): () => void {
+  if (!db) {
+    console.error('Firebase가 초기화되지 않았습니다');
+    return () => {};
+  }
+  
   const reviewsQuery = query(
     collection(db, 'reviews'),
     where('productId', '==', productId),
@@ -481,6 +535,10 @@ export function subscribeToReviewStats(callback: (stats: ReviewStats) => void): 
 // Additional functions for compatibility
 export async function addReview(reviewData: unknown): Promise<void> {
   try {
+    if (!db) {
+      throw new Error('Firebase가 초기화되지 않았습니다');
+    }
+    
     await addDoc(collection(db, 'reviews'), {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...(reviewData as any),
