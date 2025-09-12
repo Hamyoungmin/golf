@@ -87,6 +87,11 @@ export async function addToRecentlyViewed(userId: string, productId: string): Pr
     
     // Firestore에 비동기로 저장 (실패해도 로컬 캐시는 유지)
     try {
+      if (!db) {
+        console.warn('Firebase 데이터베이스가 초기화되지 않았습니다.');
+        return true; // 로컬 캐시는 성공했으므로 true 반환
+      }
+      
       const recentlyViewedRef = doc(db, 'recentlyViewed', userId);
       await setDoc(recentlyViewedRef, {
         userId,
@@ -131,6 +136,19 @@ export async function getUserRecentlyViewed(userId: string, limitCount?: number)
     
     // 캐시가 없거나 만료된 경우 Firestore에서 조회
     try {
+      if (!db) {
+        console.warn('Firebase 데이터베이스가 초기화되지 않았습니다.');
+        // 캐시가 있으면 반환, 없으면 빈 배열 반환
+        if (cachedItems) {
+          let items = cachedItems;
+          if (limitCount && limitCount > 0) {
+            items = items.slice(0, limitCount);
+          }
+          return items;
+        }
+        return [];
+      }
+      
       const recentlyViewedRef = doc(db, 'recentlyViewed', userId);
       const recentlyViewedSnap = await getDoc(recentlyViewedRef);
       
@@ -214,6 +232,11 @@ export async function getRecentlyViewedProducts(userId: string, limitCount?: num
         
         // 실제 Firebase에서 직접 조회 (샘플 데이터 제거)
         try {
+          if (!db) {
+            console.warn('Firebase 데이터베이스가 초기화되지 않았습니다.');
+            continue;
+          }
+          
           const productRef = doc(db, 'products', productId);
           const productSnap = await getDoc(productRef);
           
@@ -289,6 +312,11 @@ export async function removeFromRecentlyViewed(userId: string, productId: string
     
     // Firestore 업데이트 (실패해도 로컬 캐시는 유지)
     try {
+      if (!db) {
+        console.warn('Firebase 데이터베이스가 초기화되지 않았습니다.');
+        return true; // 로컬 캐시는 업데이트됨
+      }
+      
       const recentlyViewedRef = doc(db, 'recentlyViewed', userId);
       await setDoc(recentlyViewedRef, {
         userId,
@@ -317,6 +345,11 @@ export async function removeMultipleFromRecentlyViewed(userId: string, productId
       return false;
     }
 
+    if (!db) {
+      console.warn('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+    
     const recentlyViewedRef = doc(db, 'recentlyViewed', userId);
     const recentlyViewedSnap = await getDoc(recentlyViewedRef);
     
@@ -369,6 +402,11 @@ export async function clearRecentlyViewed(userId: string): Promise<boolean> {
     
     // Firestore에서 삭제 (실패해도 로컬은 이미 삭제됨)
     try {
+      if (!db) {
+        console.warn('Firebase 데이터베이스가 초기화되지 않았습니다.');
+        return true; // 로컬 캐시는 이미 삭제됨
+      }
+      
       const recentlyViewedRef = doc(db, 'recentlyViewed', userId);
       await deleteDoc(recentlyViewedRef);
     } catch (firestoreError) {
@@ -474,6 +512,11 @@ export async function addToRecentlyViewedDebounced(userId: string, productId: st
     
     // Firestore 업데이트는 디바운스 (1초 지연)
     debounceFirestoreOperation(`recently-viewed-${userId}`, async () => {
+      if (!db) {
+        console.warn('Firebase 데이터베이스가 초기화되지 않았습니다.');
+        return;
+      }
+      
       const recentlyViewedRef = doc(db, 'recentlyViewed', userId);
       await setDoc(recentlyViewedRef, {
         userId,

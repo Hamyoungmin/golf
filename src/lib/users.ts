@@ -15,6 +15,11 @@ import { User } from '@/types';
 // 특정 사용자 정보 가져오기
 export async function getUserData(userId: string): Promise<User | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return null;
+    }
+    
     const docRef = doc(db, 'users', userId);
     const docSnap = await getDoc(docRef);
 
@@ -39,6 +44,11 @@ export async function getUserData(userId: string): Promise<User | null> {
 // 모든 사용자 목록 가져오기 (관리자용)
 export async function getAllUsers(): Promise<User[]> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return [];
+    }
+    
     const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
     
@@ -63,6 +73,11 @@ export async function getAllUsers(): Promise<User[]> {
 // 사용자 정보 생성/업데이트
 export async function createOrUpdateUser(userId: string, userData: Partial<User>): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+    
     const docRef = doc(db, 'users', userId);
     const now = new Date();
     
@@ -93,6 +108,11 @@ export async function updateUserStatus(
   rejectionReason?: string
 ): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+    
     const docRef = doc(db, 'users', userId);
             const updateData: Partial<User> = {
       status,
@@ -117,6 +137,11 @@ export async function updateUserStatus(
 // 대기 중인 사용자 목록 가져오기
 export async function getPendingUsers(): Promise<User[]> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return [];
+    }
+    
     const q = query(
       collection(db, 'users'),
       where('status', '==', 'pending')
@@ -145,6 +170,11 @@ export async function getPendingUsers(): Promise<User[]> {
 // 사용자 프로필 업데이트
 export async function updateUserProfile(userId: string, profileData: Partial<User>): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+    
     const docRef = doc(db, 'users', userId);
     const updateData = {
       ...profileData,
@@ -162,6 +192,11 @@ export async function updateUserProfile(userId: string, profileData: Partial<Use
 // 이메일로 사용자 찾기
 export async function getUserByEmail(email: string): Promise<User | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return null;
+    }
+    
     const q = query(collection(db, 'users'), where('email', '==', email));
     const querySnapshot = await getDocs(q);
     

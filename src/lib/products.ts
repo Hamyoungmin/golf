@@ -25,6 +25,11 @@ export async function getProducts(
   startAfterDoc?: DocumentSnapshot
 ): Promise<Product[]> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return [];
+    }
+
     let q = query(collection(db, 'products'));
 
     // 필터 적용
@@ -101,6 +106,11 @@ export async function getProducts(
 // 특정 상품 가져오기
 export async function getProduct(productId: string): Promise<Product | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return null;
+    }
+
     const docRef = doc(db, 'products', productId);
     const docSnap = await getDoc(docRef);
 
@@ -162,6 +172,11 @@ export async function searchProducts(
 // 상품 추가
 export async function addProduct(productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<string | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return null;
+    }
+
     const docRef = doc(collection(db, 'products'));
     const now = new Date();
     
@@ -184,6 +199,11 @@ export async function addProduct(productData: Omit<Product, 'id' | 'createdAt' |
 // 상품 수정
 export async function updateProduct(productId: string, productData: Partial<Product>): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'products', productId);
     const updateData = {
       ...productData,
@@ -201,6 +221,11 @@ export async function updateProduct(productId: string, productData: Partial<Prod
 // 상품 삭제
 export async function deleteProduct(productId: string): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'products', productId);
     await deleteDoc(docRef);
     return true;
@@ -213,6 +238,11 @@ export async function deleteProduct(productId: string): Promise<boolean> {
 // 카테고리별 상품 개수 가져오기
 export async function getProductCountByCategory(): Promise<Record<string, number>> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return {};
+    }
+
     const querySnapshot = await getDocs(collection(db, 'products'));
     const categoryCounts: Record<string, number> = {};
 
@@ -232,6 +262,11 @@ export async function getProductCountByCategory(): Promise<Record<string, number
 // 재고 업데이트
 export async function updateProductStock(productId: string, newStock: number): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'products', productId);
     await updateDoc(docRef, {
       stock: newStock,
@@ -247,6 +282,11 @@ export async function updateProductStock(productId: string, newStock: number): P
 // 주문 완료 시 재고 감소
 export async function decreaseProductStock(productId: string, quantity: number): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     // 먼저 현재 상품 정보 가져오기
     const product = await getProduct(productId);
     if (!product) {
@@ -287,6 +327,11 @@ export async function decreaseMultipleProductsStock(orderItems: Array<{
   productName?: string;
 }>): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     console.log('주문 상품들의 재고 감소 시작:', orderItems);
 
     // 모든 상품의 재고 감소를 병렬로 처리
@@ -317,6 +362,11 @@ export async function decreaseMultipleProductsStock(orderItems: Array<{
 // 기존 상품들에 새 필드 추가 (마이그레이션)
 export async function migrateProductsWithNewFields(): Promise<{ success: number; failed: number; total: number }> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return { success: 0, failed: 0, total: 0 };
+    }
+
     console.log('상품 마이그레이션 시작...');
     
     // 모든 상품 가져오기
@@ -378,6 +428,11 @@ export async function migrateProductsWithNewFields(): Promise<{ success: number;
 // 인기 상품 가져오기 (재고가 있는 최신 상품)
 export async function getPopularProducts(limit: number = 8): Promise<Product[]> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return [];
+    }
+
     // 먼저 최신 상품을 가져온 후 클라이언트에서 재고 필터링 (인덱스 에러 방지)
     const q = query(
       collection(db, 'products'),
@@ -416,6 +471,11 @@ export async function getProductsForPage(
   limit?: number
 ): Promise<Product[]> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return [];
+    }
+
     // 먼저 targetPages 필터만으로 쿼리 (인덱스 에러 방지)
     const q = query(
       collection(db, 'products'),
@@ -497,6 +557,11 @@ export async function getProductsForPage(
 // 페이지별 상품 개수 가져오기
 export async function getProductCountForPage(pagePath: string): Promise<number> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return 0;
+    }
+
     const products = await getProductsForPage(pagePath);
     return products.length;
   } catch (error) {
@@ -508,6 +573,11 @@ export async function getProductCountForPage(pagePath: string): Promise<number> 
 // 상품 조회수 증가
 export async function incrementProductViews(productId: string): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'products', productId);
     await updateDoc(docRef, {
       views: increment(1),
@@ -523,6 +593,11 @@ export async function incrementProductViews(productId: string): Promise<boolean>
 // 상품별 위시리스트 개수 가져오기
 export async function getProductWishlistCount(productId: string): Promise<number> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return 0;
+    }
+
     const q = query(
       collection(db, 'wishlists'),
       where('productIds', 'array-contains', productId)

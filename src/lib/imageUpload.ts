@@ -73,11 +73,13 @@ export async function uploadImage(file: File, productName: string): Promise<stri
 
     // Vercel 제한 대응: 3.5MB 이상이면 압축
     const maxSize = 3.5 * 1024 * 1024; // 3.5MB
-    let processedFile = file;
+    const processedFile = file;
     
     if (file.size > maxSize) {
       console.log(`📦 파일 크기가 큽니다 (${formatFileSize(file.size)}). 압축을 시도합니다...`);
-      processedFile = await compressImage(file, maxSize);
+      // processedFile = await compressImage(file, maxSize); // TODO: 압축 기능 구현 필요
+      console.warn('이미지 압축 기능이 구현되지 않았습니다.');
+      throw new Error(`파일 크기가 너무 큽니다 (${formatFileSize(file.size)}). 최대 ${formatFileSize(maxSize)}까지 업로드 가능합니다.`);
     }
 
     // FormData 생성

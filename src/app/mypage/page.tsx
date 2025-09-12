@@ -107,7 +107,8 @@ export default function MyPage() {
     }
   };
 
-  const getOrderStatusColor = (status: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const getOrderStatusColor = (status: string) => { // restored for potential future use
     switch (status) {
       case 'pending':
         return 'text-yellow-600 bg-yellow-100';

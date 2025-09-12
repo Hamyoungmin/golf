@@ -89,16 +89,16 @@ export function getProductImageUrl(product: unknown, pagePath?: string): string 
   }
   
   // 3. 상품 카테고리에서 placeholder 선택
-  if (product.category) {
-    const placeholder = categoryPlaceholders[product.category.toLowerCase()];
+  if (prod.category) {
+    const placeholder = categoryPlaceholders[prod.category.toLowerCase()];
     if (placeholder) {
       return placeholder;
     }
   }
   
   // 4. 브랜드별 placeholder (옵션)
-  if (product.brand) {
-    const brandPlaceholder = brandPlaceholders[product.brand.toLowerCase()];
+  if (prod.brand) {
+    const brandPlaceholder = brandPlaceholders[prod.brand.toLowerCase()];
     if (brandPlaceholder) {
       return brandPlaceholder;
     }
@@ -181,10 +181,10 @@ export function getAdminProductImage(product: unknown): string {
     'xxio': '/xxio-logo.jpg'
   };
   
-  if (product.brand && brandImages[product.brand.toLowerCase()]) {
-    return brandImages[product.brand.toLowerCase()];
+  if (prod.brand && brandImages[prod.brand.toLowerCase()]) {
+    return brandImages[prod.brand.toLowerCase()];
   }
   
   // 3. 카테고리별 다양한 이미지 사용
-  return getVariedPlaceholder(product.category || 'default', product.id, product.name);
+  return getVariedPlaceholder(prod.category || 'default', prod.id, prod.name);
 }

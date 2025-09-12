@@ -2,7 +2,7 @@ import {
   db,
   collection, 
   query, 
-  where, 
+  // where, // unused
   getDocs, 
   doc,
   getDoc,
@@ -10,7 +10,7 @@ import {
   updateDoc,
   deleteDoc,
   orderBy,
-  addDoc,
+  // addDoc, // unused
   serverTimestamp
 } from './firebase';
 import { Notice } from '@/types';
@@ -18,6 +18,11 @@ import { Notice } from '@/types';
 // 모든 공지사항 가져오기
 export async function getNotices(): Promise<Notice[]> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return [];
+    }
+
     // 단순 쿼리로 변경 - 클라이언트에서 정렬
     const noticesQuery = query(
       collection(db, 'notices'),
@@ -53,6 +58,11 @@ export async function getNotices(): Promise<Notice[]> {
 export async function getPublishedNotices(): Promise<Notice[]> {
   try {
     console.log('getPublishedNotices: 공지사항 조회 시작');
+    
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return [];
+    }
     
     // 단순 쿼리로 변경 - 클라이언트에서 필터링 및 정렬
     const noticesQuery = query(
@@ -103,6 +113,11 @@ export async function getPublishedNotices(): Promise<Notice[]> {
 // 특정 공지사항 가져오기
 export async function getNotice(id: string): Promise<Notice | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return null;
+    }
+
     const docRef = doc(db, 'notices', id);
     const docSnap = await getDoc(docRef);
 
@@ -128,6 +143,11 @@ export async function createNotice(
   noticeData: Omit<Notice, 'id' | 'createdAt' | 'updatedAt' | 'views'>
 ): Promise<string | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return null;
+    }
+
     const docRef = doc(collection(db, 'notices'));
     const now = new Date();
     
@@ -158,6 +178,11 @@ export async function updateNotice(
   updateData: Partial<Omit<Notice, 'id' | 'createdAt' | 'views'>>
 ): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'notices', id);
     await updateDoc(docRef, {
       ...updateData,
@@ -173,6 +198,11 @@ export async function updateNotice(
 // 공지사항 삭제
 export async function deleteNotice(id: string): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'notices', id);
     await deleteDoc(docRef);
     return true;
@@ -185,6 +215,11 @@ export async function deleteNotice(id: string): Promise<boolean> {
 // 조회수 증가
 export async function incrementNoticeViews(id: string): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'notices', id);
     const docSnap = await getDoc(docRef);
     
@@ -205,6 +240,11 @@ export async function incrementNoticeViews(id: string): Promise<boolean> {
 // 공지사항 상단 고정/해제
 export async function toggleNoticeFixed(id: string, isFixed: boolean): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'notices', id);
     await updateDoc(docRef, {
       isFixed,
@@ -220,6 +260,11 @@ export async function toggleNoticeFixed(id: string, isFixed: boolean): Promise<b
 // 공지사항 게시/비공개
 export async function toggleNoticeVisibility(id: string, isVisible: boolean): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'notices', id);
     await updateDoc(docRef, {
       isVisible,

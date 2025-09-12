@@ -5,6 +5,10 @@ import { db } from '@/lib/firebase';
 
 export async function setupAdminUser(email: string) {
   try {
+    if (!db) {
+      throw new Error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+    }
+
     // 1. admins 컬렉션에 추가
     await setDoc(doc(db, 'admins', email), {
       email: email,

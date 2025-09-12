@@ -103,7 +103,8 @@ interface ReservationAwareAddToCartButtonProps {
 
 export function ReservationAwareAddToCartButton({
   productId,
-  price,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  price: _, // unused parameter
   onAddToCart,
   disabled = false,
   children

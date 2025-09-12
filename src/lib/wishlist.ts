@@ -5,10 +5,10 @@ import {
   setDoc,
   updateDoc,
   deleteDoc,
-  collection,
-  query,
-  where,
-  getDocs,
+  // collection, // unused
+  // query, // unused
+  // where, // unused
+  // getDocs, // unused
   arrayUnion,
   arrayRemove
 } from './firebase';
@@ -18,6 +18,11 @@ import { getProduct } from './products';
 // 사용자 위시리스트 가져오기
 export async function getUserWishlist(userId: string): Promise<Wishlist | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return null;
+    }
+
     const docRef = doc(db, 'wishlists', userId);
     const docSnap = await getDoc(docRef);
 
@@ -39,6 +44,11 @@ export async function getUserWishlist(userId: string): Promise<Wishlist | null> 
 // 위시리스트에 상품 추가
 export async function addToWishlist(userId: string, productId: string): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'wishlists', userId);
     const docSnap = await getDoc(docRef);
 
@@ -68,6 +78,11 @@ export async function addToWishlist(userId: string, productId: string): Promise<
 // 위시리스트에서 상품 제거
 export async function removeFromWishlist(userId: string, productId: string): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'wishlists', userId);
     await updateDoc(docRef, {
       productIds: arrayRemove(productId),
@@ -123,6 +138,11 @@ export async function getWishlistProducts(userId: string): Promise<Product[]> {
 // 위시리스트 전체 삭제
 export async function clearWishlist(userId: string): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'wishlists', userId);
     await deleteDoc(docRef);
     return true;
@@ -135,6 +155,11 @@ export async function clearWishlist(userId: string): Promise<boolean> {
 // 여러 상품을 위시리스트에서 제거
 export async function removeMultipleFromWishlist(userId: string, productIds: string[]): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'wishlists', userId);
     
     // 각 상품 ID를 개별적으로 제거

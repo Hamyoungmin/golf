@@ -8,7 +8,7 @@ import {
   getDoc,
   setDoc,
   updateDoc,
-  orderBy, 
+  // orderBy, // unused
   limit as firestoreLimit,
   DocumentSnapshot
 } from './firebase';
@@ -20,6 +20,11 @@ import { decreaseMultipleProductsStock } from './products';
 // 특정 사용자의 주문 목록 가져오기
 export async function getUserOrders(userId: string, limit?: number): Promise<Order[]> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return [];
+    }
+
     let q = query(
       collection(db, 'orders'),
       where('userId', '==', userId)
@@ -51,6 +56,11 @@ export async function getUserOrders(userId: string, limit?: number): Promise<Ord
 // 모든 주문 목록 가져오기 (관리자용)
 export async function getAllOrders(limit?: number, startAfter?: DocumentSnapshot, status?: OrderStatus): Promise<Order[]> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return [];
+    }
+
     let q = query(collection(db, 'orders'));
 
     if (status) {
@@ -86,6 +96,11 @@ export async function getAllOrders(limit?: number, startAfter?: DocumentSnapshot
 // 특정 주문 가져오기
 export async function getOrder(orderId: string): Promise<Order | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return null;
+    }
+
     const docRef = doc(db, 'orders', orderId);
     const docSnap = await getDoc(docRef);
 
@@ -149,6 +164,11 @@ export function getOrderStatusColor(status: OrderStatus): string {
 // 주문 생성
 export async function createOrder(orderData: Omit<Order, 'orderId' | 'createdAt' | 'updatedAt'>): Promise<string | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return null;
+    }
+
     console.log('🛍️ 주문 생성 시작:', orderData);
     
     const docRef = doc(collection(db, 'orders'));
@@ -205,6 +225,11 @@ export async function createOrder(orderData: Omit<Order, 'orderId' | 'createdAt'
 // 주문 상태 업데이트 (결제 상태도 함께 업데이트)
 export async function updateOrderStatus(orderId: string, status: OrderStatus): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'orders', orderId);
     await updateDoc(docRef, {
       status,
@@ -229,6 +254,11 @@ async function updatePaymentStatusByCancellation(orderId: string): Promise<boole
   try {
     console.log('🔍 주문 취소 처리 시작:', orderId);
     
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     // 해당 주문 ID와 관련된 모든 결제 정보 찾기 (복합 쿼리 피하기)
     const paymentsQuery = query(
       collection(db, 'payments'),
@@ -249,6 +279,7 @@ async function updatePaymentStatusByCancellation(orderId: string): Promise<boole
       .filter(paymentDoc => paymentDoc.data().status !== 'cancelled') // 클라이언트에서 필터링
       .map(paymentDoc => {
         console.log(`📋 결제 정보 취소 중: ${paymentDoc.id} (현재 상태: ${paymentDoc.data().status})`);
+        if (!db) return Promise.resolve();
         return updateDoc(doc(db, 'payments', paymentDoc.id), {
           status: 'cancelled',
           cancelledAt: new Date(),

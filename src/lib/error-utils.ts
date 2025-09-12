@@ -6,6 +6,7 @@
  * Firestore 에러인지 확인
  */
 export function isFirestoreError(error: Error | unknown): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const err = error as any;
   return err?.code?.startsWith?.('firestore/') ||
          err?.message?.includes?.('Firestore') ||
@@ -16,9 +17,11 @@ export function isFirestoreError(error: Error | unknown): boolean {
  * 네트워크 에러인지 확인
  */
 export function isNetworkError(error: Error | unknown): boolean {
-  return error?.code === 'unavailable' || 
-         error?.message?.includes?.('network') ||
-         error?.message?.includes?.('fetch');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const err = error as any;
+  return err?.code === 'unavailable' || 
+         err?.message?.includes?.('network') ||
+         err?.message?.includes?.('fetch');
 }
 
 /**

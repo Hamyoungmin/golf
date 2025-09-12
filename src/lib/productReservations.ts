@@ -5,15 +5,15 @@ import {
   where, 
   getDocs, 
   doc,
-  getDoc,
-  setDoc,
+  // getDoc, // unused
+  // setDoc, // unused
   updateDoc,
-  deleteDoc,
+  // deleteDoc, // unused
   orderBy,
   onSnapshot,
   addDoc,
   serverTimestamp,
-  Timestamp
+  // Timestamp // unused
 } from './firebase';
 import { ProductReservation } from '@/types';
 
@@ -27,6 +27,11 @@ export async function reserveProduct(
   userEmail: string
 ): Promise<string | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      throw new Error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+    }
+
     // 이미 다른 사용자가 장바구니에 담았는지 확인
     const existingReservation = await getActiveProductReservation(productId);
     if (existingReservation && existingReservation.userId !== userId) {
@@ -76,6 +81,11 @@ export async function releaseProductReservation(
   userId: string
 ): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const reservation = await getActiveProductReservation(productId);
     
     if (!reservation) {
@@ -104,6 +114,11 @@ export async function getActiveProductReservation(
   productId: string
 ): Promise<ProductReservation | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return null;
+    }
+
     console.log('🔍 [getActiveProductReservation] Firebase 쿼리 시작, productId:', productId);
     const q = query(
       collection(db, 'productReservations'),
@@ -184,6 +199,11 @@ export async function getUserActiveReservations(
   userId: string
 ): Promise<ProductReservation[]> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return [];
+    }
+
     const q = query(
       collection(db, 'productReservations'),
       where('userId', '==', userId),
@@ -250,6 +270,12 @@ export function subscribeToProductReservation(
   productId: string,
   callback: (reservation: ProductReservation | null) => void
 ): () => void {
+  if (!db) {
+    console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+    callback(null);
+    return () => {}; // 빈 unsubscribe 함수 반환
+  }
+
   const q = query(
     collection(db, 'productReservations'),
     where('productId', '==', productId),
@@ -291,6 +317,11 @@ export async function completeProductReservation(
   userId: string
 ): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const reservation = await getActiveProductReservation(productId);
     
     if (!reservation || reservation.userId !== userId) {
@@ -313,6 +344,11 @@ export async function completeProductReservation(
 // 만료된 예약 정리 (정기적으로 실행하는 함수)
 export async function cleanupExpiredReservations(): Promise<number> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return 0;
+    }
+
     const q = query(
       collection(db, 'productReservations'),
       where('status', '==', 'active')

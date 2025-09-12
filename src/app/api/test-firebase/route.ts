@@ -30,7 +30,7 @@ export async function GET() {
     let storageTest = null;
     try {
       if (storage) {
-        const testRef = ref(storage, 'test/connection-test.txt');
+        ref(storage, 'test/connection-test.txt'); // Test connection only
         console.log('🔥 Storage 레퍼런스 생성 성공');
         storageTest = { success: true, message: 'Storage 레퍼런스 생성 성공' };
       } else {

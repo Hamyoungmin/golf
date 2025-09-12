@@ -5,10 +5,10 @@ import {
   where, 
   getDocs, 
   doc,
-  getDoc,
+  // getDoc, // unused
   setDoc,
   updateDoc,
-  orderBy,
+  // orderBy, // unused
   limit as firestoreLimit
 } from './firebase';
 import { PaymentInfo, BankAccount } from '@/types';
@@ -43,6 +43,11 @@ export function getBankAccountsFromSettings(): BankAccount[] {
 // 대기 중인 결제 목록 가져오기
 export async function getPendingPayments(limit?: number): Promise<Partial<PaymentInfo>[]> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return [];
+    }
+
     let q = query(
       collection(db, 'payments'),
       where('status', '==', 'pending')
@@ -81,6 +86,11 @@ export async function getPendingPayments(limit?: number): Promise<Partial<Paymen
 // 모든 결제 정보 가져오기
 export async function getAllPayments(limit?: number): Promise<Partial<PaymentInfo>[]> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return [];
+    }
+
     let q = query(collection(db, 'payments'));
     
     if (limit) {
@@ -116,6 +126,11 @@ export async function getAllPayments(limit?: number): Promise<Partial<PaymentInf
 // 특정 결제 정보 가져오기
 export async function getPaymentInfo(orderId: string): Promise<PaymentInfo | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return null;
+    }
+
     const q = query(
       collection(db, 'payments'),
       where('orderId', '==', orderId)
@@ -145,6 +160,11 @@ export async function getPaymentInfo(orderId: string): Promise<PaymentInfo | nul
 // 결제 정보 생성
 export async function createPaymentInfo(paymentData: Omit<PaymentInfo, 'id' | 'createdAt' | 'updatedAt'>): Promise<string | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return null;
+    }
+
     const docRef = doc(collection(db, 'payments'));
     const now = new Date();
     
@@ -171,6 +191,11 @@ export async function updatePaymentStatus(
   notes?: string
 ): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'payments', paymentId);
     const updateData: Partial<PaymentInfo> = {
       status,
@@ -201,6 +226,11 @@ export async function updateBankTransferInfo(
   }
 ): Promise<boolean> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return false;
+    }
+
     const docRef = doc(db, 'payments', paymentId);
     await updateDoc(docRef, {
       'bankTransferInfo.depositorName': transferInfo.depositorName,
@@ -218,6 +248,11 @@ export async function updateBankTransferInfo(
 // 주문 ID로 결제 정보 가져오기
 export async function getPaymentByOrderId(orderId: string): Promise<PaymentInfo | null> {
   try {
+    if (!db) {
+      console.error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+      return null;
+    }
+
     const q = query(
       collection(db, 'payments'),
       where('orderId', '==', orderId)
