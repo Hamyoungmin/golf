@@ -56,6 +56,10 @@ export interface SalesAnalytics {
 // 방문자 추가/업데이트
 export async function trackVisitor(sessionId: string, userId?: string): Promise<void> {
   try {
+    if (!db) {
+      throw new Error('Firestore가 초기화되지 않았습니다');
+    }
+    
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식
     const visitorRef = doc(db, 'visitors', `${today}_${sessionId}`);
     
@@ -77,6 +81,10 @@ export async function trackVisitor(sessionId: string, userId?: string): Promise<
 // 페이지뷰 증가
 export async function incrementPageView(sessionId: string): Promise<void> {
   try {
+    if (!db) {
+      throw new Error('Firestore가 초기화되지 않았습니다');
+    }
+    
     const today = new Date().toISOString().split('T')[0];
     const visitorRef = doc(db, 'visitors', `${today}_${sessionId}`);
     
@@ -96,6 +104,10 @@ export async function incrementPageView(sessionId: string): Promise<void> {
 // 일별 방문자 통계 업데이트
 async function updateDailyVisitorStats(date: string): Promise<void> {
   try {
+    if (!db) {
+      throw new Error('Firestore가 초기화되지 않았습니다');
+    }
+    
     // 해당 날짜의 모든 방문자 조회 - 단순화
     const visitorsQuery = query(
       collection(db, 'visitors'),
@@ -191,7 +203,7 @@ export async function calculateSalesAnalytics(
     const topProducts = Array.from(productSales.entries())
       .sort((a, b) => b[1].revenue - a[1].revenue)
       .slice(0, 10)
-      .map(([id, data], index) => ({
+      .map(([id, data]) => ({
         id,
         name: data.name,
         sales: data.sales,
@@ -276,6 +288,10 @@ async function calculateConversionRate(
       endDate = new Date();
     }
     
+    if (!db) {
+      throw new Error('Firestore가 초기화되지 않았습니다');
+    }
+    
     // 기간 내 일별 통계 조회 - 단순화
     const statsQuery = query(
       collection(db, 'dailyStats'),
@@ -337,6 +353,10 @@ async function calculateDailyStats(days: number): Promise<Array<{
           });
         }
       });
+    
+    if (!db) {
+      throw new Error('Firestore가 초기화되지 않았습니다');
+    }
     
     // 방문자 데이터 조회 - 단순화
     const statsQuery = query(
@@ -490,6 +510,10 @@ async function updateDailyOrderStats(date: string): Promise<void> {
     );
     
     const totalRevenue = paidOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+    
+    if (!db) {
+      throw new Error('Firestore가 초기화되지 않았습니다');
+    }
     
     // 일별 통계 업데이트
     const statsRef = doc(db, 'dailyStats', date);

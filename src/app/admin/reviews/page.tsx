@@ -10,7 +10,6 @@ import {
   resolveReport,
   deleteReview,
   getReviewStats,
-  initializeReviews
 } from '@/lib/reviews';
 import { useAuth } from '@/contexts/AuthContext';
 import CustomAlert from '@/components/CustomAlert';
@@ -74,7 +73,7 @@ export default function ReviewsPage() {
   // 데이터 로드
   useEffect(() => {
     loadReviews();
-  }, []);
+  }, [loadReviews]);
 
   const loadReviews = useCallback(async () => {
     setLoading(true);
@@ -96,7 +95,7 @@ export default function ReviewsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showAlert]);
 
 
 

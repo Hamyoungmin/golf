@@ -286,7 +286,7 @@ export async function reportReview(id: string, reason: string, reportedBy: strin
 }
 
 // 신고 처리 (신고 해제)
-export async function resolveReport(id: string, adminId: string): Promise<boolean> {
+export async function resolveReport(id: string): Promise<boolean> {
   try {
     console.log('resolveReport: 신고 처리 시작, ID:', id);
     

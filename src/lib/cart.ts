@@ -46,7 +46,7 @@ export const clearLocalCart = (): void => {
 };
 
 // Firebase 제거됨: 더미 함수들
-export const getUserCart = async (userId: string): Promise<CartItem[]> => {
+export const getUserCart = async (): Promise<CartItem[]> => {
   // 로컬 장바구니만 반환
   return getLocalCart();
 };
@@ -278,7 +278,7 @@ export const clearCart = async (userId?: string): Promise<void> => {
 };
 
 // Firebase 제거됨: 로컬 장바구니만 반환
-export const syncCartOnLogin = async (userId: string): Promise<CartItem[]> => {
+export const syncCartOnLogin = async (): Promise<CartItem[]> => {
   // 로컬 장바구니만 반환
   return getLocalCart();
 };

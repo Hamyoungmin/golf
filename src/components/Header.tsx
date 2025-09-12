@@ -18,7 +18,7 @@ const Header = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, signOut } = useAuth();
-  const { cartItemCount } = useCart();
+  // const { cartItemCount } = useCart();
   const { settings } = useSettings();
   // const [forceUpdate, setForceUpdate] = useState(0);
   const [isDriversOpen, setIsDriversOpen] = useState(false);

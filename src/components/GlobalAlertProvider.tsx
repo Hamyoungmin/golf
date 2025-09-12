@@ -71,9 +71,9 @@ export default function GlobalAlertProvider({ children }: { children: React.Reac
     setAlertState(prev => ({ ...prev, isOpen: false }));
   };
 
-  const handleClose = () => {
-    setAlertState(prev => ({ ...prev, isOpen: false }));
-  };
+  // const handleClose = () => {
+  //   setAlertState(prev => ({ ...prev, isOpen: false }));
+  // };
 
   return (
     <>

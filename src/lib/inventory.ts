@@ -66,6 +66,10 @@ export async function adjustStock(
   adminUserId: string
 ): Promise<boolean> {
   try {
+    if (!db) {
+      throw new Error('Firestore가 초기화되지 않았습니다');
+    }
+    
     // 현재 상품 정보 가져오기
     const productDoc = await getDoc(doc(db, 'products', adjustment.productId));
     if (!productDoc.exists()) {
@@ -119,6 +123,10 @@ export async function adjustStock(
 // 재고 이력 추가
 export async function addStockHistory(historyData: Omit<StockHistory, 'id' | 'createdAt'>): Promise<boolean> {
   try {
+    if (!db) {
+      throw new Error('Firestore가 초기화되지 않았습니다');
+    }
+    
     await addDoc(collection(db, 'stockHistory'), {
       ...historyData,
       createdAt: serverTimestamp()
@@ -133,6 +141,10 @@ export async function addStockHistory(historyData: Omit<StockHistory, 'id' | 'cr
 // 특정 상품의 재고 이력 가져오기
 export async function getProductStockHistory(productId: string): Promise<StockHistory[]> {
   try {
+    if (!db) {
+      throw new Error('Firestore가 초기화되지 않았습니다');
+    }
+    
     const q = query(
       collection(db, 'stockHistory'),
       where('productId', '==', productId),
@@ -159,6 +171,10 @@ export async function getProductStockHistory(productId: string): Promise<StockHi
 // 전체 재고 이력 가져오기 (최근 100개)
 export async function getAllStockHistory(limit: number = 100): Promise<StockHistory[]> {
   try {
+    if (!db) {
+      throw new Error('Firestore가 초기화되지 않았습니다');
+    }
+    
     const q = query(
       collection(db, 'stockHistory'),
       orderBy('createdAt', 'desc')

@@ -635,7 +635,7 @@ export async function seedInitialFAQData() {
       ];
       
       const now = new Date().toISOString();
-      const formattedFAQs: FAQItem[] = initialFAQs.map((faq, index) => ({
+      const formattedFAQs: FAQItem[] = initialFAQs.map((faq) => ({
         ...faq,
         id: generateId(),
         createdAt: now,

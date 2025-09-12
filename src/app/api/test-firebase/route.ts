@@ -50,7 +50,7 @@ export async function GET() {
     try {
       if (db) {
         // 간단한 컬렉션 참조 생성 (실제로 읽지는 않음)
-        const testCollection = collection(db, 'test');
+        // const testCollection = collection(db, 'test');
         console.log('🔥 Firestore 컬렉션 참조 생성 성공');
         firestoreTest = { success: true, message: 'Firestore 컬렉션 참조 생성 성공' };
       } else {
