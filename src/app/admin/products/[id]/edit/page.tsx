@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getProduct, updateProduct } from '@/lib/products';
@@ -214,9 +214,9 @@ export default function AdminProductEditPage() {
 
   useEffect(() => {
     fetchProduct();
-  }, [productId]);
+  }, [productId, fetchProduct]);
 
-  const fetchProduct = async () => {
+  const fetchProduct = useCallback(async () => {
     try {
       setLoading(true);
       const productData = await getProduct(productId);
@@ -263,7 +263,7 @@ export default function AdminProductEditPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [productId, router]);
 
   // 메인 카테고리 선택 핸들러
   const handleMainCategoryChange = (categoryKey: string) => {

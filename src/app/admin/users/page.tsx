@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 // 사용하지 않는 아이콘 제거
 import { 
   db,
@@ -50,7 +50,7 @@ export default function UsersManagement() {
   };
 
   // 사용자 목록 가져오기
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const q = query(
         collection(db, 'users'), 
@@ -166,7 +166,7 @@ export default function UsersManagement() {
 
   useEffect(() => {
     fetchUsers();
-  }, [filter]);
+  }, [filter, fetchUsers]);
 
   useEffect(() => {
     fetchCounts();

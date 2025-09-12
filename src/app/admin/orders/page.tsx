@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 // 사용하지 않는 아이콘들 제거
 import DataTable from '@/components/admin/DataTable';
@@ -18,10 +18,6 @@ export default function AdminOrdersPage() {
   const [userCache, setUserCache] = useState<{ [key: string]: User }>({});
 
   const orderStatuses: OrderStatus[] = ['pending', 'payment_pending', 'paid', 'shipped', 'delivered', 'cancelled'];
-
-  useEffect(() => {
-    fetchOrders();
-  }, [selectedStatus]);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -52,7 +48,11 @@ export default function AdminOrdersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedStatus, userCache]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('ko-KR', {

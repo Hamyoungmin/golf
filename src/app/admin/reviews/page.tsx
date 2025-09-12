@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 // 사용하지 않는 아이콘들 제거
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { Review, ReviewStats } from '@/types';
@@ -74,9 +74,9 @@ export default function ReviewsPage() {
   // 데이터 로드
   useEffect(() => {
     loadReviews();
-  }, []);
+  }, [loadReviews]);
 
-  const loadReviews = async () => {
+  const loadReviews = useCallback(async () => {
     setLoading(true);
     try {
               // 실제 사용자 리뷰만 사용
@@ -96,7 +96,7 @@ export default function ReviewsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
 
 

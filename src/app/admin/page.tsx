@@ -123,7 +123,8 @@ export default function AdminDashboard() {
     fetchStats();
   }, []);
 
-  // const handleSeedData = async () => { // 향후 사용 예정
+  /*
+  const handleSeedData = async () => {
     setSeedLoading(true);
     try {
       const response = await fetch('/api/seed', {
@@ -143,8 +144,10 @@ export default function AdminDashboard() {
       setSeedLoading(false);
     }
   };
+  */
 
-  // const handleDeleteAllProducts = async () => { // 향후 사용 예정
+  /*
+  const handleDeleteAllProducts = async () => {
     if (!confirm('정말로 모든 상품 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       return;
     }
@@ -165,6 +168,7 @@ export default function AdminDashboard() {
       alert('데이터 삭제에 실패했습니다.');
     }
   };
+  */
 
   if (loading) {
     return (

@@ -110,7 +110,7 @@ export default function AdminPaymentsPage() {
   };
 
   // 🔥 실시간 결제 데이터 구독 설정
-  const setupRealtimePayments = () => {
+  const setupRealtimePayments = useCallback(() => {
     try {
       setLoading(true);
       

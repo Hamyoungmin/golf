@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -30,7 +30,7 @@ export default function AdminOrderDetailPage() {
 
   useEffect(() => {
     fetchOrderDetails();
-  }, [orderId]);
+  }, [orderId, fetchOrderDetails]);
 
   // 🔥 상품 정보 실시간 구독 설정
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function AdminOrderDetailPage() {
     };
   }, [order?.items]);
 
-  const fetchOrderDetails = async () => {
+  const fetchOrderDetails = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -96,7 +96,7 @@ export default function AdminOrderDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId, router]);
 
   const handleStatusChange = async (newStatus: OrderStatus) => {
     if (!order) return;

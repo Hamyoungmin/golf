@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import DataTable from '@/components/admin/DataTable';
 import { getProducts, deleteProduct, migrateProductsWithNewFields } from '@/lib/products';
@@ -22,11 +23,18 @@ export default function AdminProductsPage() {
   const categories: Category[] = ['drivers', 'irons', 'putters', 'wedges', 'woods', 'utilities', 'heads-parts'];
   const brands: Brand[] = ['titleist', 'taylormade', 'callaway', 'honma', 'bridgestone', 'others'];
 
-  useEffect(() => {
-    fetchProducts();
-  }, [currentPage, filter]);
+  // 추가 검색 키워드 매핑
+  const searchKeywordMap: Record<string, string[]> = {
+    drivers: ['드라이버', 'driver'],
+    woods: ['우드', 'wood', '페어웨이우드', '페어웨이'],
+    irons: ['아이언', 'iron'],
+    wedges: ['웨지', 'wedge'],
+    putters: ['퍼터', 'putter'],
+    utilities: ['유틸리티', 'utility', '유틸'],
+    'heads-parts': ['헤드&단품', '헤드', '단품', 'head', 'parts', '헤드단품'],
+  };
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       // 제한 해제: 모든 상품 가져오기 (관리자는 전체 목록 필요)
@@ -37,7 +45,11 @@ export default function AdminProductsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [currentPage, fetchProducts]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('정말로 이 상품을 삭제하시겠습니까?')) {
@@ -90,9 +102,11 @@ export default function AdminProductsPage() {
       key: 'images',
       header: '이미지',
       render: (product: Product) => (
-        <img 
+        <Image 
           src={getAdminProductImage(product)} 
           alt={product.name}
+          width={48}
+          height={48}
           className="w-12 h-12 object-cover rounded"
           style={{ 
             width: '48px', 
@@ -164,12 +178,42 @@ export default function AdminProductsPage() {
     },
   ];
 
-  // 검색 필터링
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.brand.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // 검색 필터링 (확장된 카테고리 검색 포함)
+  const filteredProducts = products.filter(product => {
+    const searchLower = searchTerm.toLowerCase().trim();
+    
+    // 검색어가 비어있으면 모든 상품 반환
+    if (!searchLower) return true;
+    
+    // 기본 검색 (상품명, 영어 카테고리, 브랜드)
+    const basicMatch = 
+      product.name.toLowerCase().includes(searchLower) ||
+      product.category.toLowerCase().includes(searchLower) ||
+      product.brand.toLowerCase().includes(searchLower);
+    
+    // 한국어 카테고리 검색 - 정확히 일치하거나 포함하는 경우
+    const categoryMatch = searchKeywordMap[product.category]?.some(keyword => {
+      const keywordLower = keyword.toLowerCase();
+      return keywordLower === searchLower || keywordLower.includes(searchLower) || searchLower.includes(keywordLower);
+    }) || false;
+    
+    // 특수 카테고리 검색 (왼손용, 여성용, 키즈용)
+    const specialCategoryMatch = 
+      (searchLower.includes('왼손') || searchLower.includes('왼손용') || searchLower === 'left' || searchLower === 'lefthanded') && product.isLeftHanded ||
+      (searchLower.includes('여성') || searchLower.includes('여성용') || searchLower === 'womens' || searchLower === 'women') && product.isWomens ||
+      (searchLower.includes('키즈') || searchLower.includes('아동') || searchLower === 'kids' || searchLower.includes('어린이')) && product.isKids;
+    
+    // 모든 카테고리에서 한국어 이름으로 검색 (전체 카테고리 매칭)
+    const fullCategoryMatch = Object.entries(searchKeywordMap).some(([category, keywords]) => {
+      const isKeywordMatch = keywords.some(keyword => 
+        keyword.toLowerCase() === searchLower || 
+        (searchLower.length > 1 && keyword.toLowerCase().includes(searchLower))
+      );
+      return isKeywordMatch && product.category === category;
+    });
+    
+    return basicMatch || categoryMatch || specialCategoryMatch || fullCategoryMatch;
+  });
 
   // 페이지네이션 계산
   const productsPerPage = 20;
@@ -257,7 +301,7 @@ export default function AdminProductsPage() {
           <div style={{ flex: 1, position: 'relative' }}>
               <input
                 type="text"
-                placeholder="상품명, 카테고리, 브랜드로 검색..."
+                placeholder="상품명, 카테고리 (드라이버, 우드, 유틸리티, 웨지, 퍼터, 왼손용, 여성용 등), 브랜드로 검색..."
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
