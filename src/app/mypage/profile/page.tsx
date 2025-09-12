@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserData, updateUserProfile } from '@/lib/users';
 import { User as UserType, Address } from '@/types';
@@ -112,6 +112,10 @@ export default function ProfilePage() {
 
   // 파일 업로드 함수
   const uploadFile = async (file: File, path: string): Promise<string> => {
+    if (!storage) {
+      throw new Error('Firebase Storage가 초기화되지 않았습니다.');
+    }
+    
     const storageRef = ref(storage, path);
     const snapshot = await uploadBytes(storageRef, file);
     return await getDownloadURL(snapshot.ref);
@@ -422,9 +426,11 @@ export default function ProfilePage() {
             </label>
             {currentPhotoUrls.shopInteriorPhotoUrl && (
               <div style={{ marginBottom: '10px' }}>
-                <img 
+                <Image 
                   src={currentPhotoUrls.shopInteriorPhotoUrl} 
                   alt="현재 샵 내부 사진" 
+                  width={100}
+                  height={100}
                   style={{ 
                     width: '100px', 
                     height: '100px', 
@@ -468,9 +474,11 @@ export default function ProfilePage() {
             </label>
             {currentPhotoUrls.shopSignPhotoUrl && (
               <div style={{ marginBottom: '10px' }}>
-                <img 
+                <Image 
                   src={currentPhotoUrls.shopSignPhotoUrl} 
                   alt="현재 샵 간판 사진" 
+                  width={100}
+                  height={100}
                   style={{ 
                     width: '100px', 
                     height: '100px', 

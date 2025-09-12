@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 import { searchProducts } from '@/lib/products';
 import { Product, ProductFilter, ProductSort } from '@/types';
 import ProductCard from '@/components/ProductCard';
@@ -10,6 +11,7 @@ import ProductCard from '@/components/ProductCard';
 // 실제 Firebase 데이터를 사용하도록 변경 (샘플 데이터 제거)
 
 function SearchContent() {
+  const { user } = useAuth(); // 로그인 상태 확인
   const searchParams = useSearchParams();
   const router = useRouter();
   const query = searchParams.get('q') || '';
@@ -263,8 +265,12 @@ function SearchContent() {
                   <option value="createdAt-asc">오래된순</option>
                   <option value="name-asc">이름순 (가-하)</option>
                   <option value="name-desc">이름순 (하-가)</option>
-                  <option value="price-asc">가격 낮은순</option>
-                  <option value="price-desc">가격 높은순</option>
+                  {user && (
+                    <>
+                      <option value="price-asc">가격 낮은순</option>
+                      <option value="price-desc">가격 높은순</option>
+                    </>
+                  )}
                 </select>
               </div>
             </div>

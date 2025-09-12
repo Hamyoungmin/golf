@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,7 +23,6 @@ export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
   const { settings } = useSettings();
   const { showAlert, AlertComponent } = useCustomAlert();
-  const [forceUpdate, setForceUpdate] = useState(0);
 
   // 직접 구매 파라미터
   const productId = searchParams.get('productId');
@@ -186,7 +186,6 @@ export default function CheckoutPage() {
   useEffect(() => {
     const handleSettingsUpdate = (event: CustomEvent) => {
       console.log('🔄 CheckoutPage: 설정 업데이트 감지 (결제수단 재설정)', event.detail);
-      setForceUpdate(prev => prev + 1);
       
       // 결제 방법 재설정 - 토스페이먼츠를 기본으로
       const newSettings = event.detail.settings;
@@ -786,10 +785,12 @@ export default function CheckoutPage() {
                       flexShrink: 0
                     }}>
                     {item.product.images[0] ? (
-                      <img
+                      <Image
                         src={item.product.images[0]}
                         alt={item.product.name}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        width={80}
+                        height={80}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     ) : (
                         <div style={{ 

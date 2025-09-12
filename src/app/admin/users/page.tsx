@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 // 사용하지 않는 아이콘 제거
 import { 
   db,
@@ -10,8 +11,7 @@ import {
   getDocs, 
   doc,
   updateDoc,
-  serverTimestamp,
-  orderBy
+  serverTimestamp
 } from '@/lib/firebase';
 import { User } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,9 +30,14 @@ export default function UsersManagement() {
   // 모든 상태별 카운트 가져오기
   const fetchCounts = async () => {
     try {
+      if (!db) {
+        console.error('Firestore가 초기화되지 않았습니다.');
+        return;
+      }
+      
       const statusTypes = ['pending', 'approved', 'rejected'] as const;
       const countPromises = statusTypes.map(async (status) => {
-        const q = query(collection(db, 'users'), where('status', '==', status));
+        const q = query(collection(db!, 'users'), where('status', '==', status));
         const snapshot = await getDocs(q);
         return { status, count: snapshot.size };
       });
@@ -52,6 +57,12 @@ export default function UsersManagement() {
   // 사용자 목록 가져오기
   const fetchUsers = useCallback(async () => {
     try {
+      if (!db) {
+        console.error('Firestore가 초기화되지 않았습니다.');
+        setLoading(false);
+        return;
+      }
+      
       const q = query(
         collection(db, 'users'), 
         where('status', '==', filter)
@@ -79,7 +90,7 @@ export default function UsersManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
 
   // 사용자 승인 (직접 Firebase 접근)
   const approveUser = async (uid: string) => {
@@ -95,6 +106,11 @@ export default function UsersManagement() {
     }
     
     try {
+      if (!db) {
+        alert('Firestore가 초기화되지 않았습니다.');
+        return;
+      }
+      
       console.log('승인 시작:', uid, '관리자:', currentUser.uid);
       const userRef = doc(db, 'users', uid);
       const updateData = {
@@ -140,6 +156,11 @@ export default function UsersManagement() {
     }
     
     try {
+      if (!db) {
+        alert('Firestore가 초기화되지 않았습니다.');
+        return;
+      }
+      
       console.log('거부 시작:', uid, '관리자:', currentUser.uid);
       const userRef = doc(db, 'users', uid);
       const updateData = {
@@ -358,9 +379,11 @@ export default function UsersManagement() {
                         {user.shopInteriorPhotoUrl && (
                           <div>
                             <p style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>샵 내부</p>
-                            <img 
+                            <Image 
                               src={user.shopInteriorPhotoUrl} 
                               alt="샵 내부" 
+                              width={64}
+                              height={64}
                               style={{
                                 width: '64px',
                                 height: '64px',
@@ -371,36 +394,17 @@ export default function UsersManagement() {
                                 backgroundColor: '#f5f5f5'
                               }}
                               onClick={() => window.open(user.shopInteriorPhotoUrl, '_blank')}
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                const parent = target.parentElement;
-                                if (parent) {
-                                  parent.innerHTML = `
-                                    <p style="fontSize: 12px; color: #666; marginBottom: 4px;">샵 내부</p>
-                                    <div style="
-                                      width: 64px;
-                                      height: 64px;
-                                      backgroundColor: #f5f5f5;
-                                      border: 1px solid #ddd;
-                                      borderRadius: 4px;
-                                      display: flex;
-                                      alignItems: center;
-                                      justifyContent: center;
-                                      fontSize: 12px;
-                                      color: #999;
-                                    ">📷 이미지 없음</div>
-                                  `;
-                                }
-                              }}
                             />
                           </div>
                         )}
                         {user.shopSignPhotoUrl && (
                           <div>
                             <p style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>샵 간판</p>
-                            <img 
+                            <Image 
                               src={user.shopSignPhotoUrl} 
                               alt="샵 간판" 
+                              width={64}
+                              height={64}
                               style={{
                                 width: '64px',
                                 height: '64px',
@@ -411,27 +415,6 @@ export default function UsersManagement() {
                                 backgroundColor: '#f5f5f5'
                               }}
                               onClick={() => window.open(user.shopSignPhotoUrl, '_blank')}
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                const parent = target.parentElement;
-                                if (parent) {
-                                  parent.innerHTML = `
-                                    <p style="fontSize: 12px; color: #666; marginBottom: 4px;">샵 간판</p>
-                                    <div style="
-                                      width: 64px;
-                                      height: 64px;
-                                      backgroundColor: #f5f5f5;
-                                      border: 1px solid #ddd;
-                                      borderRadius: 4px;
-                                      display: flex;
-                                      alignItems: center;
-                                      justifyContent: center;
-                                      fontSize: 12px;
-                                      color: #999;
-                                    ">📷 이미지 없음</div>
-                                  `;
-                                }
-                              }}
                             />
                           </div>
                         )}

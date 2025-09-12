@@ -3,10 +3,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getProduct, updateProduct } from '@/lib/products';
 import { uploadMultipleProductImages, formatFileSize, isValidImageFile } from '@/lib/imageUpload';
 import { unformatPrice } from '@/utils/priceUtils';
-import { Category, Brand, Product } from '@/types';
+import { Brand } from '@/types';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 export default function AdminProductEditPage() {
@@ -16,7 +17,6 @@ export default function AdminProductEditPage() {
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [product, setProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -38,7 +38,6 @@ export default function AdminProductEditPage() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedMainCategory, setSelectedMainCategory] = useState('');
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, fileName: '' });
-  const [compressing, setCompressing] = useState(false);
 
   // 모달 상태 관리
   const [modalState, setModalState] = useState({
@@ -212,16 +211,11 @@ export default function AdminProductEditPage() {
     }
   };
 
-  useEffect(() => {
-    fetchProduct();
-  }, [productId, fetchProduct]);
-
   const fetchProduct = useCallback(async () => {
     try {
       setLoading(true);
       const productData = await getProduct(productId);
       if (productData) {
-        setProduct(productData);
         setFormData({
           name: productData.name,
           price: productData.price,
@@ -264,6 +258,10 @@ export default function AdminProductEditPage() {
       setLoading(false);
     }
   }, [productId, router]);
+
+  useEffect(() => {
+    fetchProduct();
+  }, [fetchProduct]);
 
   // 메인 카테고리 선택 핸들러
   const handleMainCategoryChange = (categoryKey: string) => {
@@ -510,7 +508,8 @@ export default function AdminProductEditPage() {
 
   // 스펙 제거
   const handleSpecificationRemove = (key: string) => {
-    const { [key]: _, ...rest } = formData.specifications;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { [key]: removed, ...rest } = formData.specifications;
     setFormData({ ...formData, specifications: rest });
   };
 
@@ -1328,9 +1327,11 @@ export default function AdminProductEditPage() {
                         justifyContent: 'center',
                         overflow: 'hidden'
                       }}>
-                        <img 
+                        <Image 
                           src={URL.createObjectURL(file)}
                           alt={file.name}
+                          width={200}
+                          height={120}
                           style={{
                             maxWidth: '100%',
                             maxHeight: '100%',

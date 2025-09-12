@@ -56,14 +56,14 @@ export const useCustomAlert = () => {
       alertState.onConfirm();
     }
     hideAlert();
-  }, [alertState.onConfirm, hideAlert]);
+  }, [alertState, hideAlert]);
 
   const handleCancel = useCallback(() => {
     if (alertState.onCancel) {
       alertState.onCancel();
     }
     hideAlert();
-  }, [alertState.onCancel, hideAlert]);
+  }, [alertState, hideAlert]);
 
   const AlertComponent = useCallback(() => (
     <CustomAlert

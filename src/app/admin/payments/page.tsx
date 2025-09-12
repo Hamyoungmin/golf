@@ -1,12 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { CheckIcon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import React, { useEffect, useState, useCallback } from 'react';
+import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import DataTable from '@/components/admin/DataTable';
 import { 
-  getAllPayments, 
-  getPendingPayments, 
   updatePaymentStatus, 
   getPaymentStatusText, 
   getPaymentStatusColor,
@@ -20,7 +17,6 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { db, collection, query, where, onSnapshot, orderBy } from '@/lib/firebase';
 
 export default function AdminPaymentsPage() {
-  const router = useRouter();
   const { user } = useAuth();
   const { settings, updatePaymentSettings, saveSettings } = useSettings();
   const [payments, setPayments] = useState<PaymentInfo[]>([]);
@@ -32,87 +28,17 @@ export default function AdminPaymentsPage() {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [processing, setProcessing] = useState<{ [key: string]: boolean }>({});
 
-  const paymentStatuses = ['pending', 'confirmed', 'rejected', 'cancelled'];
-
-  useEffect(() => {
-    const unsubscribe = setupRealtimePayments();
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, [selectedStatus]);
-
-  const fetchPayments = async () => {
-    try {
-      setLoading(true);
-      let paymentList;
-      
-      if (selectedStatus === 'pending') {
-        paymentList = await getPendingPayments(100);
-      } else if (selectedStatus === '') {
-        paymentList = await getAllPayments(100);
-      } else {
-        const allPayments = await getAllPayments(100);
-        paymentList = allPayments.filter(payment => payment.status === selectedStatus);
-      }
-      
-      setPayments(paymentList as PaymentInfo[]);
-
-      // 사용자 정보 및 주문 정보 캐싱
-      const uniqueUserIds = [...new Set(paymentList.map(payment => payment.userId))];
-      const uniqueOrderIds = [...new Set(paymentList.map(payment => payment.orderId))];
-
-      // 사용자 정보 캐싱
-      const userPromises = uniqueUserIds.map(async (userId) => {
-        if (userId && !userCache[userId]) {
-          const userData = await getUserData(userId);
-          return { userId, userData };
-        }
-        return null;
-      });
-
-      const userResults = await Promise.all(userPromises);
-      const newUserCache: { [key: string]: User } = { ...userCache };
-      userResults.forEach(result => {
-        if (result && result.userData && result.userId) {
-          newUserCache[result.userId] = result.userData;
-        }
-      });
-      setUserCache(newUserCache);
-
-      // 주문 정보 캐싱
-      const orderPromises = uniqueOrderIds.map(async (orderId) => {
-        if (orderId && !orderCache[orderId]) {
-          try {
-            const orderData = await getOrderByOrderId(orderId);
-            return { orderId, orderData };
-          } catch (error) {
-            console.error(`주문 정보 로드 실패 (${orderId}):`, error);
-            return null;
-          }
-        }
-        return null;
-      });
-
-      const orderResults = await Promise.all(orderPromises);
-      const newOrderCache: { [key: string]: Order } = { ...orderCache };
-      orderResults.forEach(result => {
-        if (result && result.orderData && result.orderId) {
-          newOrderCache[result.orderId] = result.orderData;
-        }
-      });
-      setOrderCache(newOrderCache);
-
-    } catch (error) {
-      console.error('결제 목록 로딩 실패:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // 🔥 실시간 결제 데이터 구독 설정
   const setupRealtimePayments = useCallback(() => {
     try {
       setLoading(true);
+      
+      // db가 null인 경우 조기 리턴
+      if (!db) {
+        console.error('Firestore가 초기화되지 않았습니다.');
+        setLoading(false);
+        return null;
+      }
       
       // 기본 쿼리 설정
       let paymentsQuery = query(
@@ -201,7 +127,14 @@ export default function AdminPaymentsPage() {
       setLoading(false);
       return null;
     }
-  };
+  }, [selectedStatus, orderCache, userCache]);
+
+  useEffect(() => {
+    const unsubscribe = setupRealtimePayments();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [setupRealtimePayments]);
 
   const handlePaymentAction = async (paymentId: string, action: 'confirmed' | 'rejected', notes?: string) => {
     if (!user) return;

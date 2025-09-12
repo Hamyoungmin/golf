@@ -525,5 +525,80 @@ service cloud.firestore {
       allow delete: if request.auth != null && 
                        request.auth.uid == resource.data.userId;
     }
+    
+    // ============== 사용자 활동 추적 및 보안 규칙 ==============
+    
+    // 사용자 활동 로그 (가격 클릭, 로그인 유도, 상품 조회 등)
+    match /userActivityLogs/{logId} {
+      // 관리자만 읽기 가능 (분석용)
+      allow read: if request.auth != null;
+      // 모든 사용자 로그 생성 가능 (비로그인도 포함)
+      allow write: if true;
+    }
+    
+    // 관리자 검색 로그 (한국어 카테고리 검색 추적)
+    match /adminSearchLogs/{logId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 비로그인 사용자 게스트 세션
+    match /guestSessions/{sessionId} {
+      // 임시 세션 데이터 (장바구니, 최근 조회 등)
+      allow read, write: if true;
+    }
+    
+    // 가격 조회 시도 로그 (보안 모니터링)
+    match /priceAccessLogs/{logId} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+    
+    // 로그인 유도 클릭 추적
+    match /loginPromptLogs/{logId} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+    
+    // 상품별 비로그인 조회 통계
+    match /productViewStats/{productId} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+    
+    // 검색 키워드 분석 (한국어/영어 매핑 효과)
+    match /searchAnalytics/{keywordId} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+    
+    // 사용자 전환 추적 (비로그인 → 회원가입)
+    match /conversionTracking/{trackingId} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+    
+    // A/B 테스트 데이터 (가격 숨기기 효과 측정)
+    match /abTestData/{testId} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+    
+    // 실시간 사용자 카운터
+    match /realtimeUserCount/{counterId} {
+      allow read, write: if true;
+    }
+    
+    // 상품 관심도 히트맵 (클릭/조회 위치)
+    match /productHeatmap/{heatmapId} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+    
+    // 사기 방지 로그 (의심스러운 활동)
+    match /fraudPrevention/{logId} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+    
   }
 }

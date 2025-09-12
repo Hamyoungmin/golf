@@ -5,12 +5,17 @@ export async function GET() {
   try {
     console.log('🧪 Firebase Storage 연결 테스트 시작');
     
+    // Storage 초기화 확인
+    if (!storage) {
+      throw new Error('Firebase Storage가 초기화되지 않았습니다.');
+    }
+    
     // 간단한 텍스트 파일로 테스트
     const testContent = new TextEncoder().encode('Firebase Storage 연결 테스트');
     const testFileName = `test/connection-test-${Date.now()}.txt`;
     
     console.log('🧪 테스트 파일 경로:', testFileName);
-    
+
     // Storage 레퍼런스 생성
     const storageRef = ref(storage, testFileName);
     console.log('🧪 Storage 레퍼런스 생성 완료');

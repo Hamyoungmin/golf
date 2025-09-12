@@ -1,25 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Notice } from '@/types';
 import { getNotice, getPublishedNotices, incrementNoticeViews } from '@/lib/notices';
 
 export default function NoticeDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const noticeId = params.id as string;
 
   const [notice, setNotice] = useState<Notice | null>(null);
   const [allNotices, setAllNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchNotice();
-  }, [noticeId]);
-
-  const fetchNotice = async () => {
+  const fetchNotice = useCallback(async () => {
     setLoading(true);
     try {
       // 현재 공지사항 가져오기
@@ -45,7 +40,11 @@ export default function NoticeDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [noticeId]);
+
+  useEffect(() => {
+    fetchNotice();
+  }, [fetchNotice]);
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('ko-KR', {

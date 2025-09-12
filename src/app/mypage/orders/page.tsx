@@ -13,7 +13,7 @@ export default function OrdersPage() {
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedStatus] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<string>('orders');
 
 

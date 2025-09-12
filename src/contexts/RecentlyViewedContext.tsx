@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { 
   getUserRecentlyViewed, 
@@ -36,7 +36,7 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
 
   // 최근 본 상품 데이터 로드 (개선된 에러 핸들링)
-  const loadRecentlyViewed = async () => {
+  const loadRecentlyViewed = useCallback(async () => {
     if (!user) {
       setRecentlyViewedItems([]);
       setRecentlyViewedProductIds([]);
@@ -65,12 +65,12 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   // 사용자 변경 시 최근 본 상품 로드
   useEffect(() => {
     loadRecentlyViewed();
-  }, [user]);
+  }, [loadRecentlyViewed]);
 
   // 최근 본 상품에 상품 추가 (디바운스 적용)
   const addToRecentlyViewed = async (productId: string): Promise<boolean> => {

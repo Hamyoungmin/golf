@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -80,7 +81,7 @@ export default function ProductPage() {
     };
 
     fetchProduct();
-  }, [params.id, user]);
+  }, [params.id, user, addToRecentlyViewed]);
 
 
 
@@ -222,9 +223,11 @@ export default function ProductPage() {
         }}>
           {/* 상품 이미지 */}
           <div>
-            <img
+            <Image
               src={product.images && product.images.length > 0 ? product.images[selectedImage] : '/placeholder-image.jpg'}
               alt={product.name}
+              width={500}
+              height={400}
               style={{
                 width: '100%', 
                 maxWidth: '500px', 
@@ -249,9 +252,11 @@ export default function ProductPage() {
                       cursor: 'pointer'
                     }}
                   >
-                    <img
+                    <Image
                       src={image}
                       alt={`${product.name} ${index + 1}`}
+                      width={60}
+                      height={60}
                       style={{ width: '60px', height: '60px', objectFit: 'cover' }}
                     />
                   </button>
@@ -263,10 +268,28 @@ export default function ProductPage() {
           {/* 상품 정보 */}
           <div>
             <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '16px' }}>{product.name}</h1>
-            <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#007bff', marginBottom: '20px' }}>
-              {product.price === '가격문의' ? product.price : 
-                new Intl.NumberFormat('ko-KR').format(parseInt(product.price.replace(/[^0-9]/g, ''))) + '원'}
-            </p>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#007bff', marginBottom: '20px' }}>
+              {user ? (
+                product.price === '가격문의' ? product.price : 
+                new Intl.NumberFormat('ko-KR').format(parseInt(product.price.replace(/[^0-9]/g, ''))) + '원'
+              ) : (
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '10px',
+                  fontSize: '20px',
+                  color: '#666'
+                }}>
+                  <span style={{ fontSize: '24px' }}>🔒</span>
+                  <div>
+                    <div style={{ fontSize: '18px', fontWeight: '600' }}>로그인 후 가격 확인 가능</div>
+                    <div style={{ fontSize: '14px', fontWeight: 'normal', color: '#888', marginTop: '4px' }}>
+                      회원가입 후 특별 가격을 확인하세요
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* 상품 설명 */}
             {product.description && (
@@ -440,60 +463,135 @@ export default function ProductPage() {
 
             {/* 구매 버튼들 */}
             <div style={{ display: 'flex', gap: '10px' }}>
-              {/* 가격문의 상품인 경우 */}
-              {product.price === '가격문의' && (
-                <button
-                  onClick={() => setShowContactModal(true)}
-                  style={{
-                    flex: 1,
-                    padding: '16px',
-                    backgroundColor: '#007bff',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                >
-                  가격 문의하기
-                </button>
-              )}
-              
-              {/* 일반 구매 버튼들 */}
-              {product.price !== '가격문의' && (
+              {user ? (
                 <>
-                  <button
-                    onClick={handleBuyNow}
-                    disabled={product.stock === 0}
-                    style={{
-                      flex: 1,
-                      padding: '16px',
-                      backgroundColor: product.stock === 0 ? '#9ca3af' : '#007bff',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      cursor: product.stock === 0 ? 'not-allowed' : 'pointer',
-                      opacity: product.stock === 0 ? 0.6 : 1,
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    바로 구매
-                  </button>
+                  {/* 가격문의 상품인 경우 */}
+                  {product.price === '가격문의' && (
+                    <button
+                      onClick={() => setShowContactModal(true)}
+                      style={{
+                        flex: 1,
+                        padding: '16px',
+                        backgroundColor: '#007bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      가격 문의하기
+                    </button>
+                  )}
                   
-                  <div style={{ flex: 1 }}>
-                    <ReservationAwareAddToCartButton
-                      productId={product.id}
-                      price={parseInt(product.price.replace(/[^0-9]/g, '')) || 0}
-                      onAddToCart={handleAddToCart}
-                    disabled={product.stock === 0}
-                  >
-                    장바구니
-                    </ReservationAwareAddToCartButton>
-                  </div>
+                  {/* 일반 구매 버튼들 */}
+                  {product.price !== '가격문의' && (
+                    <>
+                      <button
+                        onClick={handleBuyNow}
+                        disabled={product.stock === 0}
+                        style={{
+                          flex: 1,
+                          padding: '16px',
+                          backgroundColor: product.stock === 0 ? '#9ca3af' : '#007bff',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          cursor: product.stock === 0 ? 'not-allowed' : 'pointer',
+                          opacity: product.stock === 0 ? 0.6 : 1,
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        바로 구매
+                      </button>
+                      
+                      <div style={{ flex: 1 }}>
+                        <ReservationAwareAddToCartButton
+                          productId={product.id}
+                          price={parseInt(product.price.replace(/[^0-9]/g, '')) || 0}
+                          onAddToCart={handleAddToCart}
+                        disabled={product.stock === 0}
+                      >
+                        장바구니
+                        </ReservationAwareAddToCartButton>
+                      </div>
+                    </>
+                  )}
                 </>
+              ) : (
+                /* 비로그인 사용자용 로그인 유도 버튼들 */
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '12px',
+                  width: '100%',
+                  padding: '20px',
+                  backgroundColor: '#f8f9fa',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '8px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ 
+                    fontSize: '16px', 
+                    fontWeight: '600', 
+                    color: '#495057',
+                    marginBottom: '8px'
+                  }}>
+                    🔒 회원만 구매 가능한 상품입니다
+                  </div>
+                  <p style={{ 
+                    fontSize: '14px', 
+                    color: '#6c757d', 
+                    marginBottom: '15px',
+                    lineHeight: '1.4'
+                  }}>
+                    로그인하시면 특별 가격과 함께<br />
+                    상품을 구매하실 수 있습니다
+                  </p>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      onClick={() => router.push('/login')}
+                      style={{
+                        flex: 1,
+                        padding: '14px',
+                        backgroundColor: '#007bff',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#0056b3'}
+                      onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#007bff'}
+                    >
+                      로그인하기
+                    </button>
+                    <button
+                      onClick={() => router.push('/register')}
+                      style={{
+                        flex: 1,
+                        padding: '14px',
+                        backgroundColor: '#28a745',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#218838'}
+                      onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#28a745'}
+                    >
+                      회원가입
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           </div>

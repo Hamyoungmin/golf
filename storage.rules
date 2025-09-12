@@ -97,5 +97,90 @@ service firebase.storage {
       allow read, write: if true;
     }
     
+    // ============== 가격 보호 및 보안 관련 파일 ==============
+    
+    // 💰 가격 관련 이미지/파일 (로그인 사용자만)
+    match /pricing/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // 🔒 가격 워터마크 이미지 (로그인 유도용)
+    match /priceProtection/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 📊 사용자 활동 로그 파일 (관리자만)
+    match /activityLogs/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if true; // 로그 자동 생성용
+    }
+    
+    // 🔍 검색 관련 파일 (키워드 매핑, 결과 캐시)
+    match /searchData/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if true; // 검색 결과 캐싱용
+    }
+    
+    // 👤 게스트 세션 파일 (임시 데이터)
+    match /guestData/{allPaths=**} {
+      allow read, write: if true;
+    }
+    
+    // 📈 변환 추적 이미지 (분석용)
+    match /conversionTracking/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+    
+    // 🧪 A/B 테스트 리소스
+    match /abTestAssets/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 🗺️ 히트맵 이미지 (클릭/조회 분석)
+    match /heatmaps/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+    
+    // 🚨 보안 이벤트 스크린샷 (의심스러운 활동)
+    match /securityEvents/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+    
+    // 📱 모바일 전용 가격 표시 이미지
+    match /mobilePricing/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // 🎯 사용자 세그먼트 관련 리소스
+    match /userSegments/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // 📊 실시간 대시보드 차트 이미지
+    match /realtimeCharts/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+    
+    // 🔍 검색 자동완성 데이터 파일
+    match /autocomplete/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 🏷️ 가격 태그 템플릿 이미지
+    match /priceTags/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
   }
 }

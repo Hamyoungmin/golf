@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { getProductReservationStatus } from '@/lib/productReservations';
 import { getProduct, getProductWishlistCount } from '@/lib/products';
 
@@ -18,7 +19,8 @@ interface ProductCardProps {
   category?: string;
 }
 
-const ProductCard = ({ product, category }: ProductCardProps) => {
+const ProductCard = ({ product }: ProductCardProps) => {
+  const { user } = useAuth(); // 로그인 상태 확인
   const [stock, setStock] = useState<number>(0);
   const [views, setViews] = useState<number>(0);
   const [wishlistCount, setWishlistCount] = useState<number>(0);
@@ -93,7 +95,17 @@ const ProductCard = ({ product, category }: ProductCardProps) => {
         </div>
         <div className="product-info">
           <h3 className="product-title">{product.name}</h3>
-          <p className="product-price">{product.price}</p>
+          <p className="product-price">
+            {user ? product.price : (
+              <span style={{ 
+                color: '#666', 
+                fontSize: '14px', 
+                fontStyle: 'italic'
+              }}>
+                🔒 로그인 후 가격 확인
+              </span>
+            )}
+          </p>
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 

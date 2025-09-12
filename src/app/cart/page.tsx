@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
@@ -18,15 +19,12 @@ export default function CartPage() {
   const { user } = useAuth();
   const { 
     cartItems, 
-    cartTotal, 
     updateCartItemQuantity, 
-    removeFromCart, 
-    clearCart,
+    removeFromCart,
     loading 
   } = useCart();
   const { settings } = useSettings();
   const { showAlert, AlertComponent } = useCustomAlert();
-  const [forceUpdate, setForceUpdate] = useState(0);
 
   const [cartItemsWithProducts, setCartItemsWithProducts] = useState<(CartItem & { product: Product })[]>([]);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -89,7 +87,6 @@ export default function CartPage() {
   useEffect(() => {
     const handleSettingsUpdate = (event: CustomEvent) => {
       console.log('🔄 CartPage: 설정 업데이트 감지 (배송비 재계산)', event.detail);
-      setForceUpdate(prev => prev + 1);
     };
 
     window.addEventListener('settingsUpdated', handleSettingsUpdate as EventListener);
@@ -121,18 +118,6 @@ export default function CartPage() {
     });
   };
 
-  const handleClearCart = async () => {
-    showAlert('장바구니를 비우시겠습니까?', 'confirm', {
-      onConfirm: async () => {
-        try {
-          await clearCart();
-        } catch (error) {
-          console.error('장바구니 비우기 오류:', error);
-          showAlert('장바구니 비우기 중 오류가 발생했습니다.', 'error');
-        }
-      }
-    });
-  };
 
   const handleSelectItem = (productId: string) => {
     setSelectedItems(prev => 
@@ -419,9 +404,11 @@ export default function CartPage() {
                     <div style={{ flexShrink: 0 }}>
                       <Link href={`/products/${item.productId}`}>
                         {item.product.images[0] ? (
-                          <img
+                          <Image
                             src={item.product.images[0]}
                             alt={item.product.name}
+                            width={80}
+                            height={80}
                             style={{ 
                               width: '80px', 
                               height: '80px', 

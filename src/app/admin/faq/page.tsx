@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 // 사용하지 않는 아이콘들 제거
 import { useFAQ, FAQItem } from '@/contexts/FAQContext';
 
@@ -18,6 +19,7 @@ export default function FAQPage() {
   const [showViewsModal, setShowViewsModal] = useState(false);
   const [editingViewsFaqId, setEditingViewsFaqId] = useState<string | null>(null);
   const [newViewsCount, setNewViewsCount] = useState('');
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     category: '주문/결제',
     question: '',
@@ -805,14 +807,17 @@ export default function FAQPage() {
                 }}>
                   {imagePreview ? (
                     <div>
-                      <img 
+                      <Image 
                         src={imagePreview} 
                         alt="미리보기" 
+                        width={400}
+                        height={200}
                         style={{ 
                           maxWidth: '100%', 
                           maxHeight: '200px', 
                           borderRadius: '4px',
-                          marginBottom: '10px'
+                          marginBottom: '10px',
+                          objectFit: 'contain'
                         }} 
                       />
                       <div>
@@ -1521,14 +1526,17 @@ export default function FAQPage() {
                 </p>
                 {faq.imageUrl && (
                   <div style={{ marginTop: '10px' }}>
-                    <img 
+                    <Image 
                       src={faq.imageUrl} 
                       alt="FAQ 이미지" 
+                      width={400}
+                      height={200}
                       style={{ 
                         maxWidth: '100%', 
                         maxHeight: '200px', 
                         borderRadius: '4px',
-                        border: '1px solid #e0e0e0'
+                        border: '1px solid #e0e0e0',
+                        objectFit: 'contain'
                       }} 
                     />
                   </div>

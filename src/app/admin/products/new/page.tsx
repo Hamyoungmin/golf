@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { addProduct } from '@/lib/products';
 import { uploadMultipleProductImages, formatFileSize, isValidImageFile } from '@/lib/imageUpload';
-import { validatePrice, formatPriceInput, unformatPrice } from '@/utils/priceUtils';
+import { unformatPrice } from '@/utils/priceUtils';
 import { Category, Brand, CategoryPageMap } from '@/types';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 export default function AdminProductCreatePage() {
   const router = useRouter();
@@ -472,7 +472,8 @@ export default function AdminProductCreatePage() {
   };
 
   const handleSpecificationRemove = (key: string) => {
-    const { [key]: _, ...rest } = formData.specifications;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { [key]: removed, ...rest } = formData.specifications;
     setFormData({ ...formData, specifications: rest });
   };
 
@@ -1264,16 +1265,18 @@ export default function AdminProductCreatePage() {
                           justifyContent: 'center',
                           overflow: 'hidden'
                         }}>
-                          <img 
-                            src={URL.createObjectURL(file)}
-                            alt={file.name}
-                            style={{
-                              maxWidth: '100%',
-                              maxHeight: '100%',
-                              objectFit: 'cover',
-                              borderRadius: '4px'
-                            }}
-                          />
+                        <Image 
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          width={200}
+                          height={120}
+                          style={{
+                            maxWidth: '100%',
+                            maxHeight: '100%',
+                            objectFit: 'cover',
+                            borderRadius: '4px'
+                          }}
+                        />
                         </div>
                         
                         {/* 파일 정보 */}
@@ -1390,9 +1393,11 @@ export default function AdminProductCreatePage() {
                     }}
                   />
                     {url && (
-                      <img 
+                      <Image 
                         src={url} 
                         alt="미리보기" 
+                        width={40}
+                        height={40}
                         style={{ 
                           width: '40px', 
                           height: '40px', 

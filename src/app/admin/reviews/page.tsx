@@ -74,7 +74,7 @@ export default function ReviewsPage() {
   // 데이터 로드
   useEffect(() => {
     loadReviews();
-  }, [loadReviews]);
+  }, []);
 
   const loadReviews = useCallback(async () => {
     setLoading(true);

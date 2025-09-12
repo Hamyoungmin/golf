@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { auth, db, doc, getDoc, setDoc } from '@/lib/firebase';
 import { onAuthStateChanged, signOut as firebaseSignOut, User as FirebaseUser } from 'firebase/auth';
 import { User as UserType } from '@/types';
@@ -62,9 +62,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ];
 
   // 관리자 권한 확인 - 특정 이메일 목록만 관리자로 인정
-  const checkAdminRole = async (email: string) => {
+  const checkAdminRole = useCallback(async (email: string) => {
     return ADMIN_EMAILS.includes(email);
-  };
+  }, [ADMIN_EMAILS]);
 
   // 사용자 데이터 업데이트
   const updateUserData = async (data: Partial<UserType>) => {
@@ -135,7 +135,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [checkAdminRole]);
 
   const value = {
     user,

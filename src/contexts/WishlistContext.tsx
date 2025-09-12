@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { 
   getUserWishlist, 
@@ -33,7 +33,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
 
   // 위시리스트 데이터 로드
-  const loadWishlist = async () => {
+  const loadWishlist = useCallback(async () => {
     if (!user) {
       setWishlistItems([]);
       setWishlistProductIds([]);
@@ -50,12 +50,12 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   // 사용자 변경 시 위시리스트 로드
   useEffect(() => {
     loadWishlist();
-  }, [user]);
+  }, [loadWishlist]);
 
   // 위시리스트에 상품 추가
   const addToWishlist = async (productId: string): Promise<boolean> => {

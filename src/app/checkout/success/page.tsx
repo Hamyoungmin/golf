@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getOrder } from '@/lib/orders';
 import { getPaymentByOrderId, updateBankTransferInfo } from '@/lib/payments';
@@ -9,7 +9,6 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { Order, PaymentInfo, BankTransferInfo } from '@/types';
 
 function CheckoutSuccessContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
   const { settings } = useSettings();
@@ -90,7 +89,8 @@ function CheckoutSuccessContent() {
     setSubmitting(true);
 
     try {
-      const bankTransferInfo: BankTransferInfo = {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const bankTransferInfo: BankTransferInfo = {
         bankName: transferData.bankName,
         accountNumber: settings.payment.bankAccounts.find(acc => acc.bankName === transferData.bankName)?.accountNumber || '',
         accountHolder: settings.payment.bankAccounts.find(acc => acc.bankName === transferData.bankName)?.accountHolder || '',

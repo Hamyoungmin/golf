@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRecentlyViewed } from '@/contexts/RecentlyViewedContext';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -16,8 +17,7 @@ export default function RecentlyViewedPage() {
     recentlyViewedItems, 
     loading, 
     removeFromRecentlyViewed, 
-    removeMultipleFromRecentlyViewed,
-    clearRecentlyViewed
+    removeMultipleFromRecentlyViewed
   } = useRecentlyViewed();
   const { addToWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
@@ -283,9 +283,11 @@ export default function RecentlyViewedPage() {
                     <div style={{ flexShrink: 0 }}>
                       <Link href={`/products/${product.id}`}>
                         {product.images[0] ? (
-                          <img
+                          <Image
                             src={product.images[0]}
                             alt={product.name}
+                            width={80}
+                            height={80}
                             style={{ 
                               width: '80px', 
                               height: '80px', 

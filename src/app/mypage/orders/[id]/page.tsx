@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { getOrder, getOrderStatusText, getOrderStatusColor } from '@/lib/orders';
+import { getOrder, getOrderStatusText } from '@/lib/orders';
 import { useSettings } from '@/contexts/SettingsContext';
 
 import { Order } from '@/types';

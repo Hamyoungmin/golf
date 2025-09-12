@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useFAQ } from '@/contexts/FAQContext';
 
 export default function MyPageFAQPage() {
@@ -284,15 +285,18 @@ export default function MyPageFAQPage() {
                         </div>
                         {faq.imageUrl && (
                           <div style={{ marginTop: '10px' }}>
-                            <img 
+                            <Image 
                               src={faq.imageUrl} 
                               alt="FAQ 이미지" 
+                              width={400}
+                              height={200}
                               style={{ 
                                 maxWidth: '100%', 
                                 height: 'auto',
                                 maxHeight: '200px',
                                 borderRadius: '4px',
-                                border: '1px solid #e0e0e0'
+                                border: '1px solid #e0e0e0',
+                                objectFit: 'contain'
                               }}
                             />
                           </div>

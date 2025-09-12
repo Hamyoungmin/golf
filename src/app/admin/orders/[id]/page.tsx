@@ -28,40 +28,6 @@ export default function AdminOrderDetailPage() {
   const [trackingNumber, setTrackingNumber] = useState('');
   const [orderNote, setOrderNote] = useState('');
 
-  useEffect(() => {
-    fetchOrderDetails();
-  }, [orderId, fetchOrderDetails]);
-
-  // 🔥 상품 정보 실시간 구독 설정
-  useEffect(() => {
-    if (!order?.items || !db) return;
-
-    const unsubscribeFunctions: (() => void)[] = [];
-
-    order.items.forEach(item => {
-      const productRef = doc(collection(db!, 'products'), item.productId);
-      const unsubscribe = onSnapshot(productRef, (snapshot) => {
-        if (snapshot.exists()) {
-          const updatedProduct = { id: snapshot.id, ...snapshot.data() } as Product;
-          console.log('🔥 상품 정보 실시간 업데이트:', updatedProduct.name, updatedProduct.productCode);
-          
-          setProducts(prev => ({
-            ...prev,
-            [item.productId]: updatedProduct
-          }));
-        }
-      }, (error) => {
-        console.error('상품 정보 실시간 구독 오류:', error);
-      });
-
-      unsubscribeFunctions.push(unsubscribe);
-    });
-
-    return () => {
-      unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
-    };
-  }, [order?.items]);
-
   const fetchOrderDetails = useCallback(async () => {
     try {
       setLoading(true);
@@ -97,6 +63,40 @@ export default function AdminOrderDetailPage() {
       setLoading(false);
     }
   }, [orderId, router]);
+
+  useEffect(() => {
+    fetchOrderDetails();
+  }, [fetchOrderDetails]);
+
+  // 🔥 상품 정보 실시간 구독 설정
+  useEffect(() => {
+    if (!order?.items || !db) return;
+
+    const unsubscribeFunctions: (() => void)[] = [];
+
+    order.items.forEach(item => {
+      const productRef = doc(collection(db!, 'products'), item.productId);
+      const unsubscribe = onSnapshot(productRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const updatedProduct = { id: snapshot.id, ...snapshot.data() } as Product;
+          console.log('🔥 상품 정보 실시간 업데이트:', updatedProduct.name, updatedProduct.productCode);
+          
+          setProducts(prev => ({
+            ...prev,
+            [item.productId]: updatedProduct
+          }));
+        }
+      }, (error) => {
+        console.error('상품 정보 실시간 구독 오류:', error);
+      });
+
+      unsubscribeFunctions.push(unsubscribe);
+    });
+
+    return () => {
+      unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
+    };
+  }, [order?.items]);
 
   const handleStatusChange = async (newStatus: OrderStatus) => {
     if (!order) return;

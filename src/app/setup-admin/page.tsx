@@ -57,37 +57,6 @@ export default function SetupAdminPage() {
     }
   };
 
-  // exam222838@gmail.com 자동 관리자 설정
-  const setupExamAdmin = async () => {
-    try {
-      const { doc, setDoc, updateDoc } = await import('firebase/firestore');
-      const { db } = await import('@/lib/firebase');
-      
-      const email = 'exam222838@gmail.com';
-      const userUID = 'VvVT4LM1pMbo1Vo3j3iLaS80OXv1'; // Firebase Console에서 확인한 UID
-      
-      // 1. admins 컬렉션에 추가
-      await setDoc(doc(db, 'admins', email), {
-        email: email,
-        role: 'admin',
-        createdAt: new Date()
-      });
-      
-      // 2. users 컬렉션에서 권한 부여
-      await updateDoc(doc(db, 'users', userUID), {
-        role: 'admin',
-        status: 'approved'
-      });
-      
-      alert('✅ exam222838@gmail.com 관리자 권한 설정 완료! 다시 로그인해주세요.');
-      
-    } catch (error) {
-      console.error('관리자 설정 실패:', error);
-      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
-      alert('❌ 관리자 설정에 실패했습니다: ' + errorMessage);
-    }
-  };
-
   return (
     <div className="container" style={{ maxWidth: '900px', margin: '50px auto', padding: '20px' }}>
       <div style={{ 
