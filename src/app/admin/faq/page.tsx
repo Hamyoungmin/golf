@@ -19,7 +19,7 @@ export default function FAQPage() {
   const [showViewsModal, setShowViewsModal] = useState(false);
   const [editingViewsFaqId, setEditingViewsFaqId] = useState<string | null>(null);
   const [newViewsCount, setNewViewsCount] = useState('');
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [, setSelectedImage] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     category: '주문/결제',
     question: '',

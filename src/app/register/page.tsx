@@ -103,9 +103,13 @@ export default function Register() {
 
 
       // 1. Firebase 회원가입
+      if (!auth) {
+        throw new Error('Firebase 인증이 초기화되지 않았습니다');
+      }
+      
       const userCredential = await createUserWithEmailAndPassword(
-        auth, 
-        formData.email, 
+        auth,
+        formData.email,
         formData.password
       );
       const user = userCredential.user;
@@ -121,6 +125,10 @@ export default function Register() {
       );
       
       // 3. 사용자 프로필 생성 (승인 대기 상태)
+      if (!db) {
+        throw new Error('Firebase Firestore가 초기화되지 않았습니다');
+      }
+      
       const userData: Partial<User> = {
         uid: user.uid,
         email: formData.email,
@@ -140,7 +148,9 @@ export default function Register() {
       await setDoc(doc(db, 'users', user.uid), userData);
       
       // 승인 대기 상태 보장을 위해 즉시 로그아웃
-      await auth.signOut();
+      if (auth) {
+        await auth.signOut();
+      }
       console.log('🚪 승인 대기를 위해 자동 로그아웃');
       
       if (process.env.NODE_ENV === 'development') {

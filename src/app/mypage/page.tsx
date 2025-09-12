@@ -36,6 +36,11 @@ export default function MyPage() {
     setLoading(true);
     
     // 🔥 사용자 정보 실시간 구독
+    if (!db) {
+      console.warn('Firebase가 초기화되지 않았습니다');
+      return;
+    }
+    
     const userRef = doc(db, 'users', user.uid);
     const unsubscribeUser = onSnapshot(userRef, (snapshot) => {
       if (snapshot.exists()) {

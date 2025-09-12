@@ -45,7 +45,11 @@ export default function ReviewsPage() {
   });
 
   // 알림창 헬퍼 함수들
-  const showAlert = (
+  const closeAlert = useCallback(() => {
+    setAlert(prev => ({ ...prev, isOpen: false }));
+  }, []);
+
+  const showAlert = useCallback((
     type: 'success' | 'error' | 'warning' | 'info' | 'confirm',
     message: string,
     title?: string,
@@ -62,11 +66,7 @@ export default function ReviewsPage() {
       confirmText: type === 'confirm' ? '확인' : '확인',
       cancelText: '취소'
     });
-  };
-
-  const closeAlert = () => {
-    setAlert(prev => ({ ...prev, isOpen: false }));
-  };
+  }, [closeAlert]);
 
 
 
