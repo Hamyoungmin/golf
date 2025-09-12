@@ -74,6 +74,10 @@ export async function POST(request: NextRequest) {
     const imagePath = `products/${fileName}`;
     console.log('📤 Storage 경로:', imagePath);
     
+    if (!storage) {
+      throw new Error('Firebase Storage가 초기화되지 않았습니다');
+    }
+    
     const imageRef = ref(storage, imagePath);
     console.log('📤 Storage 레퍼런스 생성 완료');
     
