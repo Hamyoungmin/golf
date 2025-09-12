@@ -111,8 +111,9 @@ export const overrideAlert = () => {
     const originalConfirm = window.confirm;
     const originalPrompt = window.prompt;
     
-    window.alert = (message: string | any) => {
-      const msg = typeof message === 'string' ? message : String(message);
+    window.alert = (message: string | unknown) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const msg = typeof message === 'string' ? message : String(message as any);
       
       // 로그인 관련 메시지들을 감지하여 적절한 타입 설정
       if (msg.includes('로그인이 필요') || 

@@ -80,13 +80,17 @@ export function validatePrice(priceInput: string): { isValid: boolean; message?:
  * @param imagePath 이미지 경로 (optional)
  * @returns 포맷된 상품 배열
  */
-export function formatProductsForDisplay(products: any[], imagePath?: string) {
-  return products.map(product => ({
-    id: product.id,
-    name: product.name || '상품명 없음',
-    price: formatPrice(product.price),
-    image: product.images?.[0] || (imagePath ? imagePath : '/placeholder.jpg')
-  }));
+export function formatProductsForDisplay(products: unknown[], imagePath?: string) {
+  return products.map(product => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prod = product as any;
+    return {
+      id: prod.id,
+      name: prod.name || '상품명 없음',
+      price: formatPrice(prod.price),
+      image: prod.images?.[0] || (imagePath ? imagePath : '/placeholder.jpg')
+    };
+  });
 }
 
 /**

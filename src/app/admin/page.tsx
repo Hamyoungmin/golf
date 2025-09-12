@@ -99,7 +99,7 @@ export default function AdminDashboard() {
   });
   const [popularProducts, setPopularProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [seedLoading, setSeedLoading] = useState(false);
+  // const [seedLoading, setSeedLoading] = useState(false); // 향후 사용 예정
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -123,7 +123,7 @@ export default function AdminDashboard() {
     fetchStats();
   }, []);
 
-  const handleSeedData = async () => {
+  // const handleSeedData = async () => { // 향후 사용 예정
     setSeedLoading(true);
     try {
       const response = await fetch('/api/seed', {
@@ -144,7 +144,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteAllProducts = async () => {
+  // const handleDeleteAllProducts = async () => { // 향후 사용 예정
     if (!confirm('정말로 모든 상품 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       return;
     }

@@ -479,10 +479,11 @@ export function subscribeToReviewStats(callback: (stats: ReviewStats) => void): 
 }
 
 // Additional functions for compatibility
-export async function addReview(reviewData: any): Promise<void> {
+export async function addReview(reviewData: unknown): Promise<void> {
   try {
     await addDoc(collection(db, 'reviews'), {
-      ...reviewData,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...(reviewData as any),
       createdAt: new Date(),
       status: 'approved' // 즉시 승인 상태로 변경
     });

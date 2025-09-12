@@ -23,9 +23,11 @@ export function isNetworkError(error: Error | unknown): boolean {
 /**
  * 할당량 초과 에러인지 확인
  */
-export function isQuotaExceededError(error: any): boolean {
-  return error?.code === 'resource-exhausted' ||
-         error?.message?.includes?.('Quota exceeded');
+export function isQuotaExceededError(error: Error | unknown): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (error as any)?.code === 'resource-exhausted' ||
+         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         (error as any)?.message?.includes?.('Quota exceeded');
 }
 
 /**
@@ -62,7 +64,7 @@ export const safeLocalStorage = {
     }
   },
   
-  set: (key: string, value: any) => {
+  set: (key: string, value: unknown) => {
     if (typeof window === 'undefined') return false;
     try {
       localStorage.setItem(key, JSON.stringify(value));
@@ -88,7 +90,7 @@ export const safeLocalStorage = {
 /**
  * 배열 안전성 검사
  */
-export function ensureArray<T>(value: any): T[] {
+export function ensureArray<T>(value: unknown): T[] {
   if (Array.isArray(value)) {
     return value;
   }
@@ -104,7 +106,7 @@ export async function retryOperation<T>(
   maxRetries: number = 3,
   delay: number = 1000
 ): Promise<T> {
-  let lastError: any;
+  let lastError: unknown;
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {

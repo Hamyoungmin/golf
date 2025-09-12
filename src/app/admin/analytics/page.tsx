@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { 
-  ChartBarIcon,
-  CurrencyDollarIcon,
-  ShoppingBagIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon
-} from '@heroicons/react/24/outline';
-import StatsCard from '@/components/admin/StatsCard';
+import React, { useState, useEffect, useCallback } from 'react';
+// 통계 아이콘들과 StatsCard는 향후 사용 예정
+// import { 
+//   ChartBarIcon,
+//   CurrencyDollarIcon,
+//   ShoppingBagIcon,
+//   ArrowTrendingUpIcon,
+//   ArrowTrendingDownIcon
+// } from '@heroicons/react/24/outline';
+// import StatsCard from '@/components/admin/StatsCard';
 import { calculateSalesAnalytics, SalesAnalytics } from '@/lib/analytics';
 
 export default function AnalyticsPage() {
@@ -26,16 +27,10 @@ export default function AnalyticsPage() {
   });
   const [loading, setLoading] = useState(true);
 
-  // 데이터 로드
-  useEffect(() => {
-    loadAnalyticsData();
-  }, [selectedPeriod, loadAnalyticsData]);
-
-  const loadAnalyticsData = async () => {
+  const loadAnalyticsData = useCallback(async () => {
     setLoading(true);
     try {
       let startDate: Date | undefined;
-      let endDate: Date | undefined;
 
       // 기간별 날짜 설정
       const now = new Date();
@@ -70,7 +65,12 @@ export default function AnalyticsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedPeriod]);
+
+  // 데이터 로드
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [selectedPeriod, loadAnalyticsData]);
 
   const periods = [
     { value: 'day', label: '일별' },

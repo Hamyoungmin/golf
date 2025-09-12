@@ -316,7 +316,7 @@ export default function FAQPage() {
             alert('FAQ 가져오기 중 오류가 발생했습니다.');
           }
         }
-      } catch (error) {
+      } catch {
         alert('파일을 읽는 중 오류가 발생했습니다.');
       }
     };
@@ -1105,7 +1105,7 @@ export default function FAQPage() {
             </label>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e.target.value as 'order' | 'views' | 'createdAt' | 'updatedAt' | 'category')}
               style={{
                 width: '100%',
                 padding: '8px',
@@ -1135,7 +1135,7 @@ export default function FAQPage() {
             </label>
             <select
               value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as any)}
+              onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
               style={{
                 width: '100%',
                 padding: '8px',

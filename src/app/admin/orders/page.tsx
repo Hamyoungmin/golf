@@ -23,7 +23,7 @@ export default function AdminOrdersPage() {
     fetchOrders();
   }, [selectedStatus]);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
       const orderList = await getAllOrders(50, undefined, selectedStatus || undefined);

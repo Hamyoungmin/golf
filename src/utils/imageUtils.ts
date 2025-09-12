@@ -71,10 +71,12 @@ export function getCategoryFromPath(pagePath: string): string {
  * @param pagePath 현재 페이지 경로 (카테고리 추출용)
  * @returns 이미지 URL
  */
-export function getProductImageUrl(product: any, pagePath?: string): string {
+export function getProductImageUrl(product: unknown, pagePath?: string): string {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const prod = product as any;
   // 1. 실제 상품 이미지가 있으면 첫 번째 이미지 사용
-  if (product.images && product.images.length > 0 && product.images[0]) {
-    return product.images[0];
+  if (prod.images && prod.images.length > 0 && prod.images[0]) {
+    return prod.images[0];
   }
   
   // 2. 페이지 경로에서 카테고리 추출
@@ -112,13 +114,17 @@ export function getProductImageUrl(product: any, pagePath?: string): string {
  * @param pagePath 현재 페이지 경로
  * @returns 포맷된 상품 배열
  */
-export function formatProductsForList(products: any[], pagePath?: string) {
-  return products.map(product => ({
-    id: product.id,
-    name: product.name,
-    price: `₩${Number(product.price).toLocaleString()}`,
-    image: getProductImageUrl(product, pagePath)
-  }));
+export function formatProductsForList(products: unknown[], pagePath?: string) {
+  return products.map(product => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prod = product as any;
+    return {
+      id: prod.id,
+      name: prod.name,
+      price: `₩${Number(prod.price).toLocaleString()}`,
+      image: getProductImageUrl(product, pagePath)
+    };
+  });
 }
 
 /**
@@ -158,10 +164,12 @@ export function getVariedPlaceholder(category: string, productId: string | numbe
  * @param product 상품 객체
  * @returns 이미지 URL
  */
-export function getAdminProductImage(product: any): string {
+export function getAdminProductImage(product: unknown): string {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const prod = product as any;
   // 1. 실제 업로드된 이미지가 있으면 사용
-  if (product.images && product.images.length > 0 && product.images[0]) {
-    return product.images[0];
+  if (prod.images && prod.images.length > 0 && prod.images[0]) {
+    return prod.images[0];
   }
   
   // 2. 브랜드별로 다른 이미지 사용
