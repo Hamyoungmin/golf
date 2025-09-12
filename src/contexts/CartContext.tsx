@@ -60,7 +60,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       if (user) {
         setLoading(true);
         try {
-          const syncedCart = await syncCartOnLogin(user.uid);
+          const syncedCart = await syncCartOnLogin();
           setCartItems(syncedCart);
         } catch (error) {
           console.error('장바구니 동기화 실패:', error);
