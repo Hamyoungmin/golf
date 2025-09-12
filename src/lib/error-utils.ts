@@ -5,7 +5,7 @@
 /**
  * Firestore 에러인지 확인
  */
-export function isFirestoreError(error: any): boolean {
+export function isFirestoreError(error: Error | unknown): boolean {
   return error?.code?.startsWith?.('firestore/') || 
          error?.message?.includes?.('Firestore') ||
          error?.code === 'resource-exhausted';
@@ -14,7 +14,7 @@ export function isFirestoreError(error: any): boolean {
 /**
  * 네트워크 에러인지 확인
  */
-export function isNetworkError(error: any): boolean {
+export function isNetworkError(error: Error | unknown): boolean {
   return error?.code === 'unavailable' || 
          error?.message?.includes?.('network') ||
          error?.message?.includes?.('fetch');
@@ -31,7 +31,7 @@ export function isQuotaExceededError(error: any): boolean {
 /**
  * 에러를 사용자 친화적인 메시지로 변환
  */
-export function getErrorMessage(error: any): string {
+export function getErrorMessage(error: Error | unknown): string {
   if (isQuotaExceededError(error)) {
     return '일시적으로 서비스 이용량이 많습니다. 잠시 후 다시 시도해주세요.';
   }

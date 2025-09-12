@@ -69,8 +69,8 @@ export default function Register() {
   // Firebase Storage에 파일 업로드
   const uploadFile = async (file: File, path: string): Promise<string> => {
     try {
-      const { uploadImage } = await import('@/lib/imageUpload');
-      return await uploadImage(file, path);
+      const { uploadImageDirect } = await import('@/lib/imageUpload');
+      return await uploadImageDirect(file, path);
     } catch (error) {
       console.error('파일 업로드 실패:', error);
       throw new Error('파일 업로드에 실패했습니다.');

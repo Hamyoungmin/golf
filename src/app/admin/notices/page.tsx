@@ -1,18 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  SpeakerWaveIcon,
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  EyeIcon
-} from '@heroicons/react/24/outline';
+// 사용하지 않는 아이콘들 제거
 import { Notice } from '@/types';
 import { 
   getNotices, 
   createNotice, 
-  updateNotice, 
   deleteNotice, 
   toggleNoticeFixed, 
   toggleNoticeVisibility,

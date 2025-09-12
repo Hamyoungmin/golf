@@ -42,7 +42,7 @@ export async function getAllUsers(): Promise<User[]> {
     const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
     
-    const users = querySnapshot.docs.map((doc: any) => {
+    const users = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         ...data,
@@ -123,7 +123,7 @@ export async function getPendingUsers(): Promise<User[]> {
     );
     const querySnapshot = await getDocs(q);
     
-    const users = querySnapshot.docs.map((doc: any) => {
+    const users = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         ...data,

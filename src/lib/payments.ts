@@ -54,7 +54,7 @@ export async function getPendingPayments(limit?: number): Promise<Partial<Paymen
     
     const querySnapshot = await getDocs(q);
     
-    const payments = querySnapshot.docs.map((doc: any) => {
+    const payments = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         ...data,
@@ -89,7 +89,7 @@ export async function getAllPayments(limit?: number): Promise<Partial<PaymentInf
     
     const querySnapshot = await getDocs(q);
     
-    const payments = querySnapshot.docs.map((doc: any) => {
+    const payments = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         ...data,

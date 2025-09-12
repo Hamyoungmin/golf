@@ -22,7 +22,7 @@ export async function getProducts(
   filter?: ProductFilter,
   sort?: ProductSort,
   limit?: number,
-  startAfterDoc?: any
+  startAfterDoc?: DocumentSnapshot
 ): Promise<Product[]> {
   try {
     let q = query(collection(db, 'products'));
@@ -81,7 +81,7 @@ export async function getProducts(
     }
 
     const querySnapshot = await getDocs(q);
-    const products = querySnapshot.docs.map((doc: any) => {
+    const products = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         ...data,
@@ -216,7 +216,7 @@ export async function getProductCountByCategory(): Promise<Record<string, number
     const querySnapshot = await getDocs(collection(db, 'products'));
     const categoryCounts: Record<string, number> = {};
 
-    querySnapshot.docs.forEach((doc: any) => {
+    querySnapshot.docs.forEach((doc) => {
       const data = doc.data();
       const category = data.category;
       categoryCounts[category] = (categoryCounts[category] || 0) + 1;
@@ -386,7 +386,7 @@ export async function getPopularProducts(limit: number = 8): Promise<Product[]> 
     );
 
     const querySnapshot = await getDocs(q);
-    let products = querySnapshot.docs.map((doc: any) => {
+    let products = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         ...data,
@@ -417,13 +417,13 @@ export async function getProductsForPage(
 ): Promise<Product[]> {
   try {
     // 먼저 targetPages 필터만으로 쿼리 (인덱스 에러 방지)
-    let q = query(
+    const q = query(
       collection(db, 'products'),
       where('targetPages', 'array-contains', pagePath)
     );
 
     const querySnapshot = await getDocs(q);
-    let products = querySnapshot.docs.map((doc: any) => {
+    let products = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         ...data,

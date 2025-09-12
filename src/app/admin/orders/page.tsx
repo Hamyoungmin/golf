@@ -2,17 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  MagnifyingGlassIcon,
-  CalendarIcon,
-  DocumentTextIcon,
-  ExclamationCircleIcon 
-} from '@heroicons/react/24/outline';
+// 사용하지 않는 아이콘들 제거
 import DataTable from '@/components/admin/DataTable';
 import { getAllOrders, getOrderStatusText, getOrderStatusColor } from '@/lib/orders';
-import { getPendingPayments } from '@/lib/payments';
 import { getUserData } from '@/lib/users';
-import { Order, OrderStatus, User, PaymentInfo } from '@/types';
+import { Order, OrderStatus, User } from '@/types';
 
 export default function AdminOrdersPage() {
   const router = useRouter();

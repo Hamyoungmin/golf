@@ -2,11 +2,11 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db, doc, getDoc, setDoc } from '@/lib/firebase';
-import { onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut as firebaseSignOut, User as FirebaseUser } from 'firebase/auth';
 import { User as UserType } from '@/types';
 
 interface AuthContextType {
-  user: any | null;
+  user: FirebaseUser | null;
   userData: UserType | null;
   loading: boolean;
   isAdmin: boolean;
@@ -30,7 +30,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userData, setUserData] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -113,7 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: any) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       setUser(firebaseUser);
       
       if (firebaseUser) {

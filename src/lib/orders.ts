@@ -30,7 +30,7 @@ export async function getUserOrders(userId: string, limit?: number): Promise<Ord
     }
 
     const querySnapshot = await getDocs(q);
-    const orders = querySnapshot.docs.map((doc: any) => {
+    const orders = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         ...data,
@@ -49,7 +49,7 @@ export async function getUserOrders(userId: string, limit?: number): Promise<Ord
 }
 
 // 모든 주문 목록 가져오기 (관리자용)
-export async function getAllOrders(limit?: number, startAfter?: any, status?: OrderStatus): Promise<Order[]> {
+export async function getAllOrders(limit?: number, startAfter?: DocumentSnapshot, status?: OrderStatus): Promise<Order[]> {
   try {
     let q = query(collection(db, 'orders'));
 
@@ -65,7 +65,7 @@ export async function getAllOrders(limit?: number, startAfter?: any, status?: Or
     }
 
     const querySnapshot = await getDocs(q);
-    const orders = querySnapshot.docs.map((doc: any) => {
+    const orders = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         ...data,

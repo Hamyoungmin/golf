@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  UsersIcon 
-} from '@heroicons/react/24/outline';
+// 사용하지 않는 아이콘 제거
 import { 
   db,
   collection, 
@@ -60,7 +58,7 @@ export default function UsersManagement() {
       );
       
       const querySnapshot = await getDocs(q);
-      const usersData = querySnapshot.docs.map((doc: any) => ({
+      const usersData = querySnapshot.docs.map((doc) => ({
         ...doc.data(),
         uid: doc.id,
         createdAt: doc.data().createdAt?.toDate(),

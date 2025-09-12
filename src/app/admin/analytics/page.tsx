@@ -29,7 +29,7 @@ export default function AnalyticsPage() {
   // 데이터 로드
   useEffect(() => {
     loadAnalyticsData();
-  }, [selectedPeriod]);
+  }, [selectedPeriod, loadAnalyticsData]);
 
   const loadAnalyticsData = async () => {
     setLoading(true);
@@ -61,7 +61,7 @@ export default function AnalyticsPage() {
           startDate.setDate(now.getDate() - 30);
       }
       
-      endDate = new Date();
+      const endDate = new Date();
 
       const data = await calculateSalesAnalytics(startDate, endDate);
       setAnalyticsData(data);

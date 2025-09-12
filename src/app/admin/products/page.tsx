@@ -3,13 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { 
-  PlusIcon, 
-  PencilIcon, 
-  TrashIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon
-} from '@heroicons/react/24/outline';
 import DataTable from '@/components/admin/DataTable';
 import { getProducts, deleteProduct, migrateProductsWithNewFields } from '@/lib/products';
 import { formatPrice as safeFormatPrice } from '@/utils/priceUtils';
@@ -24,7 +17,6 @@ export default function AdminProductsPage() {
   const [filter, setFilter] = useState<ProductFilter>({});
   const [showFilter, setShowFilter] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [migrating, setMigrating] = useState(false);
 
   const categories: Category[] = ['drivers', 'irons', 'putters', 'wedges', 'woods', 'utilities', 'heads-parts'];
@@ -40,8 +32,6 @@ export default function AdminProductsPage() {
       // 제한 해제: 모든 상품 가져오기 (관리자는 전체 목록 필요)
       const productList = await getProducts(filter, undefined);
       setProducts(productList);
-      // 페이지네이션을 위한 전체 페이지 수 계산 (페이지당 20개)
-      setTotalPages(Math.ceil(productList.length / 20));
     } catch (error) {
       console.error('상품 목록 로딩 실패:', error);
     } finally {
@@ -174,11 +164,22 @@ export default function AdminProductsPage() {
     },
   ];
 
+  // 검색 필터링
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.brand.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // 페이지네이션 계산
+  const productsPerPage = 20;
+  const totalFilteredProducts = filteredProducts.length;
+  const totalPagesCalculated = Math.ceil(totalFilteredProducts / productsPerPage);
+  
+  // 현재 페이지의 상품들만 가져오기
+  const startIndex = (currentPage - 1) * productsPerPage;
+  const endIndex = startIndex + productsPerPage;
+  const currentPageProducts = filteredProducts.slice(startIndex, endIndex);
 
   return (
     <div className="container" style={{ maxWidth: '1200px', margin: '50px auto', padding: '20px' }}>
@@ -254,19 +255,22 @@ export default function AdminProductsPage() {
         </h3>
         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
           <div style={{ flex: 1, position: 'relative' }}>
-            <input
-              type="text"
-              placeholder="상품명, 카테고리, 브랜드로 검색..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '14px'
-              }}
-            />
+              <input
+                type="text"
+                placeholder="상품명, 카테고리, 브랜드로 검색..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1); // 검색 시 첫 페이지로 이동
+                }}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
+              />
           </div>
           <button
             onClick={() => setShowFilter(!showFilter)}
@@ -305,7 +309,10 @@ export default function AdminProductsPage() {
               </label>
               <select
                 value={filter.category || ''}
-                onChange={(e) => setFilter({ ...filter, category: e.target.value as Category || undefined })}
+                onChange={(e) => {
+                  setFilter({ ...filter, category: e.target.value as Category || undefined });
+                  setCurrentPage(1); // 필터 변경 시 첫 페이지로 이동
+                }}
                 style={{
                   width: '100%',
                   padding: '10px',
@@ -331,7 +338,10 @@ export default function AdminProductsPage() {
               </label>
               <select
                 value={filter.brand || ''}
-                onChange={(e) => setFilter({ ...filter, brand: e.target.value as Brand || undefined })}
+                onChange={(e) => {
+                  setFilter({ ...filter, brand: e.target.value as Brand || undefined });
+                  setCurrentPage(1); // 필터 변경 시 첫 페이지로 이동
+                }}
                 style={{
                   width: '100%',
                   padding: '10px',
@@ -357,7 +367,10 @@ export default function AdminProductsPage() {
               </label>
               <select
                 value={filter.inStock === undefined ? '' : filter.inStock.toString()}
-                onChange={(e) => setFilter({ ...filter, inStock: e.target.value === '' ? undefined : e.target.value === 'true' })}
+                onChange={(e) => {
+                  setFilter({ ...filter, inStock: e.target.value === '' ? undefined : e.target.value === 'true' });
+                  setCurrentPage(1); // 필터 변경 시 첫 페이지로 이동
+                }}
                 style={{
                   width: '100%',
                   padding: '10px',
@@ -384,7 +397,12 @@ export default function AdminProductsPage() {
           borderBottom: '1px solid #e0e0e0',
           paddingBottom: '8px'
         }}>
-          상품 목록 ({filteredProducts.length}개)
+          상품 목록 ({totalFilteredProducts}개) 
+          {totalFilteredProducts > 0 && (
+            <span style={{ fontSize: '14px', color: '#666', fontWeight: 'normal' }}>
+              - {currentPage}페이지 / 총 {totalPagesCalculated}페이지
+            </span>
+          )}
         </h3>
         <div style={{ 
           border: '1px solid #ddd', 
@@ -392,10 +410,10 @@ export default function AdminProductsPage() {
           backgroundColor: '#fff'
         }}>
           <DataTable
-            data={filteredProducts}
+            data={currentPageProducts}
             columns={columns}
             loading={loading}
-            emptyMessage="등록된 상품이 없습니다."
+            emptyMessage={searchTerm ? `"${searchTerm}"에 대한 검색 결과가 없습니다.` : "등록된 상품이 없습니다."}
             actions={(product) => (
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
@@ -433,7 +451,7 @@ export default function AdminProductsPage() {
       </div>
 
       {/* 페이지네이션 */}
-      {totalPages > 1 && (
+      {totalPagesCalculated > 1 && (
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
           <div style={{ display: 'flex', gap: '5px' }}>
             <button
@@ -451,7 +469,7 @@ export default function AdminProductsPage() {
             >
               이전
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            {Array.from({ length: totalPagesCalculated }, (_, i) => i + 1).map((page) => (
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
@@ -469,16 +487,16 @@ export default function AdminProductsPage() {
               </button>
             ))}
             <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(Math.min(totalPagesCalculated, currentPage + 1))}
+              disabled={currentPage === totalPagesCalculated}
               style={{
                 padding: '8px 12px',
                 border: '1px solid #ddd',
                 borderRadius: '4px',
                 fontSize: '14px',
-                backgroundColor: currentPage === totalPages ? '#f5f5f5' : '#fff',
-                color: currentPage === totalPages ? '#999' : '#333',
-                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
+                backgroundColor: currentPage === totalPagesCalculated ? '#f5f5f5' : '#fff',
+                color: currentPage === totalPagesCalculated ? '#999' : '#333',
+                cursor: currentPage === totalPagesCalculated ? 'not-allowed' : 'pointer'
               }}
             >
               다음

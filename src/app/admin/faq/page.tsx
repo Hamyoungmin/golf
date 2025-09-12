@@ -1,14 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  QuestionMarkCircleIcon,
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  ChevronUpIcon,
-  ChevronDownIcon
-} from '@heroicons/react/24/outline';
+// 사용하지 않는 아이콘들 제거
 import { useFAQ, FAQItem } from '@/contexts/FAQContext';
 
 export default function FAQPage() {
@@ -16,7 +9,6 @@ export default function FAQPage() {
   
   const [showForm, setShowForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [editingFaq, setEditingFaq] = useState<FAQItem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -346,7 +338,7 @@ export default function FAQPage() {
     
     return categoryMatch && searchMatch;
   }).sort((a, b) => {
-    let aValue: any, bValue: any;
+    let aValue: string | number, bValue: string | number;
     
     switch (sortBy) {
       case 'order':

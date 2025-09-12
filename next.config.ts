@@ -44,11 +44,11 @@ const nextConfig: NextConfig = {
   },
   
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false, // 오류 확인을 위해 일시적으로 비활성화
   },
   
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false, // 오류 확인을 위해 일시적으로 비활성화
   },
   
   // 도메인 관련 환경 변수

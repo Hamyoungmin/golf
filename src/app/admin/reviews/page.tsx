@@ -1,14 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  StarIcon,
-  EyeIcon,
-  CheckIcon,
-  XMarkIcon,
-  ChatBubbleLeftIcon,
-  FlagIcon
-} from '@heroicons/react/24/outline';
+// 사용하지 않는 아이콘들 제거
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { Review, ReviewStats } from '@/types';
 import { 

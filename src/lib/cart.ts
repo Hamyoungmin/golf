@@ -108,7 +108,7 @@ export const addToCart = async (
     console.log('✅ [addToCart] 상품 예약 완료! reservationId:', reservationId);
 
     // 로컬 장바구니에서 현재 아이템들 가져오기
-    let cartItems = getLocalCart();
+    const cartItems = getLocalCart();
 
     // 기존 아이템이 있는지 확인
     const existingItemIndex = cartItems.findIndex(item => item.productId === productId);
