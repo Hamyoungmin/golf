@@ -21,7 +21,7 @@ export default function AdminProductsPage() {
   const [migrating, setMigrating] = useState(false);
 
   const categories: Category[] = ['drivers', 'irons', 'putters', 'wedges', 'woods', 'utilities', 'heads-parts'];
-  const brands: Brand[] = ['titleist', 'taylormade', 'callaway', 'honma', 'bridgestone', 'others'];
+  const brands: Brand[] = ['titleist', 'taylormade', 'callaway', 'honma', 'xxio', 'ping', 'bridgestone', 'others'];
 
   // 추가 검색 키워드 매핑
   const searchKeywordMap: Record<string, string[]> = {

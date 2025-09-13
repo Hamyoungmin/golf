@@ -207,7 +207,7 @@ export interface RecentlyViewed {
 
 // 카테고리 타입 정의
 export type Category = 'drivers' | 'irons' | 'putters' | 'wedges' | 'woods' | 'utilities' | 'heads-parts';
-export type Brand = 'titleist' | 'taylormade' | 'callaway' | 'honma' | 'xxio' | 'bridgestone' | 'others';
+export type Brand = 'titleist' | 'taylormade' | 'callaway' | 'honma' | 'xxio' | 'ping' | 'bridgestone' | 'others';
 
 // 검색 및 필터링 관련 타입
 export interface ProductFilter {

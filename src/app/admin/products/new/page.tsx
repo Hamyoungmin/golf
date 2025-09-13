@@ -170,7 +170,7 @@ export default function AdminProductCreatePage() {
     }
   };
 
-  const brands: Brand[] = ['titleist', 'taylormade', 'callaway', 'honma', 'bridgestone', 'others'];
+  const brands: Brand[] = ['titleist', 'taylormade', 'callaway', 'honma', 'xxio', 'ping', 'bridgestone', 'others'];
 
   // 모달 헬퍼 함수들
   const openModal = (
