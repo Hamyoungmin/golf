@@ -108,6 +108,20 @@ export default function AdminProductCreatePage() {
         { path: 'utilities/others', label: '기타 유틸리티' },
       ]
     },
+    irons: {
+      label: '아이언',
+      pages: [
+        { path: 'irons', label: '전체 아이언' },
+        { path: 'irons/titleist', label: '타이틀리스트 아이언' },
+        { path: 'irons/callaway', label: '캘러웨이 아이언' },
+        { path: 'irons/taylormade', label: '테일러메이드 아이언' },
+        { path: 'irons/honma', label: '혼마 아이언' },
+        { path: 'irons/xxio', label: '젝시오 아이언' },
+        { path: 'irons/bridgestone', label: '브리지스톤 아이언' },
+        { path: 'irons/ping', label: '핑 아이언' },
+        { path: 'irons/others', label: '기타 아이언' },
+      ]
+    },
     wedges: {
       label: '웨지',
       pages: [

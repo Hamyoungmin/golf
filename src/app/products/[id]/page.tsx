@@ -45,21 +45,12 @@ export default function ProductPage() {
           const productData = await getProductById(params.id);
           if (productData) {
             setProduct(productData);
-            // 재고에 따른 수량 초기화
-            setQuantity(productData.stock > 0 ? 1 : 0);
+            // 수량은 처음 로드할 때만 초기화 (사용자가 변경한 수량 유지)
+            setQuantity(prev => prev === 1 ? (productData.stock > 0 ? 1 : 0) : Math.min(prev, productData.stock));
             // 리뷰도 함께 가져오기
             const reviewsData = await getProductReviews(params.id);
             setReviews(reviewsData);
             
-            // 최근 본 상품에 추가 (사용자가 로그인되어 있을 때만)
-            if (user) {
-              try {
-                await addToRecentlyViewed(params.id);
-              } catch (error) {
-                console.warn('최근 본 상품 추가 실패:', error);
-                // 실패해도 페이지는 정상적으로 표시
-              }
-            }
 
             // 조회수 증가 (로그인 여부와 관계없이 항상 실행)
             try {
@@ -81,7 +72,22 @@ export default function ProductPage() {
     };
 
     fetchProduct();
-  }, [params.id, user, addToRecentlyViewed]);
+  }, [params.id]);
+
+  // 최근 본 상품 추가는 별도 useEffect로 처리
+  useEffect(() => {
+    const addRecentlyViewedProduct = async () => {
+      if (user && params.id && typeof params.id === 'string') {
+        try {
+          await addToRecentlyViewed(params.id);
+        } catch (error) {
+          console.warn('최근 본 상품 추가 실패:', error);
+        }
+      }
+    };
+
+    addRecentlyViewedProduct();
+  }, [user, params.id, addToRecentlyViewed]);
 
 
 

@@ -24,6 +24,7 @@ const Header = () => {
   const [isDriversOpen, setIsDriversOpen] = useState(false);
   const [isWoodsOpen, setIsWoodsOpen] = useState(false);
   const [isUtilitiesOpen, setIsUtilitiesOpen] = useState(false);
+  const [isIronsOpen, setIsIronsOpen] = useState(false);
   const [isWedgesOpen, setIsWedgesOpen] = useState(false);
   const [isPuttersOpen, setIsPuttersOpen] = useState(false);
   const [isHeadsPartsOpen, setIsHeadsPartsOpen] = useState(false);
@@ -35,6 +36,7 @@ const Header = () => {
     { name: '드라이버', href: '/drivers', category: 'drivers', hasDropdown: true },
     { name: '우드', href: '/woods', category: 'woods', hasDropdown: true },
     { name: '유틸리티', href: '/utilities', category: 'utilities', hasDropdown: true },
+    { name: '아이언', href: '/irons', category: 'irons', hasDropdown: true },
     { name: '웨지', href: '/wedges', category: 'wedges', hasDropdown: true },
     { name: '퍼터', href: '/putters', category: 'putters', hasDropdown: true },
     { name: '왼손용', href: '/left-handed', category: 'left', hasDropdown: true },
@@ -75,6 +77,17 @@ const Header = () => {
     { name: '브리지스톤', href: '/utilities/bridgestone' },
     { name: '핑', href: '/utilities/ping' },
     { name: '기타', href: '/utilities/others' }
+  ];
+
+  const ironsItems = [
+    { name: '타이틀리스트', href: '/irons/titleist' },
+    { name: '캘러웨이', href: '/irons/callaway' },
+    { name: '테일러메이드', href: '/irons/taylormade' },
+    { name: '혼마', href: '/irons/honma' },
+    { name: '젝시오', href: '/irons/xxio' },
+    { name: '브리지스톤', href: '/irons/bridgestone' },
+    { name: '핑', href: '/irons/ping' },
+    { name: '기타', href: '/irons/others' }
   ];
 
   const wedgesItems = [
@@ -211,6 +224,7 @@ const Header = () => {
               const isDrivers = item.category === 'drivers';
               const isWoods = item.category === 'woods';
               const isUtilities = item.category === 'utilities';
+              const isIrons = item.category === 'irons';
               const isWedges = item.category === 'wedges';
               const isPutters = item.category === 'putters';
               const isHeadsParts = item.category === 'heads-parts';
@@ -220,6 +234,7 @@ const Header = () => {
               const dropdownItems = isDrivers ? driversItems 
                 : isWoods ? woodsItems
                 : isUtilities ? utilitiesItems
+                : isIrons ? ironsItems
                 : isWedges ? wedgesItems
                 : isPutters ? puttersItems
                 : isHeadsParts ? headsPartsItems
@@ -230,6 +245,7 @@ const Header = () => {
               const isDropdownOpen = isDrivers ? isDriversOpen
                 : isWoods ? isWoodsOpen
                 : isUtilities ? isUtilitiesOpen
+                : isIrons ? isIronsOpen
                 : isWedges ? isWedgesOpen
                 : isPutters ? isPuttersOpen
                 : isHeadsParts ? isHeadsPartsOpen
@@ -245,6 +261,7 @@ const Header = () => {
                     if (isDrivers) setIsDriversOpen(true);
                     if (isWoods) setIsWoodsOpen(true);
                     if (isUtilities) setIsUtilitiesOpen(true);
+                    if (isIrons) setIsIronsOpen(true);
                     if (isWedges) setIsWedgesOpen(true);
                     if (isPutters) setIsPuttersOpen(true);
                     if (isHeadsParts) setIsHeadsPartsOpen(true);
@@ -255,6 +272,7 @@ const Header = () => {
                     if (isDrivers) setIsDriversOpen(false);
                     if (isWoods) setIsWoodsOpen(false);
                     if (isUtilities) setIsUtilitiesOpen(false);
+                    if (isIrons) setIsIronsOpen(false);
                     if (isWedges) setIsWedgesOpen(false);
                     if (isPutters) setIsPuttersOpen(false);
                     if (isHeadsParts) setIsHeadsPartsOpen(false);

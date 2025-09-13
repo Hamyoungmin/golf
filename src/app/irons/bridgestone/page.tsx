@@ -6,7 +6,7 @@ import { getProductsForPage } from '@/lib/products';
 import { formatPrice } from '@/utils/priceUtils';
 import { Product } from '@/types';
 
-export default function Irons() {
+export default function BridgestoneIrons() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -14,11 +14,11 @@ export default function Irons() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        // 'irons' 페이지에 표시될 상품들 가져오기
-        const ironProducts = await getProductsForPage('irons');
-        setProducts(ironProducts);
+        // 'irons/bridgestone' 페이지에 표시될 상품들 가져오기
+        const bridgestoneProducts = await getProductsForPage('irons/bridgestone');
+        setProducts(bridgestoneProducts);
       } catch (error) {
-        console.error('아이언 상품 로딩 실패:', error);
+        console.error('브리지스톤 아이언 상품 로딩 실패:', error);
       } finally {
         setLoading(false);
       }
@@ -27,7 +27,7 @@ export default function Irons() {
     fetchProducts();
   }, []);
 
-  // Product 타입을 ProductList가 기대하는 형태로 변환 (카테고리별 이미지 적용)
+  // Product 타입을 ProductList가 기대하는 형태로 변환
   const formattedProducts = products.map(product => ({
     id: product.id,
     name: product.name,
@@ -53,11 +53,11 @@ export default function Irons() {
 
   return (
     <ProductList 
-      title="아이언"
-      subtitle="| Irons"
+      title="브리지스톤 아이언"
+      subtitle="| BRIDGESTONE IRONS"
       products={formattedProducts}
       totalCount={products.length}
-      category="아이언"
+      category="브리지스톤 아이언"
     />
   );
 }
