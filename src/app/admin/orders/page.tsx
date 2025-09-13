@@ -22,33 +22,32 @@ export default function AdminOrdersPage() {
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      const orderList = await getAllOrders(50, undefined, selectedStatus || undefined);
+      const orderList = await getAllOrders(undefined, undefined, selectedStatus || undefined);
       setOrders(orderList);
 
-      // 사용자 정보 캐싱
+      // 사용자 정보 캐싱 - 함수형 업데이트 사용
       const uniqueUserIds = [...new Set(orderList.map(order => order.userId))];
       const userPromises = uniqueUserIds.map(async (userId) => {
-        if (!userCache[userId]) {
-          const userData = await getUserData(userId);
-          return { userId, userData };
-        }
-        return null;
+        const userData = await getUserData(userId);
+        return { userId, userData };
       });
 
       const userResults = await Promise.all(userPromises);
-      const newUserCache: { [key: string]: User } = { ...userCache };
-      userResults.forEach(result => {
-        if (result && result.userData) {
-          newUserCache[result.userId] = result.userData;
-        }
+      setUserCache(prevCache => {
+        const newUserCache: { [key: string]: User } = { ...prevCache };
+        userResults.forEach(result => {
+          if (result && result.userData && !newUserCache[result.userId]) {
+            newUserCache[result.userId] = result.userData;
+          }
+        });
+        return newUserCache;
       });
-      setUserCache(newUserCache);
     } catch (error) {
       console.error('주문 목록 로딩 실패:', error);
     } finally {
       setLoading(false);
     }
-  }, [selectedStatus, userCache]);
+  }, [selectedStatus]);
 
   useEffect(() => {
     fetchOrders();

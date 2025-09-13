@@ -10,8 +10,8 @@ import {
   formatCurrency 
 } from '@/lib/payments';
 import { getUserData } from '@/lib/users';
-import { getOrderByOrderId, updateOrderStatus } from '@/lib/orders';
-import { PaymentInfo, User, Order } from '@/types';
+import { updateOrderStatus } from '@/lib/orders';
+import { PaymentInfo, User } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { db, collection, query, where, onSnapshot, orderBy } from '@/lib/firebase';
@@ -24,7 +24,6 @@ export default function AdminPaymentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [userCache, setUserCache] = useState<{ [key: string]: User }>({});
-  const [orderCache, setOrderCache] = useState<{ [key: string]: Order }>({});
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [processing, setProcessing] = useState<{ [key: string]: boolean }>({});
 
@@ -70,13 +69,12 @@ export default function AdminPaymentsPage() {
         
         setPayments(paymentList);
         
-        // 사용자 정보 및 주문 정보 캐싱
-        const uniqueUserIds = [...new Set(paymentList.map(payment => payment.userId))];
-        const uniqueOrderIds = [...new Set(paymentList.map(payment => payment.orderId))];
-
         // 사용자 정보 캐싱
+        const uniqueUserIds = [...new Set(paymentList.map(payment => payment.userId))];
+
+        // 사용자 정보 캐싱 - 함수형 업데이트 사용
         const userPromises = uniqueUserIds.map(async (userId) => {
-          if (userId && !userCache[userId]) {
+          if (userId) {
             const userData = await getUserData(userId);
             return { userId, userData };
           }
@@ -84,36 +82,15 @@ export default function AdminPaymentsPage() {
         });
 
         const userResults = await Promise.all(userPromises);
-        const newUserCache: { [key: string]: User } = { ...userCache };
-        userResults.forEach(result => {
-          if (result && result.userData && result.userId) {
-            newUserCache[result.userId] = result.userData;
-          }
-        });
-        setUserCache(prev => ({ ...prev, ...newUserCache }));
-
-        // 주문 정보 캐싱
-        const orderPromises = uniqueOrderIds.map(async (orderId) => {
-          if (orderId && !orderCache[orderId]) {
-            try {
-              const orderData = await getOrderByOrderId(orderId);
-              return { orderId, orderData };
-            } catch (error) {
-              console.error(`주문 정보 로드 실패 (${orderId}):`, error);
-              return null;
+        setUserCache(prevCache => {
+          const newUserCache: { [key: string]: User } = { ...prevCache };
+          userResults.forEach(result => {
+            if (result && result.userData && result.userId && !newUserCache[result.userId]) {
+              newUserCache[result.userId] = result.userData;
             }
-          }
-          return null;
+          });
+          return newUserCache;
         });
-
-        const orderResults = await Promise.all(orderPromises);
-        const newOrderCache: { [key: string]: Order } = { ...orderCache };
-        orderResults.forEach(result => {
-          if (result && result.orderData && result.orderId) {
-            newOrderCache[result.orderId] = result.orderData;
-          }
-        });
-        setOrderCache(prev => ({ ...prev, ...newOrderCache }));
         
         setLoading(false);
       }, (error) => {
@@ -127,7 +104,7 @@ export default function AdminPaymentsPage() {
       setLoading(false);
       return null;
     }
-  }, [selectedStatus, orderCache, userCache]);
+  }, [selectedStatus]);
 
   useEffect(() => {
     const unsubscribe = setupRealtimePayments();
