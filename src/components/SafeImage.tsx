@@ -17,6 +17,10 @@ export default function SafeImage({ src, alt, onError, ...rest }: SafeImageProps
       if (imgSrc !== '/placeholder.jpg') {
         setImgSrc('/placeholder.jpg');
       }
+      if (typeof window !== 'undefined') {
+        // 실패한 실제 URL 로깅
+        console.warn('[SafeImage] failed to load image:', imgSrc);
+      }
       if (onError) onError(event);
     },
     [imgSrc, onError]
