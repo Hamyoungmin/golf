@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import SafeImage from './SafeImage';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -82,7 +82,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       <Link href={`/${categoryPath}/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
         <div className="product-image">
           {product.image ? (
-            <Image 
+            <SafeImage 
               src={product.image} 
               alt={product.name}
               width={250}

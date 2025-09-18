@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import SafeImage from '../../../components/SafeImage';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -229,7 +229,7 @@ export default function ProductPage() {
         }}>
           {/* 상품 이미지 */}
           <div>
-            <Image
+            <SafeImage
               src={product.images && product.images.length > 0 ? product.images[selectedImage] : '/placeholder-image.jpg'}
               alt={product.name}
               width={500}
@@ -258,7 +258,7 @@ export default function ProductPage() {
                       cursor: 'pointer'
                     }}
                   >
-                    <Image
+                    <SafeImage
                       src={image}
                       alt={`${product.name} ${index + 1}`}
                       width={60}

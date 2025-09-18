@@ -40,6 +40,19 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Google user content (Firebase가 내부적으로 리사이징 프록시를 쓸 때 사용)
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh4.googleusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   
