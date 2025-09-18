@@ -87,7 +87,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
               alt={product.name}
               width={250}
               height={200}
-              style={{objectFit: 'cover'}}
+              sizes="(max-width: 768px) 50vw, 250px"
+              style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
             />
           ) : (
             <span>이미지 없음</span>

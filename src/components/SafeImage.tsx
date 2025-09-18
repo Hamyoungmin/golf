@@ -1,7 +1,7 @@
 'use client';
 
 import Image, { ImageProps } from 'next/image';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 
 declare global {
   interface Window {
@@ -20,6 +20,7 @@ export default function SafeImage({
   onError,
   loading = 'lazy',
   sizes = '(max-width: 768px) 100vw, 500px',
+  priority,
   ...rest
 }: SafeImageProps) {
   const normalized = typeof src === 'string' ? src.trim() : src;
@@ -33,6 +34,9 @@ export default function SafeImage({
     return window.__safeImageFailedUrls;
   }, []);
 
+  // 이전 버전에서 호스트 판별에 쓰이던 isFirebaseHost는 제거(불필요)
+
+  // 기본은 최적화 경로를 시도하고, 실패/지연 시 원본으로 전환
   const [useOriginal, setUseOriginal] = useState<boolean>(failedUrls.has(originalUrl));
   const [imgSrc, setImgSrc] = useState<string>(originalUrl);
   const loadedRef = useRef(false);
@@ -59,13 +63,14 @@ export default function SafeImage({
   // 5초 타임아웃: 최적화 경로가 느리면 자동 우회
   useEffect(() => {
     if (useOriginal || loadedRef.current) return;
+    // 최적화 경로가 느리면 1.5초 내 자동 우회
     timeoutRef.current = window.setTimeout(() => {
       if (!loadedRef.current) {
         failedUrls.add(originalUrl);
         setUseOriginal(true);
         if (typeof window !== 'undefined') console.warn('[SafeImage] timed out, switching to original:', originalUrl);
       }
-    }, 5000);
+    }, 1500);
     return () => {
       if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
     };
@@ -76,15 +81,42 @@ export default function SafeImage({
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
   };
 
+  // src 변경 시 상태 초기화하여 새로운 이미지로 전환되도록 함
+  useEffect(() => {
+    loadedRef.current = false;
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setImgSrc(originalUrl);
+    setUseOriginal(failedUrls.has(originalUrl));
+  }, [originalUrl, failedUrls]);
+
+  // width 또는 height 중 하나만 스타일로 지정되었을 때 종횡비 유지 보정
+  const { style: incomingStyle, ...restProps } = rest as { style?: CSSProperties };
+  const normalizedStyle = useMemo<CSSProperties | undefined>(() => {
+    if (!incomingStyle) return undefined;
+    const hasWidth = incomingStyle.width !== undefined;
+    const hasHeight = incomingStyle.height !== undefined;
+    if (hasWidth && !hasHeight) return { ...incomingStyle, height: 'auto' };
+    if (hasHeight && !hasWidth) return { ...incomingStyle, width: 'auto' };
+    return incomingStyle;
+  }, [incomingStyle]);
+
+  // priority가 true면 loading 속성은 사용하지 않음(Next.js 규칙)
+  const effectiveLoading = priority ? undefined : loading;
+
   return (
     <Image
-      {...rest}
+      {...restProps}
       src={imgSrc || '/placeholder.jpg'}
       alt={alt || ''}
       onError={handleError}
       onLoad={handleLoad}
-      loading={loading}
+      loading={effectiveLoading as ImageProps['loading']}
       sizes={sizes}
+      priority={priority}
+      style={normalizedStyle}
       {...(useOriginal
         ? { unoptimized: true, loader: () => originalUrl }
         : {})}

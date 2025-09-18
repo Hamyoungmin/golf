@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 // Firebase exports
@@ -47,14 +47,19 @@ const firebaseConfig = {
 // Firebase 초기화 (환경변수가 있을 때만)
 let app: ReturnType<typeof initializeApp> | null = null;
 let auth: ReturnType<typeof getAuth> | null = null;
-let db: ReturnType<typeof getFirestore> | null = null;
+let db: ReturnType<typeof initializeFirestore> | null = null;
 let storage: ReturnType<typeof getStorage> | null = null;
 
 try {
   if (firebaseConfig.apiKey && firebaseConfig.projectId) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
-    db = getFirestore(app);
+    db = initializeFirestore(app, {
+      // 네트워크/프록시 환경에서 WebChannel 400을 줄이기 위한 설정
+      experimentalAutoDetectLongPolling: true,
+      // 탭 간 캐시 공유로 불필요한 네트워크 감소
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+    });
     storage = getStorage(app);
   }
 } catch (error) {

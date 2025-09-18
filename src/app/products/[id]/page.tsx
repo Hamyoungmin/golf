@@ -234,6 +234,8 @@ export default function ProductPage() {
               alt={product.name}
               width={500}
               height={400}
+              priority
+              sizes="(max-width: 768px) 100vw, 500px"
               style={{
                 width: '100%', 
                 maxWidth: '500px', 
@@ -263,6 +265,7 @@ export default function ProductPage() {
                       alt={`${product.name} ${index + 1}`}
                       width={60}
                       height={60}
+                      sizes="60px"
                       style={{ width: '60px', height: '60px', objectFit: 'cover' }}
                     />
                   </button>
