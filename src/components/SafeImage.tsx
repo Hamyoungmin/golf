@@ -32,6 +32,8 @@ export default function SafeImage({ src, alt, onError, ...rest }: SafeImageProps
       src={imgSrc || '/placeholder.jpg'}
       alt={alt || ''}
       onError={handleError}
+      loading={(rest as any)?.loading ?? 'lazy'}
+      sizes={(rest as any)?.sizes ?? '(max-width: 768px) 100vw, 500px'}
     />
   );
 }
