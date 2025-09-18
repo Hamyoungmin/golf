@@ -8,7 +8,14 @@ type SafeImageProps = Omit<ImageProps, 'src' | 'alt'> & {
   alt: string;
 };
 
-export default function SafeImage({ src, alt, onError, ...rest }: SafeImageProps) {
+export default function SafeImage({
+  src,
+  alt,
+  onError,
+  loading = 'lazy',
+  sizes = '(max-width: 768px) 100vw, 500px',
+  ...rest
+}: SafeImageProps) {
   const normalized = typeof src === 'string' ? src.trim() : src;
   const [imgSrc, setImgSrc] = useState<string>(normalized || '/placeholder.jpg');
 
@@ -32,8 +39,8 @@ export default function SafeImage({ src, alt, onError, ...rest }: SafeImageProps
       src={imgSrc || '/placeholder.jpg'}
       alt={alt || ''}
       onError={handleError}
-      loading={(rest as any)?.loading ?? 'lazy'}
-      sizes={(rest as any)?.sizes ?? '(max-width: 768px) 100vw, 500px'}
+      loading={loading}
+      sizes={sizes}
     />
   );
 }
