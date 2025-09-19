@@ -52,13 +52,12 @@ export default function ProductPage() {
             setReviews(reviewsData);
             
 
-            // 조회수 증가 (로그인 여부와 관계없이 항상 실행)
-            try {
-              await incrementProductViews(params.id);
-            } catch (error) {
-              console.warn('조회수 증가 실패:', error);
-              // 실패해도 페이지는 정상적으로 표시
-            }
+            // 조회수 증가 (렌더 차단 방지: 비동기 fire-and-forget)
+            Promise.resolve()
+              .then(() => incrementProductViews(params.id))
+              .catch((error) => {
+                console.warn('조회수 증가 실패:', error);
+              });
           } else {
             setError('상품을 찾을 수 없습니다.');
           }
