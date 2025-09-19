@@ -42,19 +42,20 @@ export default function ProductPage() {
     const fetchProduct = async () => {
       try {
         if (params.id && typeof params.id === 'string') {
-          const productData = await getProductById(params.id);
+          const productId = params.id as string;
+          const productData = await getProductById(productId);
           if (productData) {
             setProduct(productData);
             // 수량은 처음 로드할 때만 초기화 (사용자가 변경한 수량 유지)
             setQuantity(prev => prev === 1 ? (productData.stock > 0 ? 1 : 0) : Math.min(prev, productData.stock));
             // 리뷰도 함께 가져오기
-            const reviewsData = await getProductReviews(params.id);
+            const reviewsData = await getProductReviews(productId);
             setReviews(reviewsData);
             
 
             // 조회수 증가 (렌더 차단 방지: 비동기 fire-and-forget)
             Promise.resolve()
-              .then(() => incrementProductViews(params.id))
+              .then(() => incrementProductViews(productId))
               .catch((error) => {
                 console.warn('조회수 증가 실패:', error);
               });
