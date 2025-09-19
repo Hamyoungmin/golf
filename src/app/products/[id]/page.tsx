@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import SafeImage from '../../../components/SafeImage';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -25,6 +25,12 @@ export default function ProductPage() {
   const { addToRecentlyViewed } = useRecentlyViewed();
   const { settings } = useSettings();
   const { AlertComponent, showAlert } = useCustomAlert();
+
+  // addToRecentlyViewed의 레퍼런스를 안정적으로 보관하여 effect 의존성 루프 방지
+  const addToRecentlyViewedRef = useRef(addToRecentlyViewed);
+  useEffect(() => {
+    addToRecentlyViewedRef.current = addToRecentlyViewed;
+  }, [addToRecentlyViewed]);
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -74,12 +80,12 @@ export default function ProductPage() {
     fetchProduct();
   }, [params.id]);
 
-  // 최근 본 상품 추가는 별도 useEffect로 처리
+  // 최근 본 상품 추가는 별도 useEffect로 처리 (함수 레퍼런스 의존성 제거)
   useEffect(() => {
     const addRecentlyViewedProduct = async () => {
       if (user && params.id && typeof params.id === 'string') {
         try {
-          await addToRecentlyViewed(params.id);
+          await addToRecentlyViewedRef.current(params.id);
         } catch (error) {
           console.warn('최근 본 상품 추가 실패:', error);
         }
@@ -87,7 +93,7 @@ export default function ProductPage() {
     };
 
     addRecentlyViewedProduct();
-  }, [user, params.id, addToRecentlyViewed]);
+  }, [user, params.id]);
 
 
 

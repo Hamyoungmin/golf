@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { 
   // getUserRecentlyViewed, // unused
@@ -74,7 +74,7 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
   }, [loadRecentlyViewed]);
 
   // 최근 본 상품에 상품 추가 (디바운스 적용)
-  const addToRecentlyViewed = async (productId: string): Promise<boolean> => {
+  const addToRecentlyViewed = useCallback(async (productId: string): Promise<boolean> => {
     if (!user) {
       return false;
     }
@@ -84,17 +84,17 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
       const success = await addToRecentlyViewedDebounced(user.uid, productId);
       if (success) {
         // 로컬 상태 즉시 업데이트 (UI 반응성 향상)
-        await refreshRecentlyViewed();
+        await loadRecentlyViewed();
       }
       return success;
     } catch (error) {
       console.error('최근 본 상품 추가 오류:', error);
       return false;
     }
-  };
+  }, [user, loadRecentlyViewed]);
 
   // 최근 본 상품에서 상품 제거
-  const removeFromRecentlyViewed = async (productId: string): Promise<boolean> => {
+  const removeFromRecentlyViewed = useCallback(async (productId: string): Promise<boolean> => {
     if (!user) {
       return false;
     }
@@ -102,17 +102,17 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
     try {
       const success = await removeFromRecentlyViewedAPI(user.uid, productId);
       if (success) {
-        await refreshRecentlyViewed();
+        await loadRecentlyViewed();
       }
       return success;
     } catch (error) {
       console.error('최근 본 상품 제거 오류:', error);
       return false;
     }
-  };
+  }, [user, loadRecentlyViewed]);
 
   // 최근 본 상품에서 여러 상품 제거
-  const removeMultipleFromRecentlyViewed = async (productIds: string[]): Promise<boolean> => {
+  const removeMultipleFromRecentlyViewed = useCallback(async (productIds: string[]): Promise<boolean> => {
     if (!user) {
       return false;
     }
@@ -120,17 +120,17 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
     try {
       const success = await removeMultipleFromRecentlyViewedAPI(user.uid, productIds);
       if (success) {
-        await refreshRecentlyViewed();
+        await loadRecentlyViewed();
       }
       return success;
     } catch (error) {
       console.error('최근 본 상품 다중 제거 오류:', error);
       return false;
     }
-  };
+  }, [user, loadRecentlyViewed]);
 
   // 최근 본 상품 전체 삭제
-  const clearRecentlyViewed = async (): Promise<boolean> => {
+  const clearRecentlyViewed = useCallback(async (): Promise<boolean> => {
     if (!user) {
       return false;
     }
@@ -138,17 +138,17 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
     try {
       const success = await clearRecentlyViewedAPI(user.uid);
       if (success) {
-        await refreshRecentlyViewed();
+        await loadRecentlyViewed();
       }
       return success;
     } catch (error) {
       console.error('최근 본 상품 전체 삭제 오류:', error);
       return false;
     }
-  };
+  }, [user, loadRecentlyViewed]);
 
   // 상품이 최근 본 상품에 있는지 확인 (로컬 캐시 우선 사용)
-  const isInRecentlyViewed = (productId: string): boolean => {
+  const isInRecentlyViewed = useCallback((productId: string): boolean => {
     // 로컬 상태에서 먼저 확인 (가장 빠른 응답)
     if (recentlyViewedProductIds.includes(productId)) {
       return true;
@@ -161,14 +161,14 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
     }
     
     return false;
-  };
+  }, [recentlyViewedProductIds]);
 
   // 최근 본 상품 새로고침
-  const refreshRecentlyViewed = async (): Promise<void> => {
+  const refreshRecentlyViewed = useCallback(async (): Promise<void> => {
     await loadRecentlyViewed();
-  };
+  }, [loadRecentlyViewed]);
 
-  const value: RecentlyViewedContextType = {
+  const value: RecentlyViewedContextType = useMemo(() => ({
     recentlyViewedItems,
     recentlyViewedProductIds,
     loading,
@@ -179,7 +179,17 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
     isInRecentlyViewed,
     refreshRecentlyViewed,
     recentlyViewedCount: recentlyViewedItems.length,
-  };
+  }), [
+    recentlyViewedItems,
+    recentlyViewedProductIds,
+    loading,
+    addToRecentlyViewed,
+    removeFromRecentlyViewed,
+    removeMultipleFromRecentlyViewed,
+    clearRecentlyViewed,
+    isInRecentlyViewed,
+    refreshRecentlyViewed,
+  ]);
 
   return (
     <RecentlyViewedContext.Provider value={value}>
