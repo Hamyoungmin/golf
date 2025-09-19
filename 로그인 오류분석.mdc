@@ -1,0 +1,76 @@
+# 로그인 오류 원인 분석 및 점검 가이드
+
+## 실행 요약
+- 최근 콘솔에서 net::ERR_INTERNET_DISCONNECTED, Firestore Listen 400(Bad Request) 발생을 확인함.
+- 앱의 로그인은 Firebase Auth를 사용. `src/lib/firebase.ts`에서 환경변수가 없으면 `auth`가 null로 남아 로그인 페이지에서 즉시 실패함.
+- 네트워크 차단(googleapis) 또는 환경변수 미적용이 가장 가능성 높음.
+
+## 증상 정리
+- 로그인 시도 시 지연/멈춤, 또는 실패 토스트·콘솔에 "Firebase 인증이 초기화되지 않았습니다"류 메시지.
+- 네트워크 콘솔: `securetoken.googleapis.com` 요청 실패(net::ERR_INTERNET_DISCONNECTED)
+- Firestore 실시간 리스너 Listen 요청 400(Bad Request) 간헐 발생.
+
+## 코드 기반 동작 개요
+- Firebase 초기화: `src/lib/firebase.ts`
+  - `apiKey`, `projectId` 등 NEXT_PUBLIC_* 환경변수 존재 시에만 `initializeApp` 실행.
+  - 없으면 `auth`, `db`, `storage` 모두 null → 로그인 페이지에서 `auth` 체크 후 에러 처리.
+- 로그인 처리: `src/app/login/page.tsx`
+  - `signInWithEmailAndPassword(auth, email, password)` 호출. `auth`가 null이면 즉시 예외.
+- Auth 구독: `src/contexts/AuthContext.tsx`
+  - `onAuthStateChanged(auth, ...)`로 세션 유지/관리자 판별.
+
+## 가능 원인(우선순위)
+1) 네트워크/정책 이슈(가장 유력)
+- 증거: `net::ERR_INTERNET_DISCONNECTED`, `Listen/channel ... 400`. 회사 VPN/프록시/방화벽·확장프로그램이 `*.googleapis.com` 스트리밍/토큰 엔드포인트 차단 시 자주 발생.
+- 영향: 토큰 발급·갱신 실패 → 로그인 불가, Firestore 실시간 실패.
+- 조치:
+  - 일시 해제: VPN/프록시, 보안SW HTTPS 검사, AdBlock류 확장 → 시크릿 모드로 재현 확인.
+  - 도메인 화이트리스트: `securetoken.googleapis.com`, `identitytoolkit.googleapis.com`, `firestore.googleapis.com`, `firebasestorage.googleapis.com`.
+  - Firestore 옵션 완화(망 호환성):
+    - `experimentalForceLongPolling: true`, `useFetchStreams: false` 권장.
+
+2) 환경변수 미적용/오타
+- 조건: `.env.local` 미존재, 키 오타, 서버 재시작 누락 시 `auth` null.
+- 빠른 진단:
+  - API 헬스체크: `/api/debug-firebase`, `/api/test-firebase` 응답에서 키 존재 여부 확인.
+  - 콘솔 로그: 로그인 페이지에서 `Firebase 인증이 초기화되지 않았습니다` 메시지.
+- 조치:
+  - `env.example` → `.env.local`로 복사 후 값 채우기, 개발 서버 재시작.
+  - 필수 키: `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`, `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`.
+
+3) 시스템 시간 불일치/DNS 문제(가능성 중)
+- TLS/이름해석 문제로 외부 요청 실패 가능.
+- 조치: OS 시간 자동 동기화, DNS를 1.1.1.1/8.8.8.8로 임시 변경 테스트.
+
+## 점검 체크리스트(빠른 순서)
+1) 네트워크 즉검
+- 다른 사이트 새로고침, 모바일 테더링 전환 테스트.
+- DevTools Network의 "Offline/Throttling" OFF 확인.
+
+2) 정책/확장 차단 여부
+- 시크릿 창(확장 비활성)에서 로그인 재현.
+- VPN/프록시 해제, 사내망이면 위 도메인 화이트리스트 문의.
+
+3) 환경변수 로딩 확인
+- `.env.local` 생성/갱신 후 개발 서버 재시작.
+- 브라우저에서 `/api/debug-firebase` 결과 확인(키 유무 표시), `/api/test-firebase`로 불린 여부 확인.
+- 값 예시(현재 `env.example` 기준):
+  - PROJECT_ID=golff12, API_KEY=AIzaSyBE-..., AUTH_DOMAIN=golff12.firebaseapp.com, STORAGE_BUCKET=golff12.firebasestorage.app, SENDER_ID=994634067271
+
+4) Firestore 네트워크 호환성 옵션(권장)
+- `src/lib/firebase.ts` Firestore 초기화에 아래 옵션 적용:
+```
+initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+  useFetchStreams: false,
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+});
+```
+
+## 결론
+- 현재 로그로 보아 "네트워크 차단/끊김" 또는 "환경변수 미적용"이 원인일 확률이 가장 높음.
+- 위 체크리스트 순서대로 조치 시, 연결이 정상화되면 별도 코드 수정 없이 로그인 복구 가능.
+- 회사망 정책이 상시 차단인 경우, Firestore 롱폴링 강제+화이트리스트 등록이 필요.
+
+---
+문서 버전: 2025-09-19

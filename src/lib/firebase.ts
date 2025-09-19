@@ -55,8 +55,8 @@ try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = initializeFirestore(app, {
-      // 네트워크/프록시 환경에서 WebChannel 400을 줄이기 위한 설정
-      experimentalAutoDetectLongPolling: true,
+      // 네트워크/프록시 환경에서 WebChannel 지연/차단 회피
+      experimentalForceLongPolling: true,
       // 탭 간 캐시 공유로 불필요한 네트워크 감소
       localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
     });

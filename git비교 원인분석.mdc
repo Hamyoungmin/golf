@@ -1,0 +1,51 @@
+# git 비교 기반 원인 분석 (기준: 3ddba5ac36357674a04e4c5dff707e951087519d → HEAD)
+
+## 변경 파일 목록
+- `next.config.ts`
+- `src/app/products/[id]/page.tsx`
+- `src/components/ProductCard.tsx`
+- `src/components/SafeImage.tsx` (신규)
+- `src/lib/firebase.ts`
+
+## 주요 변경 요약과 영향 가설
+- `SafeImage` 도입 및 전역 사용 전환
+  - 상세/카드 이미지가 `next/image` → `SafeImage`로 교체
+  - `priority`/`sizes` 추가, 종횡비 자동 보정, 최적화 실패 시 원본 우회 로직, 1.5초 타임아웃 도입
+  - 가설:
+    - 장점: 느린 최적화 경로 우회로 체감 개선 가능
+    - 리스크: 최초 도입 시 상태 전환/타임아웃 로직이 src 변경에 반응하지 않으면 전환 지연 발생 가능(이미 보완 적용됨)
+
+- Firestore 초기화 방식 변경
+  - `getFirestore` → `initializeFirestore`로 전환, `persistentLocalCache` 적용
+  - 최근 HEAD에서 `experimentalForceLongPolling: true`(망 호환) 활성화
+  - 가설:
+    - 장점: 탭 간 캐시 공유로 네트워크 감소, 롱폴링으로 사내망 스트리밍 지연 완화
+    - 리스크: 일부 환경에서 초기 연결 협상에 시간이 걸릴 수 있음(네트워크 이슈 동반 시 체감 지연)
+
+- `next.config.ts` 이미지 도메인/포맷/캐시 설정 확장
+  - `lh3/4.googleusercontent.com` 허용, avif/webp, deviceSizes, minimumCacheTTL 설정
+  - 가설: 이미지 최적화 캐시 전략 강화로 긍정적 영향. 직접적인 로그인/상호작용 지연 원인은 아님.
+
+## 커밋 이후 느려진 현상의 직접 원인 후보
+1) 네트워크 이슈(가장 유력)
+- 실제 로그: `net::ERR_INTERNET_DISCONNECTED`, Firestore `Listen` 400 에러가 관측됨.
+- 이슈가 존재하면 로그인 이후 페이지 전환 시 Firestore/토큰 갱신이 지연되어 "오래 걸림"으로 체감.
+
+2) SafeImage 초기가 src 변경에 반응하지 않던 문제(현재 수정됨)
+- 썸네일 클릭/이미지 전환이 멈춤 → 상태 초기화 useEffect 추가로 해결.
+
+3) Firestore WebChannel과 사내망의 궁합 문제
+- 스트리밍이 막혀 재시도/백오프가 길어짐 → HEAD에서 롱폴링 강제하여 완화 조치 적용.
+
+## 권장 조치(이미 적용/추가 권고)
+- 이미 적용: SafeImage src 변경 초기화, priority/size 설정, Firestore 롱폴링 강제.
+- 추가 권고:
+  - 사내망 화이트리스트: `securetoken.googleapis.com`, `identitytoolkit.googleapis.com`, `firestore.googleapis.com`, `firebasestorage.googleapis.com`.
+  - 확장 프로그램/프록시/VPN 해제 후 재현 확인.
+  - `/api/debug-firebase`/`/api/test-firebase`로 환경변수/연결 상태 확인.
+
+## 결론
+- 기준 커밋 대비 코드상 가장 영향 큰 변경은 SafeImage 도입과 Firestore 초기화 변경.
+- 그러나 체감 지연의 주된 트리거는 네트워크 단절/차단에 기인(로그 근거). 코드 측면 변경점은 현재 완화 패치가 반영되어 재현 가능성이 낮아졌으며, 네트워크 정책 정비 시 정상 속도로 회복될 가능성이 높습니다.
+
+문서 버전: 2025-09-19
