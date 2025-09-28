@@ -7,10 +7,11 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useSettings } from '@/contexts/SettingsContext';
-import { CartItem, Product, Address } from '@/types';
+import { CartItem, Product, Address, PaymentMethod } from '@/types';
 import { createOrder } from '@/lib/orders';
 import { useCustomAlert } from '@/hooks/useCustomAlert';
 import { getProduct } from '@/lib/products';
+import PaymentMethodSelector from '@/components/checkout/PaymentMethodSelector';
 
 // 실제 Firebase 데이터를 사용하도록 변경 (샘플 데이터 제거)
 
@@ -34,6 +35,13 @@ export default function CartPage() {
     state: ''
   });
   const [isAddressValid, setIsAddressValid] = useState(false);
+
+  // 결제 방법 - 활성화된 첫 번째 결제 수단을 기본값으로 설정
+  const getDefaultPaymentMethod = (): PaymentMethod => {
+    if (settings.payment.enabledMethods.transfer) return 'bank_transfer';
+    return 'toss_payments';
+  };
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(getDefaultPaymentMethod());
 
   // 장바구니 아이템에 상품 정보 매핑
   useEffect(() => {
@@ -211,7 +219,7 @@ export default function CartPage() {
         totalAmount: finalAmount,
         status: 'pending' as const,
         shippingAddress,
-        paymentMethod: 'bank_transfer'
+        paymentMethod
       };
 
       const orderId = await createOrder(orderData);
@@ -593,6 +601,56 @@ export default function CartPage() {
               </div>
             </div>
 
+            {/* 결제 방법 */}
+            <div style={{ marginTop: '20px' }}>
+              <PaymentMethodSelector
+                methods={{
+                  transfer: settings.payment.enabledMethods.transfer,
+                  phone: settings.payment.enabledMethods.phone,
+                  naverpay: settings.payment.enabledMethods.naverpay,
+                }}
+                value={paymentMethod}
+                onChange={setPaymentMethod}
+              />
+
+              {/* 계좌이체 선택 시 계좌 정보 */}
+              {paymentMethod === 'bank_transfer' && (
+                <div style={{ 
+                  marginTop: '20px', 
+                  padding: '20px', 
+                  backgroundColor: '#f8f9fa', 
+                  border: '1px solid #e0e0e0', 
+                  borderRadius: '8px' 
+                }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '15px', color: '#0d6efd' }}>입금 계좌 정보</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {settings.payment.bankAccounts.map((account, index) => (
+                      <div key={index} style={{ 
+                        backgroundColor: '#fff', 
+                        padding: '15px', 
+                        borderRadius: '6px', 
+                        border: '1px solid #ddd' 
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '14px', fontWeight: '500', color: '#0d6efd' }}>{account.bankName}</span>
+                          <span style={{ fontSize: '12px', color: '#666' }}>예금주: {account.accountHolder}</span>
+                        </div>
+                        <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#333' }}>{account.accountNumber}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ marginTop: '12px', fontSize: '13px', color: '#666' }}>
+                    <p style={{ fontWeight: '600', marginBottom: '8px', color: '#333' }}>입금 시 주의사항:</p>
+                    <ul style={{ paddingLeft: '20px', lineHeight: '1.5', margin: 0 }}>
+                      <li>주문 완료 후 3일 이내에 입금해주세요.</li>
+                      <li>입금자명을 주문자명과 동일하게 입력해주세요.</li>
+                      <li>입금 확인 후 배송이 시작됩니다.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* 결제 정보 */}
             <div style={{ 
               backgroundColor: '#fff3cd', 
@@ -630,7 +688,7 @@ export default function CartPage() {
               <div style={{ fontSize: '12px', color: '#856404', marginBottom: '15px' }}>
                 <p>• {formatPrice(settings.shipping.freeShippingThreshold)} 이상 주문 시 무료배송</p>
                 <p>• 주문 후 관리자 확인을 거쳐 결제 안내를 드립니다</p>
-                <p>• 결제는 무통장입금으로 진행됩니다</p>
+                <p>• 결제수단: {paymentMethod === 'bank_transfer' ? '무통장 입금' : '토스페이먼츠(관리자 승인 기반)'}</p>
               </div>
 
               <button
