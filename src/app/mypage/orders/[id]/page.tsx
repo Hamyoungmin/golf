@@ -429,6 +429,76 @@ export default function OrderDetailPage() {
               </div>
             </div>
           </div>
+
+        {/* 결제 정보 */}
+        <div style={{ 
+          backgroundColor: '#fff', 
+          border: '1px solid #e0e0e0', 
+          borderRadius: '8px', 
+          padding: '25px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+          <h2 style={{ 
+            fontSize: '18px', 
+            fontWeight: '600', 
+            marginBottom: '20px', 
+            color: '#333',
+            borderBottom: '1px solid #e0e0e0',
+            paddingBottom: '8px'
+          }}>
+            결제 정보
+          </h2>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+              <span style={{ color: '#666' }}>결제 방법</span>
+              <span style={{ color: '#333', fontWeight: '500' }}>{getPaymentMethodText(order.paymentMethod)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+              <span style={{ color: '#666' }}>총 결제금액</span>
+              <span style={{ color: '#007bff', fontWeight: '600' }}>{formatPrice(order.totalAmount)}</span>
+            </div>
+          </div>
+
+          {/* 무통장입금일 때 계좌 정보 노출 */}
+          {order.paymentMethod === 'bank_transfer' && (
+            <div style={{ 
+              marginTop: '20px', 
+              padding: '20px', 
+              backgroundColor: '#f8f9fa', 
+              border: '1px solid #e0e0e0', 
+              borderRadius: '8px' 
+            }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '15px', color: '#007bff' }}>입금 계좌 정보</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {settings.payment.bankAccounts.map((account, index) => (
+                  <div key={index} style={{ 
+                    backgroundColor: '#fff', 
+                    padding: '15px', 
+                    borderRadius: '6px', 
+                    border: '1px solid #ddd' 
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '14px', fontWeight: '500', color: '#007bff' }}>{account.bankName}</span>
+                      <span style={{ fontSize: '12px', color: '#666' }}>예금주: {account.accountHolder}</span>
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#333' }}>
+                      {account.accountNumber}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: '12px', fontSize: '13px', color: '#666' }}>
+                <p style={{ fontWeight: '600', marginBottom: '8px', color: '#333' }}>입금 시 주의사항:</p>
+                <ul style={{ paddingLeft: '20px', lineHeight: '1.5', margin: 0 }}>
+                  <li>주문 완료 후 3일 이내에 입금해주세요.</li>
+                  <li>입금자명을 주문자명과 동일하게 입력해주세요.</li>
+                  <li>입금 확인 후 배송이 시작됩니다.</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
         </div>
 
         {/* 사이드바 정보 */}
